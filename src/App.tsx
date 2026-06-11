@@ -90,7 +90,7 @@ export function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <h1>QR Studio</h1>
+        <h1>Dotcraft</h1>
         <p>Design a styled QR code, then export it as PNG or SVG.</p>
       </header>
 

@@ -82,7 +82,7 @@ describe("App", () => {
   it("renders the library, editor and a live preview", async () => {
     render(<App />);
     expect(
-      screen.getByRole("heading", { name: "QR Studio" }),
+      screen.getByRole("heading", { name: "Dotcraft" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Library" }),

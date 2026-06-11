@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "qr-editor",
+      "name": "dotcraft",
       "dependencies": {
         "lucide-react": "^1.17.0",
         "qrcode": "^1.5.4",

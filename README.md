@@ -1,4 +1,4 @@
-# QR Studio
+# Dotcraft
 
 A browser-based editor for designing styled QR codes — custom dot styles, droplet
 (teardrop) corner indicators, colors, and a center logo with aspect-preserving
