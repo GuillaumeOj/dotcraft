@@ -55,11 +55,13 @@ export function SelectField<T extends string>({
   value,
   options,
   onChange,
+  disabled,
 }: {
   label: string;
   value: T;
   options: readonly T[];
   onChange: (v: T) => void;
+  disabled?: boolean;
 }) {
   return (
     <Field label={label}>
@@ -67,6 +69,7 @@ export function SelectField<T extends string>({
         <select
           id={id}
           value={value}
+          disabled={disabled}
           onChange={(e) => onChange(e.target.value as T)}
         >
           {options.map((o) => (

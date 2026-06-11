@@ -47,9 +47,10 @@ export function Controls({
         />
         <SelectField
           label="Error correction"
-          value={options.errorCorrection}
+          value={options.logo ? "H" : options.errorCorrection}
           options={ERROR_LEVELS}
           onChange={(errorCorrection) => onChange({ errorCorrection })}
+          disabled={!!options.logo}
         />
         {options.logo && (
           <p className="hint">
