@@ -20,7 +20,8 @@ import {
   type QrOptions,
 } from "./types";
 
-const STATE_KEY = "qr-studio:state";
+/** localStorage key holding the serialised settings record. Exported for tests. */
+export const STATE_KEY = "qr-studio:state";
 const STATE_VERSION = 1;
 
 const DB_NAME = "qr-studio";
