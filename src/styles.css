@@ -25,7 +25,12 @@ body,
 body {
   background: radial-gradient(1200px 600px at 80% -10%, #1b1f2b, var(--bg));
   color: var(--text);
-  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font:
+    15px / 1.5 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 .app {
@@ -190,7 +195,9 @@ input[type="color"] {
   background: var(--accent);
   color: #fff;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .btn:hover {
@@ -240,10 +247,10 @@ input[type="color"] {
   min-height: 280px;
   padding: 20px;
   background:
-    linear-gradient(45deg, #1c2029 25%, transparent 25%) -8px 0/16px 16px,
-    linear-gradient(-45deg, #1c2029 25%, transparent 25%) -8px 0/16px 16px,
-    linear-gradient(45deg, transparent 75%, #1c2029 75%) -8px 0/16px 16px,
-    linear-gradient(-45deg, transparent 75%, #1c2029 75%) -8px 0/16px 16px,
+    linear-gradient(45deg, #1c2029 25%, transparent 25%) -8px 0 / 16px 16px,
+    linear-gradient(-45deg, #1c2029 25%, transparent 25%) -8px 0 / 16px 16px,
+    linear-gradient(45deg, transparent 75%, #1c2029 75%) -8px 0 / 16px 16px,
+    linear-gradient(-45deg, transparent 75%, #1c2029 75%) -8px 0 / 16px 16px,
     var(--panel-2);
   border-radius: 10px;
 }
@@ -251,10 +258,6 @@ input[type="color"] {
 .preview__qr {
   width: 100%;
   max-width: 360px;
-}
-
-.preview__qr svg {
-  width: 100%;
   height: auto;
   display: block;
   border-radius: 6px;

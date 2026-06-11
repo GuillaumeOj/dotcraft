@@ -1,10 +1,10 @@
-import { ChangeEvent } from "react";
+import type { ChangeEvent } from "react";
 import {
   DOT_STYLES,
   ERROR_LEVELS,
   EYE_STYLES,
   isTransparent,
-  QrOptions,
+  type QrOptions,
 } from "../qr/types";
 import {
   ColorField,
@@ -52,7 +52,9 @@ export function Controls({
           onChange={(errorCorrection) => onChange({ errorCorrection })}
         />
         {options.logo && (
-          <p className="hint">A logo is set — error correction is forced to H.</p>
+          <p className="hint">
+            A logo is set — error correction is forced to H.
+          </p>
         )}
       </fieldset>
 
@@ -93,16 +95,23 @@ export function Controls({
       <fieldset className="panel">
         <legend>Logo</legend>
         <Field label="Image (PNG / JPG / SVG)">
-          <input
-            type="file"
-            accept="image/png,image/jpeg,image/svg+xml"
-            onChange={onLogoFile}
-          />
+          {(id) => (
+            <input
+              id={id}
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml"
+              onChange={onLogoFile}
+            />
+          )}
         </Field>
         {options.logo && (
           <>
             <div className="logo-row">
-              <img className="logo-thumb" src={options.logo} alt="logo preview" />
+              <img
+                className="logo-thumb"
+                src={options.logo}
+                alt="logo preview"
+              />
               <button
                 type="button"
                 className="btn btn--ghost"

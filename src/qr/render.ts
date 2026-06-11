@@ -1,12 +1,29 @@
 import QRCode from "qrcode";
-import { Corners, roundedRectPath } from "./paths";
-import { DotStyle, EyeStyle, isTransparent, QrOptions } from "./types";
+import { type Corners, roundedRectPath } from "./paths";
+import {
+  type DotStyle,
+  type EyeStyle,
+  isTransparent,
+  type QrOptions,
+} from "./types";
 
 /** SVG units per module. The whole SVG scales freely, so this is arbitrary. */
 const MS = 10;
 
 /** A finder pattern (eye) spans EYE_MODULES×EYE_MODULES modules. */
 const EYE_MODULES = 7;
+
+/** Escape a value before interpolating it into XML/SVG attribute markup.
+ *  Colors and the logo href come from free-text user input, so this prevents
+ *  any attribute-breakout / markup injection regardless of who consumes the SVG. */
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 interface Matrix {
   size: number;
@@ -92,7 +109,13 @@ function renderEye(
   const ring =
     roundedRectPath(ox, oy, outer, outer, eyeCorners(style, outer, tip)) +
     " " +
-    roundedRectPath(ox + MS, oy + MS, inner, inner, eyeCorners(style, inner, tip));
+    roundedRectPath(
+      ox + MS,
+      oy + MS,
+      inner,
+      inner,
+      eyeCorners(style, inner, tip),
+    );
   const dot = roundedRectPath(
     ox + 2 * MS,
     oy + 2 * MS,
@@ -104,7 +127,10 @@ function renderEye(
   return `<path d="${ring}" fill-rule="evenodd"/><path d="${dot}"/>`;
 }
 
-function renderLogo(opts: QrOptions, px: number): { defs: string; body: string } {
+function renderLogo(
+  opts: QrOptions,
+  px: number,
+): { defs: string; body: string } {
   if (!opts.logo) return { defs: "", body: "" };
   const badge = opts.logoRatio * px;
   const x = (px - badge) / 2;
@@ -115,11 +141,11 @@ function renderLogo(opts: QrOptions, px: number): { defs: string; body: string }
 
   const bg = isTransparent(opts.logoBg)
     ? ""
-    : `<path d="${shape}" fill="${opts.logoBg}"/>`;
+    : `<path d="${shape}" fill="${escapeXml(opts.logoBg)}"/>`;
   const defs = `<clipPath id="logo-clip"><path d="${shape}"/></clipPath>`;
   // preserveAspectRatio "meet" keeps the logo's aspect ratio (no stretching).
   const image =
-    `<image href="${opts.logo}" x="${x + pad}" y="${y + pad}" ` +
+    `<image href="${escapeXml(opts.logo)}" x="${x + pad}" y="${y + pad}" ` +
     `width="${badge - 2 * pad}" height="${badge - 2 * pad}" ` +
     `preserveAspectRatio="xMidYMid meet" clip-path="url(#logo-clip)"/>`;
 
@@ -167,8 +193,8 @@ export function buildSvg(opts: QrOptions): RenderResult {
     `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" ` +
     `viewBox="0 0 ${px} ${px}" shape-rendering="geometricPrecision">` +
     (logo.defs ? `<defs>${logo.defs}</defs>` : "") +
-    `<rect width="${px}" height="${px}" fill="${opts.bgColor}"/>` +
-    `<g fill="${opts.fillColor}">${modules}${eyeMarkup}</g>` +
+    `<rect width="${px}" height="${px}" fill="${escapeXml(opts.bgColor)}"/>` +
+    `<g fill="${escapeXml(opts.fillColor)}">${modules}${eyeMarkup}</g>` +
     logo.body +
     `</svg>`;
 

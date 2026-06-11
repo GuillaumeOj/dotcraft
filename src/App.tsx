@@ -3,7 +3,7 @@ import { Controls } from "./components/Controls";
 import { Preview } from "./components/Preview";
 import { randomStyle } from "./qr/random";
 import { buildSvg } from "./qr/render";
-import { DEFAULT_OPTIONS, QrOptions } from "./qr/types";
+import { DEFAULT_OPTIONS, type QrOptions } from "./qr/types";
 
 export function App() {
   // Start from a random style on each load.

@@ -1,4 +1,4 @@
-import { DOT_STYLES, EYE_STYLES, QrOptions } from "./types";
+import { DOT_STYLES, EYE_STYLES, type QrOptions } from "./types";
 
 function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -30,7 +30,11 @@ export function randomStyle(): Pick<
     dotStyle: pick(DOT_STYLES),
     eyeStyle: pick(EYE_STYLES),
     fillColor: hslToHex(hue, 60 + Math.random() * 30, 22 + Math.random() * 16),
-    bgColor: hslToHex((hue + 180) % 360, 30 + Math.random() * 40, 95 + Math.random() * 5),
+    bgColor: hslToHex(
+      (hue + 180) % 360,
+      30 + Math.random() * 40,
+      95 + Math.random() * 5,
+    ),
     margin: 2 + Math.floor(Math.random() * 5), // 2..6
   };
 }

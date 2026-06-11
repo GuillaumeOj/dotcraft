@@ -29,8 +29,19 @@ export function isTransparent(color: string): boolean {
   return !color || color.toLowerCase() === "none";
 }
 
-export const DOT_STYLES: DotStyle[] = ["square", "gapped", "rounded", "circle", "dots"];
-export const EYE_STYLES: EyeStyle[] = ["square", "rounded", "circle", "droplet"];
+export const DOT_STYLES: DotStyle[] = [
+  "square",
+  "gapped",
+  "rounded",
+  "circle",
+  "dots",
+];
+export const EYE_STYLES: EyeStyle[] = [
+  "square",
+  "rounded",
+  "circle",
+  "droplet",
+];
 export const ERROR_LEVELS: ErrorCorrection[] = ["L", "M", "Q", "H"];
 
 export const DEFAULT_OPTIONS: QrOptions = {

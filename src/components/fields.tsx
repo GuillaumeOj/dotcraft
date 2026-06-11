@@ -1,11 +1,26 @@
-import { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent, ReactNode } from "react";
+import { useId } from "react";
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+/**
+ * Labelled form row. Generates an id and hands it to the control via a render
+ * prop, so the `<label htmlFor>` is genuinely associated with its input
+ * (clickable, screen-reader friendly).
+ */
+export function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: (id: string) => ReactNode;
+}) {
+  const id = useId();
   return (
-    <label className="field">
-      <span className="field__label">{label}</span>
-      {children}
-    </label>
+    <div className="field">
+      <label className="field__label" htmlFor={id}>
+        {label}
+      </label>
+      {children(id)}
+    </div>
   );
 }
 
@@ -22,12 +37,15 @@ export function TextField({
 }) {
   return (
     <Field label={label}>
-      <input
-        type="text"
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      {(id) => (
+        <input
+          id={id}
+          type="text"
+          value={value}
+          placeholder={placeholder}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
     </Field>
   );
 }
@@ -45,13 +63,19 @@ export function SelectField<T extends string>({
 }) {
   return (
     <Field label={label}>
-      <select value={value} onChange={(e) => onChange(e.target.value as T)}>
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o[0].toUpperCase() + o.slice(1)}
-          </option>
-        ))}
-      </select>
+      {(id) => (
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value as T)}
+        >
+          {options.map((o) => (
+            <option key={o} value={o}>
+              {o[0].toUpperCase() + o.slice(1)}
+            </option>
+          ))}
+        </select>
+      )}
     </Field>
   );
 }
@@ -68,10 +92,18 @@ export function ColorField({
   const set = (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value);
   return (
     <Field label={label}>
-      <span className="color">
-        <input type="color" value={value} onChange={set} aria-label={label} />
-        <input type="text" className="color__hex" value={value} onChange={set} />
-      </span>
+      {(id) => (
+        <span className="color">
+          <input id={id} type="color" value={value} onChange={set} />
+          <input
+            type="text"
+            className="color__hex"
+            value={value}
+            onChange={set}
+            aria-label={`${label} hex value`}
+          />
+        </span>
+      )}
     </Field>
   );
 }
@@ -95,14 +127,17 @@ export function RangeField({
 }) {
   return (
     <Field label={`${label}  ·  ${format ? format(value) : value}`}>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
+      {(id) => (
+        <input
+          id={id}
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+        />
+      )}
     </Field>
   );
 }

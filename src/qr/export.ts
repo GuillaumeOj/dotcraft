@@ -9,6 +9,12 @@ function download(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+/** Encode an SVG string as a data URI. Loaded via <img>, SVG runs in image
+ *  mode with scripting disabled, so this is safe even for untrusted markup. */
+export function svgDataUri(svg: string): string {
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
 export function downloadSvg(svg: string, filename = "qrcode.svg") {
   download(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), filename);
 }
@@ -20,7 +26,7 @@ export async function downloadPng(
   filename = "qrcode.png",
 ): Promise<void> {
   const img = new Image();
-  const src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  const src = svgDataUri(svg);
   await new Promise<void>((resolve, reject) => {
     img.onload = () => resolve();
     img.onerror = () => reject(new Error("Failed to render SVG to image."));
