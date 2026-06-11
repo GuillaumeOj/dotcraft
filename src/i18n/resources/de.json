@@ -65,7 +65,8 @@
       "Q": "Behebt ~25 % Schäden.",
       "H": "Behebt ~30 % Schäden — am robustesten, hinter einem Logo nötig."
     },
-    "logoForcesHigh": "Ein Logo ist gesetzt — die Fehlerkorrektur wird auf Hoch erzwungen."
+    "logoForcesHigh": "Ein Logo ist gesetzt — die Fehlerkorrektur wird auf Hoch erzwungen.",
+    "settings": "Einstellungen"
   },
   "preview": {
     "qrAlt": "QR-Code-Vorschau",
@@ -154,5 +155,8 @@
     "vcardPostalCode": "Postleitzahl",
     "vcardCountry": "Land",
     "vcardNote": "Notiz"
+  },
+  "export": {
+    "title": "Exportieren"
   }
 }

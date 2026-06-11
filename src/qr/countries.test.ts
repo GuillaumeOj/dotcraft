@@ -4,7 +4,6 @@ import {
   countryByCode,
   detectCountryCode,
   FALLBACK_COUNTRY,
-  flagEmoji,
 } from "./countries";
 
 describe("COUNTRIES dataset", () => {
@@ -22,13 +21,6 @@ describe("COUNTRIES dataset", () => {
     expect(new Set(codes).size).toBe(codes.length);
     const names = COUNTRIES.map((c) => c.name);
     expect([...names].sort((a, b) => a.localeCompare(b))).toEqual(names);
-  });
-});
-
-describe("flagEmoji", () => {
-  it("maps a code to its regional-indicator pair", () => {
-    expect(flagEmoji("FR")).toBe("🇫🇷");
-    expect(flagEmoji("us")).toBe("🇺🇸"); // case-insensitive
   });
 });
 

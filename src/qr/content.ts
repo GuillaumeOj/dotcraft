@@ -105,6 +105,14 @@ function dialFor(countryCode: string): string {
   );
 }
 
+/** The blank phone seeded with the fallback country — the baseline used when
+ *  normalizing stored phone/vCard drafts. */
+const FALLBACK_PHONE: PhoneNumber = {
+  country: FALLBACK_COUNTRY,
+  dialCode: dialFor(FALLBACK_COUNTRY),
+  number: "",
+};
+
 /** All six blank drafts, with phone/address country seeded from `country`. */
 export function emptyDrafts(country: string): ContentDrafts {
   const code = countryByCode(country)?.code ?? FALLBACK_COUNTRY;
@@ -273,7 +281,6 @@ function normPhone(raw: unknown, fallback: PhoneNumber): PhoneNumber {
 export function normalizeContent(raw: unknown, fallback: QrContent): QrContent {
   const r = (raw ?? {}) as Record<string, unknown>;
   const type = r.type as ContentType;
-  const drafts = emptyDrafts(FALLBACK_COUNTRY);
   switch (type) {
     case "text":
       return { type, text: str(r.text) };
@@ -287,7 +294,7 @@ export function normalizeContent(raw: unknown, fallback: QrContent): QrContent {
         body: str(r.body),
       };
     case "phone":
-      return { type, phone: normPhone(r.phone, drafts.phone.phone) };
+      return { type, phone: normPhone(r.phone, FALLBACK_PHONE) };
     case "wifi":
       return {
         type,
@@ -308,7 +315,7 @@ export function normalizeContent(raw: unknown, fallback: QrContent): QrContent {
         lastName: str(r.lastName),
         org: str(r.org),
         title: str(r.title),
-        phone: normPhone(r.phone, drafts.vcard.phone),
+        phone: normPhone(r.phone, FALLBACK_PHONE),
         email: str(r.email),
         url: str(r.url),
         address: {

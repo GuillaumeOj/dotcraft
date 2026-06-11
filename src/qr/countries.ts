@@ -3,7 +3,6 @@
  *  needs. Wrapping the dependency here keeps the rest of the app decoupled from
  *  its data model. */
 
-import type { TCountryCode } from "countries-list";
 import { getCountryDataList, getEmojiFlag } from "countries-list";
 
 export interface Country {
@@ -40,9 +39,11 @@ export const FALLBACK_COUNTRY = "US";
  *  is absent or not in {@link COUNTRIES}. */
 export function detectCountryCode(): string {
   const langs =
-    typeof navigator !== "undefined"
-      ? [navigator.language, ...(navigator.languages ?? [])]
-      : [];
+    typeof navigator === "undefined"
+      ? []
+      : navigator.languages?.length
+        ? navigator.languages
+        : [navigator.language];
   for (const lang of langs) {
     if (!lang) continue;
     let region: string | undefined;
@@ -54,9 +55,4 @@ export function detectCountryCode(): string {
     if (region && countryByCode(region)) return region.toUpperCase();
   }
   return FALLBACK_COUNTRY;
-}
-
-/** The flag emoji for an ISO alpha-2 code. */
-export function flagEmoji(code: string): string {
-  return getEmojiFlag(code.toUpperCase() as TCountryCode);
 }

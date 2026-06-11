@@ -65,7 +65,8 @@
       "Q": "Recupera ~25% di danni.",
       "H": "Recupera ~30% di danni — il più robusto, necessario dietro un logo."
     },
-    "logoForcesHigh": "È impostato un logo — la correzione degli errori è forzata su Alta."
+    "logoForcesHigh": "È impostato un logo — la correzione degli errori è forzata su Alta.",
+    "settings": "Impostazioni"
   },
   "preview": {
     "qrAlt": "Anteprima del codice QR",
@@ -154,5 +155,8 @@
     "vcardPostalCode": "CAP",
     "vcardCountry": "Paese",
     "vcardNote": "Nota"
+  },
+  "export": {
+    "title": "Esporta"
   }
 }

@@ -9,7 +9,54 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { ColorFormat } from "../qr/color";
 import { DEFAULT_OPTIONS, type QrOptions } from "../qr/types";
-import { Controls } from "./Controls";
+import {
+  ContentPanel,
+  EditorActions,
+  LogoPanel,
+  SettingsPanel,
+  StylePanel,
+} from "./Controls";
+
+/** Renders all editor panels together, the way App lays them out, so a single
+ *  setup exercises every panel through one tree. */
+function Controls({
+  options,
+  colorFormat,
+  onColorFormatChange,
+  onChange,
+  onRandomize,
+  onReset,
+}: {
+  options: QrOptions;
+  colorFormat: ColorFormat;
+  onColorFormatChange: (format: ColorFormat) => void;
+  onChange: (patch: Partial<QrOptions>) => void;
+  onRandomize: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <section>
+      <ContentPanel options={options} onChange={onChange} />
+      <SettingsPanel
+        options={options}
+        colorFormat={colorFormat}
+        onColorFormatChange={onColorFormatChange}
+        onChange={onChange}
+      />
+      <StylePanel
+        options={options}
+        colorFormat={colorFormat}
+        onChange={onChange}
+      />
+      <LogoPanel
+        options={options}
+        colorFormat={colorFormat}
+        onChange={onChange}
+      />
+      <EditorActions onRandomize={onRandomize} onReset={onReset} />
+    </section>
+  );
+}
 
 function setup(
   over: Partial<QrOptions> = {},

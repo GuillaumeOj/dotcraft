@@ -24,6 +24,9 @@ body,
 
 body {
   background: radial-gradient(1200px 600px at 80% -10%, #1b1f2b, var(--bg));
+  /* Pin the backdrop to the viewport so a tall (scrolling) page keeps the same
+     background instead of revealing a flat area below the gradient. */
+  background-attachment: fixed;
   color: var(--text);
   font:
     15px / 1.5 system-ui,
@@ -98,14 +101,62 @@ body {
 }
 
 .app__main {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 244px minmax(0, 1fr) minmax(0, 1.1fr);
+  grid-template-columns: 244px minmax(0, 1fr);
   gap: 24px;
+  align-items: stretch;
+}
+
+/* Two rows that share one column grid, so the left/right columns line up:
+   row 1 is the preview + its export/actions tools; row 2 is the content form
+   alongside the style + logo panels (which therefore start level with it). */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.workspace__top,
+.workspace__bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.workspace__top {
+  align-items: stretch;
+}
+
+.workspace__bottom {
   align-items: start;
+}
+
+/* The tools column fills the preview's height: export at the top, actions at
+   the bottom, so the space beside the preview isn't left empty. */
+.workspace__tools {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.workspace__side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
 }
 
 @media (max-width: 1080px) {
   .app__main {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace__top,
+  .workspace__bottom {
     grid-template-columns: 1fr;
   }
 }
@@ -132,30 +183,25 @@ body {
   color: var(--text);
 }
 
-/* Sidebar / library tree */
+/* Sidebar / library tree. It fills the column down to the footer but never
+   grows past the viewport: it sticks within view and the tree scrolls when the
+   list is longer than the space. The head stays put while the tree scrolls. */
 .sidebar {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel);
-  padding: 14px 12px 16px;
+  position: sticky;
+  top: 24px;
+  max-height: calc(100vh - 48px);
   display: flex;
-  flex-direction: column;
+  min-height: 0;
+}
+
+/* The bordered surface is a panel, so its title sits on the border like the
+   editor panels. It fills the sticky aside; only the tree inside it scrolls. */
+.sidebar__panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
   gap: 12px;
-}
-
-.sidebar__head {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sidebar__title {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  padding: 14px 12px 16px;
 }
 
 .sidebar__new {
@@ -170,6 +216,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1px;
+}
+
+/* Only the top-level tree scrolls; nested trees flow within it. */
+.sidebar__panel > .tree {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* Room for the scrollbar so hover actions aren't hard against it. */
+  margin-right: -4px;
+  padding-right: 4px;
 }
 
 .tree--nested {
@@ -484,6 +540,17 @@ textarea:focus {
   border-color: transparent;
 }
 
+/* Mirror the language selector's chevron on every select: drop the native
+   arrow and paint the same lucide ChevronDown glyph (muted) on the right. */
+select:not(.app__lang-select) {
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239aa3b2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 15px;
+}
+
 input[type="range"] {
   width: 100%;
   accent-color: var(--accent);
@@ -670,28 +737,14 @@ input[type="color"] {
 }
 
 /* Preview */
+/* The preview is a standard panel; its title is the fieldset legend. The stage
+   stretches to fill the panel so the QR sits centred in the available space. */
 .preview {
-  position: sticky;
-  top: 24px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--panel);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.preview__title {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  justify-content: center;
 }
 
 .preview__stage {
+  width: 100%;
   display: grid;
   place-items: center;
   min-height: 280px;

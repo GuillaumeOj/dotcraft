@@ -1,7 +1,14 @@
 import { ChevronDown, Languages } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Controls } from "./components/Controls";
+import {
+  ContentPanel,
+  EditorActions,
+  LogoPanel,
+  SettingsPanel,
+  StylePanel,
+} from "./components/Controls";
+import { ExportPanel } from "./components/ExportPanel";
 import { Preview } from "./components/Preview";
 import { Sidebar } from "./components/Sidebar";
 import { describeRenderError } from "./i18n/errors";
@@ -194,15 +201,39 @@ export function App() {
           onDeleteDocument={lib.removeDocument}
           onSelectDocument={selectDocument}
         />
-        <Controls
-          options={options}
-          colorFormat={lib.colorFormat}
-          onColorFormatChange={lib.setColorFormat}
-          onChange={patch}
-          onRandomize={() => patch(randomStyle())}
-          onReset={() => setOptions(defaults)}
-        />
-        <Preview svg={result.svg} px={result.px} error={error} />
+        <div className="workspace">
+          <div className="workspace__top">
+            <Preview svg={result.svg} error={error} />
+            <div className="workspace__tools">
+              <ExportPanel svg={result.svg} px={result.px} />
+              <EditorActions
+                onRandomize={() => patch(randomStyle())}
+                onReset={() => setOptions(defaults)}
+              />
+            </div>
+          </div>
+          <div className="workspace__bottom">
+            <ContentPanel options={options} onChange={patch} />
+            <div className="workspace__side">
+              <SettingsPanel
+                options={options}
+                colorFormat={lib.colorFormat}
+                onColorFormatChange={lib.setColorFormat}
+                onChange={patch}
+              />
+              <StylePanel
+                options={options}
+                colorFormat={lib.colorFormat}
+                onChange={patch}
+              />
+              <LogoPanel
+                options={options}
+                colorFormat={lib.colorFormat}
+                onChange={patch}
+              />
+            </div>
+          </div>
+        </div>
       </main>
 
       <footer className="app__footer">

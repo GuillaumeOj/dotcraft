@@ -65,7 +65,8 @@
       "Q": "Recovers from ~25% damage.",
       "H": "Recovers from ~30% damage — most robust, needed behind a logo."
     },
-    "logoForcesHigh": "A logo is set — error correction is forced to High."
+    "logoForcesHigh": "A logo is set — error correction is forced to High.",
+    "settings": "Settings"
   },
   "preview": {
     "qrAlt": "QR code preview",
@@ -154,5 +155,8 @@
     "vcardPostalCode": "Postal code",
     "vcardCountry": "Country",
     "vcardNote": "Note"
+  },
+  "export": {
+    "title": "Export"
   }
 }

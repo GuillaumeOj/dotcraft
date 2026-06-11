@@ -3,8 +3,6 @@ import { CONTENT_TYPES } from "./content";
 import {
   DEFAULT_OPTIONS,
   DOT_STYLES,
-  EC_DESCRIPTIONS,
-  EC_LABELS,
   EC_SETTINGS,
   ERROR_LEVELS,
   EYE_STYLES,
@@ -40,12 +38,5 @@ describe("style tables", () => {
     expect(EC_SETTINGS).toContain(DEFAULT_OPTIONS.errorCorrection);
     expect(CONTENT_TYPES).toContain(DEFAULT_OPTIONS.contentType);
     expect(DEFAULT_OPTIONS.logo).toBeNull();
-  });
-
-  it("has a friendly label and description for every EC setting", () => {
-    for (const s of EC_SETTINGS) {
-      expect(EC_LABELS[s].length).toBeGreaterThan(0);
-      expect(EC_DESCRIPTIONS[s].length).toBeGreaterThan(0);
-    }
   });
 });

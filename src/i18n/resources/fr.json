@@ -65,7 +65,8 @@
       "Q": "Corrige ~25 % de dommages.",
       "H": "Corrige ~30 % de dommages — le plus robuste, requis derrière un logo."
     },
-    "logoForcesHigh": "Un logo est défini — la correction d'erreur est forcée à Élevée."
+    "logoForcesHigh": "Un logo est défini — la correction d'erreur est forcée à Élevée.",
+    "settings": "Paramètres"
   },
   "preview": {
     "qrAlt": "Aperçu du QR code",
@@ -154,5 +155,8 @@
     "vcardPostalCode": "Code postal",
     "vcardCountry": "Pays",
     "vcardNote": "Note"
+  },
+  "export": {
+    "title": "Exporter"
   }
 }

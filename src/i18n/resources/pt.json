@@ -65,7 +65,8 @@
       "Q": "Recupera ~25% de danos.",
       "H": "Recupera ~30% de danos — o mais robusto, necessário atrás de um logótipo."
     },
-    "logoForcesHigh": "Há um logótipo definido — a correção de erros é forçada para Alta."
+    "logoForcesHigh": "Há um logótipo definido — a correção de erros é forçada para Alta.",
+    "settings": "Definições"
   },
   "preview": {
     "qrAlt": "Pré-visualização do QR code",
@@ -154,5 +155,8 @@
     "vcardPostalCode": "Código postal",
     "vcardCountry": "País",
     "vcardNote": "Nota"
+  },
+  "export": {
+    "title": "Exportar"
   }
 }

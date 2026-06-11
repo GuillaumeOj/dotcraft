@@ -65,7 +65,8 @@
       "Q": "Recupera ~25 % de daño.",
       "H": "Recupera ~30 % de daño: el más robusto, necesario tras un logo."
     },
-    "logoForcesHigh": "Hay un logo: la corrección de errores se fuerza a Alta."
+    "logoForcesHigh": "Hay un logo: la corrección de errores se fuerza a Alta.",
+    "settings": "Ajustes"
   },
   "preview": {
     "qrAlt": "Vista previa del código QR",
@@ -124,7 +125,7 @@
   },
   "content": {
     "text": "Texto",
-    "textPlaceholder": "Cualquier texto que codificar",
+    "textPlaceholder": "Cualquier texto para codificar",
     "url": "URL",
     "urlPlaceholder": "https://example.com",
     "emailTo": "Para",
@@ -154,5 +155,8 @@
     "vcardPostalCode": "Código postal",
     "vcardCountry": "País",
     "vcardNote": "Nota"
+  },
+  "export": {
+    "title": "Exportar"
   }
 }

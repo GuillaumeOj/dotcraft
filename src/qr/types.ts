@@ -52,26 +52,10 @@ export const EYE_STYLES: EyeStyle[] = [
 ];
 export const ERROR_LEVELS: ErrorCorrection[] = ["L", "M", "Q", "H"];
 
-/** Selectable error-correction settings, "auto" first (the default). */
+/** Selectable error-correction settings, "auto" first (the default). The
+ *  user-facing labels and descriptions live in the i18n catalogs
+ *  (`controls.ecLabels.*` / `controls.ecDescriptions.*`). */
 export const EC_SETTINGS: EcSetting[] = ["auto", "L", "M", "Q", "H"];
-
-/** Friendly, non-technical names for each error-correction setting. */
-export const EC_LABELS: Record<EcSetting, string> = {
-  auto: "Automatic",
-  L: "Low",
-  M: "Medium",
-  Q: "Quartile",
-  H: "High",
-};
-
-/** One-line, plain-language explanation of each error-correction setting. */
-export const EC_DESCRIPTIONS: Record<EcSetting, string> = {
-  auto: "Picks the best level for your content.",
-  L: "Recovers from ~7% damage — smallest, densest-looking code.",
-  M: "Recovers from ~15% damage — a balanced default.",
-  Q: "Recovers from ~25% damage.",
-  H: "Recovers from ~30% damage — most robust, needed behind a logo.",
-};
 
 /** A folder in the library. A folder with `parentId === null` is a top-level
  *  "project"; any other folder is nested beneath its parent. Nesting is

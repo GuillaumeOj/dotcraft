@@ -439,6 +439,19 @@ export function TextAreaField({
 }
 
 /** A country picker (flag + name), valued by ISO alpha-2 code. */
+// The country lists never change, so build the <option> nodes once at module
+// scope rather than on every render of every phone / vCard field.
+const COUNTRY_NAME_OPTIONS = COUNTRIES.map((c) => (
+  <option key={c.code} value={c.code}>
+    {c.flag} {c.name}
+  </option>
+));
+const COUNTRY_DIAL_OPTIONS = COUNTRIES.map((c) => (
+  <option key={c.code} value={c.code}>
+    {c.flag} {c.dialCode}
+  </option>
+));
+
 export function CountrySelect({
   label,
   value,
@@ -457,11 +470,7 @@ export function CountrySelect({
           onChange={(e) => onChange(e.target.value)}
         >
           <option value="">—</option>
-          {COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.flag} {c.name}
-            </option>
-          ))}
+          {COUNTRY_NAME_OPTIONS}
         </select>
       )}
     </Field>
@@ -499,11 +508,7 @@ export function PhoneField({
                 onChange({ ...value, country: c.code, dialCode: c.dialCode });
             }}
           >
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.flag} {c.dialCode}
-              </option>
-            ))}
+            {COUNTRY_DIAL_OPTIONS}
           </select>
           <input
             id={id}
