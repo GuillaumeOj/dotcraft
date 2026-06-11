@@ -44,6 +44,30 @@ export const EYE_STYLES: EyeStyle[] = [
 ];
 export const ERROR_LEVELS: ErrorCorrection[] = ["L", "M", "Q", "H"];
 
+/** A folder in the library. A folder with `parentId === null` is a top-level
+ *  "project"; any other folder is nested beneath its parent. Nesting is
+ *  unlimited. */
+export interface Folder {
+  id: string;
+  name: string;
+  /** Parent folder id, or null for a top-level project. */
+  parentId: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** A saved QR code. Its `options.logo` is always null at rest — the logo image
+ *  lives separately in the IndexedDB logo store, keyed by the document id. */
+export interface QrDocument {
+  id: string;
+  name: string;
+  /** The folder this document lives in. */
+  folderId: string;
+  options: QrOptions;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export const DEFAULT_OPTIONS: QrOptions = {
   data: "https://example.com",
   dotStyle: "circle",
