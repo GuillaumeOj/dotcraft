@@ -7,6 +7,9 @@ coverage
 .vercel
 .DS_Store
 
+# Claude Code worktrees
+.claude/worktrees/
+
 # python (archived)
 python/.venv
 python/__pycache__
