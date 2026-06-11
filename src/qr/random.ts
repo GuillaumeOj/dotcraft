@@ -1,3 +1,4 @@
+import { hslToRgb, rgbToHex } from "./color";
 import { DOT_STYLES, EYE_STYLES, type QrOptions } from "./types";
 
 function pick<T>(arr: readonly T[]): T {
@@ -5,18 +6,8 @@ function pick<T>(arr: readonly T[]): T {
 }
 
 /** h: 0–360, s/l: 0–100 -> #rrggbb */
-function hslToHex(h: number, s: number, l: number): string {
-  l /= 100;
-  const a = (s * Math.min(l, 1 - l)) / 100;
-  const channel = (n: number) => {
-    const k = (n + h / 30) % 12;
-    const c = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * c)
-      .toString(16)
-      .padStart(2, "0");
-  };
-  return `#${channel(0)}${channel(8)}${channel(4)}`;
-}
+const hslToHex = (h: number, s: number, l: number): string =>
+  rgbToHex(hslToRgb({ h, s, l }));
 
 /** Random style/colors/margin. Keeps a dark foreground on a near-white
  *  background so the result stays high-contrast and scannable. Content text,

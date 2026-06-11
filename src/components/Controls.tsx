@@ -1,5 +1,10 @@
 import type { ChangeEvent } from "react";
 import {
+  COLOR_FORMAT_LABELS,
+  COLOR_FORMATS,
+  type ColorFormat,
+} from "../qr/color";
+import {
   DOT_STYLES,
   ERROR_LEVELS,
   EYE_STYLES,
@@ -18,11 +23,15 @@ const pct = (v: number) => `${Math.round(v * 100)}%`;
 
 export function Controls({
   options,
+  colorFormat,
+  onColorFormatChange,
   onChange,
   onRandomize,
   onReset,
 }: {
   options: QrOptions;
+  colorFormat: ColorFormat;
+  onColorFormatChange: (format: ColorFormat) => void;
   onChange: (patch: Partial<QrOptions>) => void;
   onRandomize: () => void;
   onReset: () => void;
@@ -73,14 +82,23 @@ export function Controls({
           options={EYE_STYLES}
           onChange={(eyeStyle) => onChange({ eyeStyle })}
         />
+        <SelectField
+          label="Colour format"
+          value={colorFormat}
+          options={COLOR_FORMATS}
+          onChange={onColorFormatChange}
+          getLabel={(f) => COLOR_FORMAT_LABELS[f]}
+        />
         <ColorField
           label="Foreground"
           value={options.fillColor}
+          format={colorFormat}
           onChange={(fillColor) => onChange({ fillColor })}
         />
         <ColorField
           label="Background"
           value={options.bgColor}
+          format={colorFormat}
           onChange={(bgColor) => onChange({ bgColor })}
         />
         <RangeField
@@ -151,6 +169,7 @@ export function Controls({
             <ColorField
               label="Logo background"
               value={isTransparent(options.logoBg) ? "#ffffff" : options.logoBg}
+              format={colorFormat}
               onChange={(logoBg) => onChange({ logoBg })}
             />
             <label className="checkbox">

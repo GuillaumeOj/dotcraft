@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Controls } from "./components/Controls";
 import { Preview } from "./components/Preview";
+import type { ColorFormat } from "./qr/color";
 import { randomStyle } from "./qr/random";
 import { buildSvg } from "./qr/render";
 import { DEFAULT_OPTIONS, type QrOptions } from "./qr/types";
@@ -11,6 +12,10 @@ export function App() {
     ...DEFAULT_OPTIONS,
     ...randomStyle(),
   }));
+
+  // How colours are entered, app-wide. Purely an editing preference — it doesn't
+  // affect the rendered QR — so it lives outside QrOptions.
+  const [colorFormat, setColorFormat] = useState<ColorFormat>("hex");
 
   const result = useMemo(() => {
     try {
@@ -37,6 +42,8 @@ export function App() {
       <main className="app__main">
         <Controls
           options={options}
+          colorFormat={colorFormat}
+          onColorFormatChange={setColorFormat}
           onChange={patch}
           onRandomize={() => patch(randomStyle())}
           onReset={() => setOptions(DEFAULT_OPTIONS)}
