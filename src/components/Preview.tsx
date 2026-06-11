@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { downloadPng, downloadSvg, svgDataUri } from "../qr/export";
 
 const PNG_SIZES = [512, 1024, 2048];
@@ -13,6 +14,7 @@ export function Preview({
   error: string | null;
 }) {
   const [pngSize, setPngSize] = useState(1024);
+  const { t } = useTranslation();
 
   return (
     <section className="preview">
@@ -25,14 +27,14 @@ export function Preview({
           <img
             className="preview__qr"
             src={svgDataUri(svg)}
-            alt="QR code preview"
+            alt={t("preview.qrAlt")}
           />
         )}
       </div>
 
       <div className="preview__actions">
         <label className="field field--inline">
-          <span className="field__label">PNG size</span>
+          <span className="field__label">{t("preview.pngSize")}</span>
           <select
             value={pngSize}
             onChange={(e) => setPngSize(Number(e.target.value))}
@@ -51,7 +53,7 @@ export function Preview({
             disabled={!svg}
             onClick={() => downloadPng(svg, pngSize)}
           >
-            Download PNG
+            {t("preview.downloadPng")}
           </button>
           <button
             type="button"
@@ -59,14 +61,10 @@ export function Preview({
             disabled={!svg}
             onClick={() => downloadSvg(svg)}
           >
-            Download SVG
+            {t("preview.downloadSvg")}
           </button>
         </div>
-        {px > 0 && (
-          <p className="hint">
-            Vector size: {px}×{px}
-          </p>
-        )}
+        {px > 0 && <p className="hint">{t("preview.vectorSize", { px })}</p>}
       </div>
     </section>
   );

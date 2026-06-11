@@ -1,5 +1,6 @@
 import type { ChangeEvent, ReactNode } from "react";
 import { useEffect, useId, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   type ColorFormat,
   cssColorToHex,
@@ -200,6 +201,7 @@ function HexInput({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   const [draft, commit] = useColorDraft(value, decodeHex, onChange);
   const onInput = (e: ChangeEvent<HTMLInputElement>) => {
     const cleaned = e.target.value.replace(/[^0-9a-fA-F]/g, "").slice(0, 8);
@@ -219,8 +221,8 @@ function HexInput({
         spellCheck={false}
         maxLength={8}
         aria-invalid={!HEX_RE.test(draft)}
-        aria-label="Hex value"
-        placeholder="000000"
+        aria-label={t("fields.hexValue")}
+        placeholder={t("fields.hexPlaceholder")}
       />
     </span>
   );
@@ -298,6 +300,7 @@ function NamedInput({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   const [draft, commit] = useColorDraft(value, decodeNamed, onChange);
   const onInput = (e: ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
@@ -313,8 +316,8 @@ function NamedInput({
       onChange={onInput}
       spellCheck={false}
       aria-invalid={!valid}
-      aria-label="Named colour"
-      placeholder="tomato, navy, …"
+      aria-label={t("fields.namedColour")}
+      placeholder={t("fields.namedPlaceholder")}
     />
   );
 }
@@ -330,6 +333,7 @@ export function ColorField({
   format: ColorFormat;
   onChange: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   const swatch = cssColorToHex(value) ?? "#000000";
   return (
     <Field label={label}>
@@ -339,7 +343,7 @@ export function ColorField({
             type="color"
             value={swatch}
             onChange={(e) => onChange(e.target.value)}
-            aria-label={`${label} swatch`}
+            aria-label={t("fields.swatch", { label })}
           />
           {format === "hex" && (
             <HexInput id={id} value={value} onChange={onChange} />

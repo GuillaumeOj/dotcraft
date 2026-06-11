@@ -1,0 +1,99 @@
+{
+  "app": {
+    "tagline": "Gestalte einen stilvollen QR-Code und exportiere ihn als PNG oder SVG.",
+    "viewOnGithub": "Auf GitHub ansehen",
+    "language": "Sprache",
+    "documentTitle": "Dotcraft — Editor für stilvolle QR-Codes",
+    "metaDescription": "Gestalte stilvolle QR-Codes mit individuellen Punkt- und Tropfen-Augenstilen, Farben und einem zentralen Logo."
+  },
+  "controls": {
+    "content": "Inhalt",
+    "textOrUrl": "Text oder URL",
+    "urlPlaceholder": "https://beispiel.com",
+    "errorCorrection": "Fehlerkorrektur",
+    "logoForcesH": "Ein Logo ist gesetzt — die Fehlerkorrektur wird auf H erzwungen.",
+    "style": "Stil",
+    "dotStyle": "Punktstil",
+    "eyeStyle": "Augenstil",
+    "colourFormat": "Farbformat",
+    "foreground": "Vordergrund",
+    "background": "Hintergrund",
+    "quietZone": "Ruhezonen-Rand",
+    "logo": "Logo",
+    "image": "Bild (PNG / JPG / SVG)",
+    "logoPreview": "Logo-Vorschau",
+    "removeLogo": "Logo entfernen",
+    "size": "Größe",
+    "padding": "Innenabstand",
+    "cornerRadius": "Eckenradius",
+    "logoBackground": "Logo-Hintergrund",
+    "transparentLogoBg": "Transparenter Logo-Hintergrund",
+    "randomize": "Zufällig",
+    "reset": "Auf Standard zurücksetzen",
+    "dotStyles": {
+      "square": "Quadrat",
+      "gapped": "Mit Abstand",
+      "rounded": "Abgerundet",
+      "circle": "Kreis",
+      "dots": "Punkte"
+    },
+    "eyeStyles": {
+      "square": "Quadrat",
+      "rounded": "Abgerundet",
+      "circle": "Kreis",
+      "droplet": "Tropfen"
+    }
+  },
+  "preview": {
+    "qrAlt": "QR-Code-Vorschau",
+    "pngSize": "PNG-Größe",
+    "downloadPng": "PNG herunterladen",
+    "downloadSvg": "SVG herunterladen",
+    "vectorSize": "Vektorgröße: {{px}}×{{px}}"
+  },
+  "color": {
+    "hex": "Hex",
+    "rgb": "RGB",
+    "hsl": "HSL",
+    "named": "Benannt"
+  },
+  "fields": {
+    "hexValue": "Hex-Wert",
+    "hexPlaceholder": "000000",
+    "namedColour": "Benannte Farbe",
+    "namedPlaceholder": "tomato, navy, …",
+    "swatch": "{{label}} Farbfeld"
+  },
+  "sidebar": {
+    "savedQrCodes": "Gespeicherte QR-Codes",
+    "library": "Bibliothek",
+    "newProject": "Neues Projekt",
+    "noProjects": "Noch keine Projekte.",
+    "editName": "Namen bearbeiten",
+    "addQrCode": "QR-Code hinzufügen",
+    "addSubfolder": "Unterordner hinzufügen",
+    "renameProject": "Projekt umbenennen",
+    "renameFolder": "Ordner umbenennen",
+    "deleteProject": "Projekt löschen",
+    "deleteFolder": "Ordner löschen",
+    "collapse": "{{name}} einklappen",
+    "expand": "{{name}} ausklappen",
+    "confirmDeleteFolder": "„{{name}}“ und alles darin löschen?",
+    "duplicateQrCode": "QR-Code duplizieren",
+    "renameQrCode": "QR-Code umbenennen",
+    "deleteQrCode": "QR-Code löschen",
+    "confirmDeleteDoc": "„{{name}}“ löschen?"
+  },
+  "library": {
+    "myProject": "Mein Projekt",
+    "myQrCode": "Mein QR-Code",
+    "newProject": "Neues Projekt",
+    "newFolder": "Neuer Ordner",
+    "untitledQr": "Unbenannter QR",
+    "copySuffix": "{{name}} Kopie"
+  },
+  "errors": {
+    "enterText": "Gib einen Text oder eine URL zum Kodieren ein.",
+    "couldNotRender": "QR-Code konnte nicht gerendert werden."
+  }
+}

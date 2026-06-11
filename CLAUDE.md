@@ -54,6 +54,18 @@ bun run test:coverage       # tests with coverage report
 - **Fix Biome errors and warnings at the source.** Always find a real solution
   rather than suppressing the diagnostic. Do not add `biome-ignore` comments or
   disable rules unless there is a genuine, justified reason.
+- **Translate every user-facing string.** The UI is internationalized with
+  react-i18next; catalogs live in `src/i18n/resources/<locale>.json`. Never
+  hardcode display text in components — add a key to `en.json` (the typed source
+  of truth) and reference it via `t(...)`. Whenever you add a key, add it to
+  **every** locale file (`en`, `fr`, `es`, `de`, `it`, `pt`); a missing key is a
+  `tsc` error.
+- **Review changed translations per language.** When a `/simplify` (or
+  `/code-review`) pass touches any `src/i18n/resources/*.json` catalog, launch
+  one review sub-agent per **non-English** locale (`fr`, `es`, `de`, `it`, `pt`)
+  in parallel, each comparing its file against `en.json` for accuracy,
+  naturalness, placeholder integrity (`{{name}}`, `{{px}}`, …), and consistency.
+  Skip this when no catalog changed.
 
 ## Worktrees
 

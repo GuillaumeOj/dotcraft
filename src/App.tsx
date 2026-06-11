@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Controls } from "./components/Controls";
 import { Preview } from "./components/Preview";
 import { Sidebar } from "./components/Sidebar";
+import { describeRenderError } from "./i18n/errors";
+import { LOCALE_LABELS, LOCALES, type Locale } from "./i18n/locales";
 import { randomStyle } from "./qr/random";
 import { buildSvg } from "./qr/render";
-import { clearLogo, loadLogo, saveLogo } from "./qr/storage";
+import {
+  clearLogo,
+  getPrefs,
+  loadLogo,
+  saveLogo,
+  setPrefs,
+} from "./qr/storage";
 import { DEFAULT_OPTIONS, type QrOptions } from "./qr/types";
-import { useLibrary } from "./qr/useLibrary";
+import { type LibraryLabels, useLibrary } from "./qr/useLibrary";
 
 function GithubMark() {
   return (
@@ -23,8 +32,39 @@ function GithubMark() {
 }
 
 export function App() {
-  const lib = useLibrary();
+  const { t, i18n } = useTranslation();
+
+  // Default names for items the library creates, in the current language. New
+  // projects/documents are named in the active locale; existing ones keep their
+  // stored name.
+  const libraryLabels = useMemo<LibraryLabels>(
+    () => ({
+      myProject: t("library.myProject"),
+      myQrCode: t("library.myQrCode"),
+      newProject: t("library.newProject"),
+      newFolder: t("library.newFolder"),
+      untitledQr: t("library.untitledQr"),
+      copySuffix: (name) => t("library.copySuffix", { name }),
+    }),
+    [t],
+  );
+  const lib = useLibrary(libraryLabels);
   const { activeDocId, documents, persistActiveOptions } = lib;
+
+  const changeLocale = (next: Locale) => {
+    void i18n.changeLanguage(next);
+    setPrefs({ ...getPrefs(), locale: next });
+  };
+
+  // Keep the document title, language attribute and meta description in sync
+  // with the selected locale (the static index.html is the English baseline).
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+    document.title = t("app.documentTitle");
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute("content", t("app.metaDescription"));
+  }, [t, i18n.language]);
 
   // The live editor working copy for the active document. It carries the logo
   // (hydrated from IndexedDB); the persisted snapshot in the library never does.
@@ -101,11 +141,27 @@ export function App() {
     lib.duplicateDocument(id);
   };
 
+  const error = result.error ? describeRenderError(result.error, t) : null;
+
   return (
     <div className="app">
       <header className="app__header">
-        <h1>Dotcraft</h1>
-        <p>Design a styled QR code, then export it as PNG or SVG.</p>
+        <div className="app__brand">
+          <h1>Dotcraft</h1>
+          <select
+            className="app__lang"
+            aria-label={t("app.language")}
+            value={i18n.language}
+            onChange={(e) => changeLocale(e.target.value as Locale)}
+          >
+            {LOCALES.map((l) => (
+              <option key={l} value={l}>
+                {LOCALE_LABELS[l]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <p>{t("app.tagline")}</p>
       </header>
 
       <main className="app__main">
@@ -135,7 +191,7 @@ export function App() {
           onRandomize={() => patch(randomStyle())}
           onReset={() => setOptions(DEFAULT_OPTIONS)}
         />
-        <Preview svg={result.svg} px={result.px} error={result.error} />
+        <Preview svg={result.svg} px={result.px} error={error} />
       </main>
 
       <footer className="app__footer">
@@ -146,7 +202,7 @@ export function App() {
           rel="noreferrer"
         >
           <GithubMark />
-          <span>View on GitHub</span>
+          <span>{t("app.viewOnGithub")}</span>
         </a>
       </footer>
     </div>
