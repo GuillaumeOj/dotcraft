@@ -98,9 +98,7 @@ describe("App", () => {
       screen.getByRole("heading", { name: "Dotcraft" }),
     ).toBeInTheDocument();
     // The library title is a panel legend, like the editor surfaces.
-    expect(
-      screen.getByRole("group", { name: "Library" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Library" })).toBeInTheDocument();
     expect(screen.getByText("My Project")).toBeInTheDocument();
     expect(await screen.findByAltText("QR code preview")).toBeInTheDocument();
   });
