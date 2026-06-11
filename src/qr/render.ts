@@ -157,10 +157,14 @@ export interface RenderResult {
   px: number;
 }
 
+/** Thrown by {@link buildSvg} when there is nothing to encode. Exported so the
+ *  UI can recognise it and show a translated message. */
+export const EMPTY_CONTENT_ERROR = "Enter some text or a URL to encode.";
+
 /** Build the styled QR code as a self-contained SVG string. Throws if the data
  *  is empty or too large for the chosen error-correction level. */
 export function buildSvg(opts: QrOptions): RenderResult {
-  if (!opts.data) throw new Error("Enter some text or a URL to encode.");
+  if (!opts.data) throw new Error(EMPTY_CONTENT_ERROR);
 
   const ec = opts.logo ? "H" : opts.errorCorrection;
   const m = getMatrix(opts.data, ec);

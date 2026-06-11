@@ -1,10 +1,7 @@
 import { Dices } from "lucide-react";
 import type { ChangeEvent } from "react";
-import {
-  COLOR_FORMAT_LABELS,
-  COLOR_FORMATS,
-  type ColorFormat,
-} from "../qr/color";
+import { useTranslation } from "react-i18next";
+import { COLOR_FORMATS, type ColorFormat } from "../qr/color";
 import {
   DOT_STYLES,
   ERROR_LEVELS,
@@ -37,6 +34,8 @@ export function Controls({
   onRandomize: () => void;
   onReset: () => void;
 }) {
+  const { t } = useTranslation();
+
   const onLogoFile = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -48,62 +47,60 @@ export function Controls({
   return (
     <section className="controls">
       <fieldset className="panel">
-        <legend>Content</legend>
+        <legend>{t("controls.content")}</legend>
         <TextField
-          label="Text or URL"
+          label={t("controls.textOrUrl")}
           value={options.data}
-          placeholder="https://example.com"
+          placeholder={t("controls.urlPlaceholder")}
           onChange={(data) => onChange({ data })}
         />
         <SelectField
-          label="Error correction"
+          label={t("controls.errorCorrection")}
           value={options.logo ? "H" : options.errorCorrection}
           options={ERROR_LEVELS}
           onChange={(errorCorrection) => onChange({ errorCorrection })}
           disabled={!!options.logo}
         />
-        {options.logo && (
-          <p className="hint">
-            A logo is set — error correction is forced to H.
-          </p>
-        )}
+        {options.logo && <p className="hint">{t("controls.logoForcesH")}</p>}
       </fieldset>
 
       <fieldset className="panel">
-        <legend>Style</legend>
+        <legend>{t("controls.style")}</legend>
         <SelectField
-          label="Dot style"
+          label={t("controls.dotStyle")}
           value={options.dotStyle}
           options={DOT_STYLES}
           onChange={(dotStyle) => onChange({ dotStyle })}
+          getLabel={(s) => t(`controls.dotStyles.${s}`)}
         />
         <SelectField
-          label="Eye style"
+          label={t("controls.eyeStyle")}
           value={options.eyeStyle}
           options={EYE_STYLES}
           onChange={(eyeStyle) => onChange({ eyeStyle })}
+          getLabel={(s) => t(`controls.eyeStyles.${s}`)}
         />
         <SelectField
-          label="Colour format"
+          label={t("controls.colourFormat")}
           value={colorFormat}
           options={COLOR_FORMATS}
           onChange={onColorFormatChange}
-          getLabel={(f) => COLOR_FORMAT_LABELS[f]}
+          getLabel={(f) => t(`color.${f}`)}
         />
         <ColorField
-          label="Foreground"
+          label={t("controls.foreground")}
           value={options.fillColor}
           format={colorFormat}
           onChange={(fillColor) => onChange({ fillColor })}
         />
         <ColorField
-          label="Background"
+          label={t("controls.background")}
           value={options.bgColor}
           format={colorFormat}
           onChange={(bgColor) => onChange({ bgColor })}
         />
         <RangeField
-          label="Quiet-zone margin"
+          label={t("controls.quietZone")}
           value={options.margin}
           min={0}
           max={8}
@@ -113,8 +110,8 @@ export function Controls({
       </fieldset>
 
       <fieldset className="panel">
-        <legend>Logo</legend>
-        <Field label="Image (PNG / JPG / SVG)">
+        <legend>{t("controls.logo")}</legend>
+        <Field label={t("controls.image")}>
           {(id) => (
             <input
               id={id}
@@ -130,18 +127,18 @@ export function Controls({
               <img
                 className="logo-thumb"
                 src={options.logo}
-                alt="logo preview"
+                alt={t("controls.logoPreview")}
               />
               <button
                 type="button"
                 className="btn btn--ghost"
                 onClick={() => onChange({ logo: null })}
               >
-                Remove logo
+                {t("controls.removeLogo")}
               </button>
             </div>
             <RangeField
-              label="Size"
+              label={t("controls.size")}
               value={options.logoRatio}
               min={0.1}
               max={0.4}
@@ -150,7 +147,7 @@ export function Controls({
               onChange={(logoRatio) => onChange({ logoRatio })}
             />
             <RangeField
-              label="Padding"
+              label={t("controls.padding")}
               value={options.logoPadding}
               min={0}
               max={0.4}
@@ -159,7 +156,7 @@ export function Controls({
               onChange={(logoPadding) => onChange({ logoPadding })}
             />
             <RangeField
-              label="Corner radius"
+              label={t("controls.cornerRadius")}
               value={options.logoRadius}
               min={0}
               max={0.5}
@@ -168,7 +165,7 @@ export function Controls({
               onChange={(logoRadius) => onChange({ logoRadius })}
             />
             <ColorField
-              label="Logo background"
+              label={t("controls.logoBackground")}
               value={isTransparent(options.logoBg) ? "#ffffff" : options.logoBg}
               format={colorFormat}
               onChange={(logoBg) => onChange({ logoBg })}
@@ -181,7 +178,7 @@ export function Controls({
                   onChange({ logoBg: e.target.checked ? "none" : "#ffffff" })
                 }
               />
-              Transparent logo background
+              {t("controls.transparentLogoBg")}
             </label>
           </>
         )}
@@ -190,10 +187,10 @@ export function Controls({
       <div className="controls__actions">
         <button type="button" className="btn btn--icon" onClick={onRandomize}>
           <Dices size={16} aria-hidden="true" />
-          Randomize
+          {t("controls.randomize")}
         </button>
         <button type="button" className="btn btn--ghost" onClick={onReset}>
-          Reset to defaults
+          {t("controls.reset")}
         </button>
       </div>
     </section>

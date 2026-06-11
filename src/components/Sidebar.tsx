@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { MAX_FOLDER_DEPTH } from "../qr/storage";
 import type { Folder, QrDocument } from "../qr/types";
 
@@ -63,6 +64,7 @@ function groupBy<T, K>(items: T[], key: (item: T) => K): Map<K, T[]> {
 }
 
 export function Sidebar(props: SidebarProps) {
+  const { t } = useTranslation();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dropFolderId, setDropFolderId] = useState<string | null>(null);
 
@@ -107,20 +109,20 @@ export function Sidebar(props: SidebarProps) {
 
   const projects = foldersByParent.get(null) ?? [];
   return (
-    <aside className="sidebar" aria-label="Saved QR codes">
+    <aside className="sidebar" aria-label={t("sidebar.savedQrCodes")}>
       <div className="sidebar__head">
-        <h2 className="sidebar__title">Library</h2>
+        <h2 className="sidebar__title">{t("sidebar.library")}</h2>
         <button
           type="button"
           className="btn btn--ghost sidebar__new"
           onClick={props.onCreateProject}
         >
           <Plus size={ICON} aria-hidden="true" />
-          New Project
+          {t("sidebar.newProject")}
         </button>
       </div>
       {projects.length === 0 ? (
-        <p className="hint">No projects yet.</p>
+        <p className="hint">{t("sidebar.noProjects")}</p>
       ) : (
         <ul className="tree">
           {projects.map((folder) => (
@@ -143,6 +145,7 @@ function InlineEdit({
   onCommit(name: string): void;
   onCancel(): void;
 }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState(value);
   const ref = useRef<HTMLInputElement>(null);
   // Focus and select the name when the rename field opens.
@@ -156,7 +159,7 @@ function InlineEdit({
       ref={ref}
       type="text"
       className="tree__edit"
-      aria-label="Edit name"
+      aria-label={t("sidebar.editName")}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}
@@ -200,10 +203,11 @@ function FolderNode({
   depth: number;
   ctx: TreeCtx;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const childFolders = ctx.foldersByParent.get(folder.id) ?? [];
   const childDocs = ctx.docsByFolder.get(folder.id) ?? [];
-  const kind = folder.parentId === null ? "project" : "folder";
+  const isProject = folder.parentId === null;
   const expanded = !ctx.collapsedFolders.has(folder.id);
   const toggle = () => ctx.onToggleFolder(folder.id);
   const canNest = depth < MAX_FOLDER_DEPTH;
@@ -212,7 +216,7 @@ function FolderNode({
   return (
     <li className="tree__item">
       <div
-        className={`tree__row tree__row--${kind}${isDropTarget ? " is-drop" : ""}`}
+        className={`tree__row tree__row--${isProject ? "project" : "folder"}${isDropTarget ? " is-drop" : ""}`}
         role="treeitem"
         aria-expanded={expanded}
         aria-label={folder.name}
@@ -233,7 +237,9 @@ function FolderNode({
           className="tree__caret"
           aria-expanded={expanded}
           aria-label={
-            expanded ? `Collapse ${folder.name}` : `Expand ${folder.name}`
+            expanded
+              ? t("sidebar.collapse", { name: folder.name })
+              : t("sidebar.expand", { name: folder.name })
           }
           onClick={toggle}
         >
@@ -263,28 +269,35 @@ function FolderNode({
         )}
         <span className="tree__actions">
           <IconButton
-            label="Add QR code"
+            label={t("sidebar.addQrCode")}
             onClick={() => ctx.onCreateDocument(folder.id)}
           >
             <FilePlus2 size={ICON} aria-hidden="true" />
           </IconButton>
           {canNest && (
             <IconButton
-              label="Add subfolder"
+              label={t("sidebar.addSubfolder")}
               onClick={() => ctx.onCreateFolder(folder.id)}
             >
               <FolderPlus size={ICON} aria-hidden="true" />
             </IconButton>
           )}
-          <IconButton label={`Rename ${kind}`} onClick={() => setEditing(true)}>
+          <IconButton
+            label={
+              isProject ? t("sidebar.renameProject") : t("sidebar.renameFolder")
+            }
+            onClick={() => setEditing(true)}
+          >
             <Pencil size={ICON} aria-hidden="true" />
           </IconButton>
           <IconButton
-            label={`Delete ${kind}`}
+            label={
+              isProject ? t("sidebar.deleteProject") : t("sidebar.deleteFolder")
+            }
             onClick={() => {
               if (
                 window.confirm(
-                  `Delete “${folder.name}” and everything inside it?`,
+                  t("sidebar.confirmDeleteFolder", { name: folder.name }),
                 )
               )
                 ctx.onDeleteFolder(folder.id);
@@ -310,6 +323,7 @@ function FolderNode({
 }
 
 function DocNode({ doc, ctx }: { doc: QrDocument; ctx: TreeCtx }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const active = doc.id === ctx.activeDocId;
   const dragging = ctx.draggingId === doc.id;
@@ -355,18 +369,25 @@ function DocNode({ doc, ctx }: { doc: QrDocument; ctx: TreeCtx }) {
         )}
         <span className="tree__actions">
           <IconButton
-            label="Duplicate QR code"
+            label={t("sidebar.duplicateQrCode")}
             onClick={() => ctx.onDuplicateDocument(doc.id)}
           >
             <Copy size={ICON} aria-hidden="true" />
           </IconButton>
-          <IconButton label="Rename QR code" onClick={() => setEditing(true)}>
+          <IconButton
+            label={t("sidebar.renameQrCode")}
+            onClick={() => setEditing(true)}
+          >
             <Pencil size={ICON} aria-hidden="true" />
           </IconButton>
           <IconButton
-            label="Delete QR code"
+            label={t("sidebar.deleteQrCode")}
             onClick={() => {
-              if (window.confirm(`Delete “${doc.name}”?`))
+              if (
+                window.confirm(
+                  t("sidebar.confirmDeleteDoc", { name: doc.name }),
+                )
+              )
                 ctx.onDeleteDocument(doc.id);
             }}
           >

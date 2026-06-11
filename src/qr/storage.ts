@@ -14,6 +14,7 @@
  *  storage, private mode, or quota overflow degrade to a no-op rather than
  *  breaking the app. */
 
+import { asLocale, type Locale } from "../i18n/locales";
 import { COLOR_FORMATS, type ColorFormat } from "./color";
 import {
   DEFAULT_OPTIONS,
@@ -45,6 +46,9 @@ export interface Prefs {
   lastOpenedDocId: string | null;
   /** Ids of folders the user has collapsed (folders default to expanded). */
   collapsedFolderIds: string[];
+  /** The user's chosen interface language. Absent until they pick one — the app
+   *  then falls back to browser detection. */
+  locale?: Locale;
 }
 
 const DEFAULT_PREFS: Prefs = {
@@ -69,6 +73,7 @@ export function getPrefs(): Prefs {
     const parsed = JSON.parse(raw);
     if (!parsed || parsed.version !== PREFS_VERSION)
       return { ...DEFAULT_PREFS };
+    const locale = asLocale(parsed.locale);
     return {
       colorFormat: COLOR_FORMATS.includes(parsed.colorFormat)
         ? parsed.colorFormat
@@ -82,6 +87,9 @@ export function getPrefs(): Prefs {
             (id: unknown) => typeof id === "string",
           )
         : [],
+      // Only surface a stored language when it's a supported one; otherwise omit
+      // the key so callers fall back to browser detection.
+      ...(locale ? { locale } : {}),
     };
   } catch {
     return { ...DEFAULT_PREFS };

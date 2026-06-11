@@ -1,0 +1,99 @@
+{
+  "app": {
+    "tagline": "Design a styled QR code, then export it as PNG or SVG.",
+    "viewOnGithub": "View on GitHub",
+    "language": "Language",
+    "documentTitle": "Dotcraft — styled QR code editor",
+    "metaDescription": "Design styled QR codes with custom dot and droplet eye styles, colors, and a center logo."
+  },
+  "controls": {
+    "content": "Content",
+    "textOrUrl": "Text or URL",
+    "urlPlaceholder": "https://example.com",
+    "errorCorrection": "Error correction",
+    "logoForcesH": "A logo is set — error correction is forced to H.",
+    "style": "Style",
+    "dotStyle": "Dot style",
+    "eyeStyle": "Eye style",
+    "colourFormat": "Colour format",
+    "foreground": "Foreground",
+    "background": "Background",
+    "quietZone": "Quiet-zone margin",
+    "logo": "Logo",
+    "image": "Image (PNG / JPG / SVG)",
+    "logoPreview": "logo preview",
+    "removeLogo": "Remove logo",
+    "size": "Size",
+    "padding": "Padding",
+    "cornerRadius": "Corner radius",
+    "logoBackground": "Logo background",
+    "transparentLogoBg": "Transparent logo background",
+    "randomize": "Randomize",
+    "reset": "Reset to defaults",
+    "dotStyles": {
+      "square": "Square",
+      "gapped": "Gapped",
+      "rounded": "Rounded",
+      "circle": "Circle",
+      "dots": "Dots"
+    },
+    "eyeStyles": {
+      "square": "Square",
+      "rounded": "Rounded",
+      "circle": "Circle",
+      "droplet": "Droplet"
+    }
+  },
+  "preview": {
+    "qrAlt": "QR code preview",
+    "pngSize": "PNG size",
+    "downloadPng": "Download PNG",
+    "downloadSvg": "Download SVG",
+    "vectorSize": "Vector size: {{px}}×{{px}}"
+  },
+  "color": {
+    "hex": "Hex",
+    "rgb": "RGB",
+    "hsl": "HSL",
+    "named": "Named"
+  },
+  "fields": {
+    "hexValue": "Hex value",
+    "hexPlaceholder": "000000",
+    "namedColour": "Named colour",
+    "namedPlaceholder": "tomato, navy, …",
+    "swatch": "{{label}} swatch"
+  },
+  "sidebar": {
+    "savedQrCodes": "Saved QR codes",
+    "library": "Library",
+    "newProject": "New Project",
+    "noProjects": "No projects yet.",
+    "editName": "Edit name",
+    "addQrCode": "Add QR code",
+    "addSubfolder": "Add subfolder",
+    "renameProject": "Rename project",
+    "renameFolder": "Rename folder",
+    "deleteProject": "Delete project",
+    "deleteFolder": "Delete folder",
+    "collapse": "Collapse {{name}}",
+    "expand": "Expand {{name}}",
+    "confirmDeleteFolder": "Delete “{{name}}” and everything inside it?",
+    "duplicateQrCode": "Duplicate QR code",
+    "renameQrCode": "Rename QR code",
+    "deleteQrCode": "Delete QR code",
+    "confirmDeleteDoc": "Delete “{{name}}”?"
+  },
+  "library": {
+    "myProject": "My Project",
+    "myQrCode": "My QR code",
+    "newProject": "New Project",
+    "newFolder": "New Folder",
+    "untitledQr": "Untitled QR",
+    "copySuffix": "{{name}} copy"
+  },
+  "errors": {
+    "enterText": "Enter some text or a URL to encode.",
+    "couldNotRender": "Could not render QR code."
+  }
+}

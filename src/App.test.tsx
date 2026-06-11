@@ -13,6 +13,12 @@ vi.mock("./qr/storage", () => ({
   loadLogo: vi.fn(async () => null),
   saveLogo: vi.fn(async () => {}),
   clearLogo: vi.fn(async () => {}),
+  getPrefs: vi.fn(() => ({
+    colorFormat: "hex",
+    lastOpenedDocId: null,
+    collapsedFolderIds: [],
+  })),
+  setPrefs: vi.fn(),
   MAX_FOLDER_DEPTH: 5,
 }));
 vi.mock("./qr/useLibrary", () => ({ useLibrary: vi.fn() }));
@@ -217,5 +223,21 @@ describe("App", () => {
     expect(
       await screen.findByText(/Enter some text or a URL/i),
     ).toBeInTheDocument();
+  });
+
+  it("switches the interface language and remembers the choice", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    await user.selectOptions(screen.getByLabelText("Language"), "fr");
+    // The UI re-renders in the selected language...
+    expect(
+      await screen.findByText(/Concevez un QR code stylisé/),
+    ).toBeInTheDocument();
+    expect(document.title).toBe("Dotcraft — éditeur de QR codes stylisés");
+    // ...and the choice is persisted.
+    expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "fr" }),
+    );
   });
 });

@@ -30,6 +30,28 @@ import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "./types";
 const newId = (): string => crypto.randomUUID();
 const now = (): number => Date.now();
 
+/** Localised default names for items the library creates. Injected by the
+ *  caller (from the active translation) so new projects/documents are named in
+ *  the current language; defaults to English so non-UI callers (and tests) work
+ *  without wiring up i18n. */
+export interface LibraryLabels {
+  myProject: string;
+  myQrCode: string;
+  newProject: string;
+  newFolder: string;
+  untitledQr: string;
+  copySuffix: (name: string) => string;
+}
+
+export const DEFAULT_LIBRARY_LABELS: LibraryLabels = {
+  myProject: "My Project",
+  myQrCode: "My QR code",
+  newProject: "New Project",
+  newFolder: "New Folder",
+  untitledQr: "Untitled QR",
+  copySuffix: (name) => `${name} copy`,
+};
+
 /** Return `arr` with the item sharing `item.id` replaced by `item`. */
 function replaceById<T extends { id: string }>(arr: T[], item: T): T[] {
   return arr.map((x) => (x.id === item.id ? item : x));
@@ -37,18 +59,21 @@ function replaceById<T extends { id: string }>(arr: T[], item: T): T[] {
 
 /** A fresh top-level project holding one starter document. Used for first-run
  *  seeding and whenever the last document is deleted. */
-function makeStarter(): { folder: Folder; doc: QrDocument } {
+function makeStarter(labels: LibraryLabels): {
+  folder: Folder;
+  doc: QrDocument;
+} {
   const t = now();
   const folder: Folder = {
     id: newId(),
-    name: "My Project",
+    name: labels.myProject,
     parentId: null,
     createdAt: t,
     updatedAt: t,
   };
   const doc: QrDocument = {
     id: newId(),
-    name: "My QR code",
+    name: labels.myQrCode,
     folderId: folder.id,
     options: { ...DEFAULT_OPTIONS, ...randomStyle() },
     createdAt: t,
@@ -87,7 +112,15 @@ export interface Library {
   persistActiveOptions(options: QrDocument["options"]): void;
 }
 
-export function useLibrary(): Library {
+export function useLibrary(
+  labels: LibraryLabels = DEFAULT_LIBRARY_LABELS,
+): Library {
+  // Keep the latest labels in a ref so the imperative create callbacks below
+  // (memoised with empty deps) always read the current language without being
+  // re-created on every render.
+  const labelsRef = useRef(labels);
+  labelsRef.current = labels;
+
   const [folders, setFolders] = useState<Folder[]>([]);
   const [documents, setDocuments] = useState<QrDocument[]>([]);
   const [activeDocId, setActiveDocId] = useState<string | null>(null);
@@ -114,7 +147,7 @@ export function useLibrary(): Library {
       await migrateLegacy(newId, now());
       let [fs, ds] = await Promise.all([listFolders(), listDocuments()]);
       if (ds.length === 0) {
-        const { folder, doc } = makeStarter();
+        const { folder, doc } = makeStarter(labelsRef.current);
         await saveFolder(folder);
         await saveDocument(doc);
         fs = [...fs, folder];
@@ -139,7 +172,10 @@ export function useLibrary(): Library {
   // Persist preferences (colour format, last open document, folder fold state).
   useEffect(() => {
     if (!loaded) return;
+    // Merge over the stored prefs so the language choice (written separately by
+    // the switcher) isn't clobbered by this write.
     setPrefs({
+      ...getPrefs(),
       colorFormat,
       lastOpenedDocId: activeDocId,
       collapsedFolderIds: [...collapsedFolders],
@@ -169,7 +205,7 @@ export function useLibrary(): Library {
    *  document-less. */
   const settleDocuments = useCallback((remaining: QrDocument[]) => {
     if (remaining.length === 0) {
-      const { folder, doc } = makeStarter();
+      const { folder, doc } = makeStarter(labelsRef.current);
       void saveFolder(folder);
       void saveDocument(doc);
       setFolders((fs) => [...fs, folder]);
@@ -186,7 +222,7 @@ export function useLibrary(): Library {
     const t = now();
     const folder: Folder = {
       id: newId(),
-      name: "New Project",
+      name: labelsRef.current.newProject,
       parentId: null,
       createdAt: t,
       updatedAt: t,
@@ -201,7 +237,7 @@ export function useLibrary(): Library {
     const t = now();
     const folder: Folder = {
       id: newId(),
-      name: "New Folder",
+      name: labelsRef.current.newFolder,
       parentId,
       createdAt: t,
       updatedAt: t,
@@ -214,7 +250,7 @@ export function useLibrary(): Library {
     const t = now();
     const doc: QrDocument = {
       id: newId(),
-      name: "Untitled QR",
+      name: labelsRef.current.untitledQr,
       folderId,
       options: { ...DEFAULT_OPTIONS },
       createdAt: t,
@@ -232,7 +268,7 @@ export function useLibrary(): Library {
     const copy: QrDocument = {
       ...src,
       id: newId(),
-      name: `${src.name} copy`,
+      name: labelsRef.current.copySuffix(src.name),
       options: { ...src.options, logo: null },
       createdAt: t,
       updatedAt: t,

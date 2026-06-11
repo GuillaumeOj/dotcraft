@@ -42,10 +42,32 @@ body {
   flex-direction: column;
 }
 
+.app__brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .app__header h1 {
   margin: 0;
   font-size: 28px;
   letter-spacing: -0.02em;
+}
+
+.app__lang {
+  appearance: none;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.app__lang:hover {
+  border-color: var(--accent);
 }
 
 .app__header p {

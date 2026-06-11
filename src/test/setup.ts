@@ -3,6 +3,9 @@ import "@testing-library/jest-dom/vitest";
 import "fake-indexeddb/auto";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
+// Initialise the shared i18n instance so components using `useTranslation`
+// render (in English) without each test wiring up a provider.
+import i18n from "../i18n/config";
 import { installCanvasColorShim } from "./canvasColorShim";
 
 // jsdom ships no canvas 2D context. color.ts leans on the browser's CSS colour
@@ -15,6 +18,9 @@ installCanvasColorShim();
 afterEach(() => {
   cleanup();
   localStorage.clear();
+  // Reset the interface language so a test that switches it can't leak the
+  // change into the next one.
+  if (i18n.language !== "en") void i18n.changeLanguage("en");
   // Undo any vi.spyOn / vi.stubGlobal a test installed, so files don't need to
   // repeat this teardown and can't leak stubs into one another.
   vi.restoreAllMocks();
