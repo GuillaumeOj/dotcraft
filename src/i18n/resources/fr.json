@@ -42,14 +42,39 @@
       "rounded": "Arrondi",
       "circle": "Cercle",
       "droplet": "Goutte"
-    }
+    },
+    "contentTypes": {
+      "text": "Texte",
+      "url": "URL",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "wifi": "Wi-Fi",
+      "vcard": "vCard"
+    },
+    "ecLabels": {
+      "auto": "Automatique",
+      "L": "Faible",
+      "M": "Moyenne",
+      "Q": "Quartile",
+      "H": "Élevée"
+    },
+    "ecDescriptions": {
+      "auto": "Choisit le meilleur niveau selon votre contenu.",
+      "L": "Corrige ~7 % de dommages — code le plus petit et le plus dense.",
+      "M": "Corrige ~15 % de dommages — un bon compromis par défaut.",
+      "Q": "Corrige ~25 % de dommages.",
+      "H": "Corrige ~30 % de dommages — le plus robuste, requis derrière un logo."
+    },
+    "logoForcesHigh": "Un logo est défini — la correction d'erreur est forcée à Élevée.",
+    "settings": "Paramètres"
   },
   "preview": {
     "qrAlt": "Aperçu du QR code",
     "pngSize": "Taille PNG",
     "downloadPng": "Télécharger le PNG",
     "downloadSvg": "Télécharger le SVG",
-    "vectorSize": "Taille vectorielle : {{px}}×{{px}}"
+    "vectorSize": "Taille vectorielle : {{px}}×{{px}}",
+    "title": "Aperçu"
   },
   "color": {
     "hex": "Hex",
@@ -62,7 +87,9 @@
     "hexPlaceholder": "000000",
     "namedColour": "Couleur nommée",
     "namedPlaceholder": "tomato, navy, …",
-    "swatch": "Échantillon {{label}}"
+    "swatch": "Échantillon {{label}}",
+    "dialCode": "Indicatif téléphonique du pays",
+    "phonePlaceholder": "Numéro de téléphone"
   },
   "sidebar": {
     "savedQrCodes": "QR codes enregistrés",
@@ -95,5 +122,41 @@
   "errors": {
     "enterText": "Saisissez un texte ou une URL à encoder.",
     "couldNotRender": "Impossible de générer le QR code."
+  },
+  "content": {
+    "text": "Texte",
+    "textPlaceholder": "Tout texte à encoder",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "emailTo": "Destinataire",
+    "emailPlaceholder": "nom@example.com",
+    "emailSubject": "Objet",
+    "emailBody": "Message",
+    "phoneNumber": "Numéro de téléphone",
+    "wifiSsid": "Nom du réseau (SSID)",
+    "wifiSecurity": "Sécurité",
+    "wifiPassword": "Mot de passe",
+    "wifiHidden": "Réseau masqué",
+    "wifiEnc": {
+      "WPA": "WPA / WPA2",
+      "WEP": "WEP",
+      "nopass": "Aucun mot de passe (ouvert)"
+    },
+    "vcardFirstName": "Prénom",
+    "vcardLastName": "Nom",
+    "vcardOrg": "Organisation",
+    "vcardTitle": "Fonction",
+    "vcardPhone": "Téléphone",
+    "vcardEmail": "E-mail",
+    "vcardWebsite": "Site web",
+    "vcardStreet": "Rue",
+    "vcardCity": "Ville",
+    "vcardRegion": "Région / État",
+    "vcardPostalCode": "Code postal",
+    "vcardCountry": "Pays",
+    "vcardNote": "Note"
+  },
+  "export": {
+    "title": "Exporter"
   }
 }

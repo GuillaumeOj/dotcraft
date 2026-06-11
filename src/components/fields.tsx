@@ -10,6 +10,8 @@ import {
   rgbToHex,
   rgbToHsl,
 } from "../qr/color";
+import type { PhoneNumber } from "../qr/content";
+import { COUNTRIES, countryByCode } from "../qr/countries";
 
 /**
  * Labelled form row. Generates an id and hands it to the control via a render
@@ -402,6 +404,121 @@ export function RangeField({
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
         />
+      )}
+    </Field>
+  );
+}
+
+/** Multi-line text input, for free-form fields like an email body or a note. */
+export function TextAreaField({
+  label,
+  value,
+  placeholder,
+  rows = 3,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  placeholder?: string;
+  rows?: number;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <Field label={label}>
+      {(id) => (
+        <textarea
+          id={id}
+          value={value}
+          placeholder={placeholder}
+          rows={rows}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+    </Field>
+  );
+}
+
+/** A country picker (flag + name), valued by ISO alpha-2 code. */
+// The country lists never change, so build the <option> nodes once at module
+// scope rather than on every render of every phone / vCard field.
+const COUNTRY_NAME_OPTIONS = COUNTRIES.map((c) => (
+  <option key={c.code} value={c.code}>
+    {c.flag} {c.name}
+  </option>
+));
+const COUNTRY_DIAL_OPTIONS = COUNTRIES.map((c) => (
+  <option key={c.code} value={c.code}>
+    {c.flag} {c.dialCode}
+  </option>
+));
+
+export function CountrySelect({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (code: string) => void;
+}) {
+  return (
+    <Field label={label}>
+      {(id) => (
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        >
+          <option value="">—</option>
+          {COUNTRY_NAME_OPTIONS}
+        </select>
+      )}
+    </Field>
+  );
+}
+
+/** A phone field: a country dial-code dropdown beside the local number. The
+ *  value carries the dial code (with "+") and the number as typed. */
+export function PhoneField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: PhoneNumber;
+  onChange: (v: PhoneNumber) => void;
+}) {
+  const { t } = useTranslation();
+  // Prefer the stored country; fall back to the first match for the dial code.
+  const selected =
+    value.country ||
+    COUNTRIES.find((c) => c.dialCode === value.dialCode)?.code ||
+    "";
+  return (
+    <Field label={label}>
+      {(id) => (
+        <div className="phone">
+          <select
+            className="phone__code"
+            aria-label={t("fields.dialCode")}
+            value={selected}
+            onChange={(e) => {
+              const c = countryByCode(e.target.value);
+              if (c)
+                onChange({ ...value, country: c.code, dialCode: c.dialCode });
+            }}
+          >
+            {COUNTRY_DIAL_OPTIONS}
+          </select>
+          <input
+            id={id}
+            type="tel"
+            className="phone__number"
+            value={value.number}
+            placeholder={t("fields.phonePlaceholder")}
+            onChange={(e) => onChange({ ...value, number: e.target.value })}
+          />
+        </div>
       )}
     </Field>
   );

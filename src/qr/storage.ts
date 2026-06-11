@@ -17,9 +17,17 @@
 import { asLocale, type Locale } from "../i18n/locales";
 import { COLOR_FORMATS, type ColorFormat } from "./color";
 import {
+  CONTENT_TYPES,
+  type ContentDrafts,
+  legacyDataToContent,
+  normalizeContent,
+} from "./content";
+import { FALLBACK_COUNTRY } from "./countries";
+import {
   DEFAULT_OPTIONS,
   DOT_STYLES,
-  ERROR_LEVELS,
+  defaultContents,
+  EC_SETTINGS,
   EYE_STYLES,
   type Folder,
   type QrDocument,
@@ -179,13 +187,16 @@ export async function saveFolder(folder: Folder): Promise<void> {
 
 // --- Documents -------------------------------------------------------------
 
-/** All documents, or an empty list on any failure. */
+/** All documents, or an empty list on any failure. Each document's options are
+ *  normalized on read, so legacy records (with a `data` string instead of typed
+ *  `contents`) migrate transparently and the rest of the app only sees the
+ *  current shape. */
 export async function listDocuments(): Promise<QrDocument[]> {
-  return (
+  const raw =
     (
       await withStore<QrDocument[]>(DOC_STORE, "readonly", (s) => s.getAll())
-    )?.filter(Boolean) ?? []
-  );
+    )?.filter(Boolean) ?? [];
+  return raw.map((d) => ({ ...d, options: normalizeOptions(d.options) }));
 }
 
 /** Insert or update a document. The logo is forced null — it lives in the logo
@@ -291,15 +302,34 @@ export async function copyLogo(fromId: string, toId: string): Promise<void> {
 
 // --- Legacy migration ------------------------------------------------------
 
-/** Merge a raw stored options object over the defaults and snap unknown enum
- *  values back to their defaults. The logo is always cleared. */
+/** Merge a raw stored options object over the defaults, migrate any legacy
+ *  fields, validate the typed content drafts, and snap unknown enum values back
+ *  to their defaults. The logo is always cleared. */
 export function normalizeOptions(raw: unknown): QrOptions {
-  const merged: QrOptions = { ...DEFAULT_OPTIONS, ...(raw as object) };
+  const r = (raw ?? {}) as Record<string, unknown>;
+  const merged: QrOptions = { ...DEFAULT_OPTIONS, ...(r as object) };
+  const base = defaultContents(FALLBACK_COUNTRY);
+
+  // Legacy single-string `data` -> a typed draft of the matching type.
+  let rawContents = (r.contents ?? {}) as Partial<ContentDrafts>;
+  if (!("contents" in r) && typeof r.data === "string") {
+    const content = legacyDataToContent(r.data);
+    merged.contentType = content.type;
+    rawContents = { [content.type]: content } as Partial<ContentDrafts>;
+  }
+
+  if (!CONTENT_TYPES.includes(merged.contentType))
+    merged.contentType = DEFAULT_OPTIONS.contentType;
+  merged.contents = Object.fromEntries(
+    CONTENT_TYPES.map((t) => [t, normalizeContent(rawContents[t], base[t])]),
+  ) as ContentDrafts;
+  delete (merged as unknown as Record<string, unknown>).data;
+
   if (!DOT_STYLES.includes(merged.dotStyle))
     merged.dotStyle = DEFAULT_OPTIONS.dotStyle;
   if (!EYE_STYLES.includes(merged.eyeStyle))
     merged.eyeStyle = DEFAULT_OPTIONS.eyeStyle;
-  if (!ERROR_LEVELS.includes(merged.errorCorrection))
+  if (!EC_SETTINGS.includes(merged.errorCorrection))
     merged.errorCorrection = DEFAULT_OPTIONS.errorCorrection;
   merged.logo = null;
   return merged;

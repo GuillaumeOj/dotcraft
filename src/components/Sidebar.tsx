@@ -110,8 +110,8 @@ export function Sidebar(props: SidebarProps) {
   const projects = foldersByParent.get(null) ?? [];
   return (
     <aside className="sidebar" aria-label={t("sidebar.savedQrCodes")}>
-      <div className="sidebar__head">
-        <h2 className="sidebar__title">{t("sidebar.library")}</h2>
+      <fieldset className="panel sidebar__panel">
+        <legend>{t("sidebar.library")}</legend>
         <button
           type="button"
           className="btn btn--ghost sidebar__new"
@@ -120,16 +120,16 @@ export function Sidebar(props: SidebarProps) {
           <Plus size={ICON} aria-hidden="true" />
           {t("sidebar.newProject")}
         </button>
-      </div>
-      {projects.length === 0 ? (
-        <p className="hint">{t("sidebar.noProjects")}</p>
-      ) : (
-        <ul className="tree">
-          {projects.map((folder) => (
-            <FolderNode key={folder.id} folder={folder} depth={1} ctx={ctx} />
-          ))}
-        </ul>
-      )}
+        {projects.length === 0 ? (
+          <p className="hint">{t("sidebar.noProjects")}</p>
+        ) : (
+          <ul className="tree">
+            {projects.map((folder) => (
+              <FolderNode key={folder.id} folder={folder} depth={1} ctx={ctx} />
+            ))}
+          </ul>
+        )}
+      </fieldset>
     </aside>
   );
 }

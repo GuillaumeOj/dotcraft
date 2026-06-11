@@ -42,14 +42,39 @@
       "rounded": "Redondeado",
       "circle": "Círculo",
       "droplet": "Gota"
-    }
+    },
+    "contentTypes": {
+      "text": "Texto",
+      "url": "URL",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "wifi": "Wi-Fi",
+      "vcard": "vCard"
+    },
+    "ecLabels": {
+      "auto": "Automática",
+      "L": "Baja",
+      "M": "Media",
+      "Q": "Cuartil",
+      "H": "Alta"
+    },
+    "ecDescriptions": {
+      "auto": "Elige el mejor nivel según tu contenido.",
+      "L": "Recupera ~7 % de daño: el código más pequeño y denso.",
+      "M": "Recupera ~15 % de daño: un valor equilibrado por defecto.",
+      "Q": "Recupera ~25 % de daño.",
+      "H": "Recupera ~30 % de daño: el más robusto, necesario tras un logo."
+    },
+    "logoForcesHigh": "Hay un logo: la corrección de errores se fuerza a Alta.",
+    "settings": "Ajustes"
   },
   "preview": {
     "qrAlt": "Vista previa del código QR",
     "pngSize": "Tamaño PNG",
     "downloadPng": "Descargar PNG",
     "downloadSvg": "Descargar SVG",
-    "vectorSize": "Tamaño vectorial: {{px}}×{{px}}"
+    "vectorSize": "Tamaño vectorial: {{px}}×{{px}}",
+    "title": "Vista previa"
   },
   "color": {
     "hex": "Hex",
@@ -62,7 +87,9 @@
     "hexPlaceholder": "000000",
     "namedColour": "Color con nombre",
     "namedPlaceholder": "tomato, navy, …",
-    "swatch": "Muestra de {{label}}"
+    "swatch": "Muestra de {{label}}",
+    "dialCode": "Código de marcación del país",
+    "phonePlaceholder": "Número de teléfono"
   },
   "sidebar": {
     "savedQrCodes": "Códigos QR guardados",
@@ -95,5 +122,41 @@
   "errors": {
     "enterText": "Introduce un texto o una URL para codificar.",
     "couldNotRender": "No se pudo generar el código QR."
+  },
+  "content": {
+    "text": "Texto",
+    "textPlaceholder": "Cualquier texto para codificar",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "emailTo": "Para",
+    "emailPlaceholder": "nombre@example.com",
+    "emailSubject": "Asunto",
+    "emailBody": "Mensaje",
+    "phoneNumber": "Número de teléfono",
+    "wifiSsid": "Nombre de red (SSID)",
+    "wifiSecurity": "Seguridad",
+    "wifiPassword": "Contraseña",
+    "wifiHidden": "Red oculta",
+    "wifiEnc": {
+      "WPA": "WPA / WPA2",
+      "WEP": "WEP",
+      "nopass": "Sin contraseña (abierta)"
+    },
+    "vcardFirstName": "Nombre",
+    "vcardLastName": "Apellidos",
+    "vcardOrg": "Organización",
+    "vcardTitle": "Cargo",
+    "vcardPhone": "Teléfono",
+    "vcardEmail": "Correo",
+    "vcardWebsite": "Sitio web",
+    "vcardStreet": "Calle",
+    "vcardCity": "Ciudad",
+    "vcardRegion": "Región / Estado",
+    "vcardPostalCode": "Código postal",
+    "vcardCountry": "País",
+    "vcardNote": "Nota"
+  },
+  "export": {
+    "title": "Exportar"
   }
 }

@@ -5,9 +5,12 @@ import { describe, expect, it, vi } from "vitest";
 import type { ColorFormat } from "../qr/color";
 import {
   ColorField,
+  CountrySelect,
   Field,
+  PhoneField,
   RangeField,
   SelectField,
+  TextAreaField,
   TextField,
 } from "./fields";
 
@@ -309,5 +312,70 @@ describe("ColorField — external value changes", () => {
     expect(hex.value).toBe("000000");
     await user.click(screen.getByRole("button", { name: "set white" }));
     expect(hex.value).toBe("ffffff");
+  });
+});
+
+describe("TextAreaField", () => {
+  it("renders the value and reports edits", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<TextAreaField label="Note" value="" onChange={onChange} />);
+    await user.type(screen.getByLabelText("Note"), "x");
+    expect(onChange).toHaveBeenLastCalledWith("x");
+  });
+});
+
+describe("CountrySelect", () => {
+  it("lists countries and emits the chosen ISO code", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<CountrySelect label="Country" value="US" onChange={onChange} />);
+    await user.selectOptions(screen.getByLabelText("Country"), "FR");
+    expect(onChange).toHaveBeenCalledWith("FR");
+  });
+});
+
+describe("PhoneField", () => {
+  it("shows the dial code for the current country and edits the number", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <PhoneField
+        label="Phone"
+        value={{ country: "FR", dialCode: "+33", number: "" }}
+        onChange={onChange}
+      />,
+    );
+    const code = screen.getByLabelText(
+      "Country dialling code",
+    ) as HTMLSelectElement;
+    expect(code.value).toBe("FR");
+    await user.type(screen.getByLabelText("Phone"), "6");
+    expect(onChange).toHaveBeenLastCalledWith({
+      country: "FR",
+      dialCode: "+33",
+      number: "6",
+    });
+  });
+
+  it("updates the dial code when another country is picked", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <PhoneField
+        label="Phone"
+        value={{ country: "FR", dialCode: "+33", number: "5" }}
+        onChange={onChange}
+      />,
+    );
+    await user.selectOptions(
+      screen.getByLabelText("Country dialling code"),
+      "DE",
+    );
+    expect(onChange).toHaveBeenCalledWith({
+      country: "DE",
+      dialCode: "+49",
+      number: "5",
+    });
   });
 });
