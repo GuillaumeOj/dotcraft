@@ -42,14 +42,38 @@
       "rounded": "Abgerundet",
       "circle": "Kreis",
       "droplet": "Tropfen"
-    }
+    },
+    "contentTypes": {
+      "text": "Text",
+      "url": "URL",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "wifi": "WLAN",
+      "vcard": "vCard"
+    },
+    "ecLabels": {
+      "auto": "Automatisch",
+      "L": "Niedrig",
+      "M": "Mittel",
+      "Q": "Quartil",
+      "H": "Hoch"
+    },
+    "ecDescriptions": {
+      "auto": "Wählt die beste Stufe für deinen Inhalt.",
+      "L": "Behebt ~7 % Schäden — kleinster, dichtester Code.",
+      "M": "Behebt ~15 % Schäden — ausgewogene Standardwahl.",
+      "Q": "Behebt ~25 % Schäden.",
+      "H": "Behebt ~30 % Schäden — am robustesten, hinter einem Logo nötig."
+    },
+    "logoForcesHigh": "Ein Logo ist gesetzt — die Fehlerkorrektur wird auf Hoch erzwungen."
   },
   "preview": {
     "qrAlt": "QR-Code-Vorschau",
     "pngSize": "PNG-Größe",
     "downloadPng": "PNG herunterladen",
     "downloadSvg": "SVG herunterladen",
-    "vectorSize": "Vektorgröße: {{px}}×{{px}}"
+    "vectorSize": "Vektorgröße: {{px}}×{{px}}",
+    "title": "Vorschau"
   },
   "color": {
     "hex": "Hex",
@@ -62,7 +86,9 @@
     "hexPlaceholder": "000000",
     "namedColour": "Benannte Farbe",
     "namedPlaceholder": "tomato, navy, …",
-    "swatch": "{{label}} Farbfeld"
+    "swatch": "{{label}} Farbfeld",
+    "dialCode": "Ländervorwahl",
+    "phonePlaceholder": "Telefonnummer"
   },
   "sidebar": {
     "savedQrCodes": "Gespeicherte QR-Codes",
@@ -95,5 +121,38 @@
   "errors": {
     "enterText": "Gib einen Text oder eine URL zum Kodieren ein.",
     "couldNotRender": "QR-Code konnte nicht gerendert werden."
+  },
+  "content": {
+    "text": "Text",
+    "textPlaceholder": "Beliebiger Text zum Kodieren",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "emailTo": "An",
+    "emailPlaceholder": "name@example.com",
+    "emailSubject": "Betreff",
+    "emailBody": "Nachricht",
+    "phoneNumber": "Telefonnummer",
+    "wifiSsid": "Netzwerkname (SSID)",
+    "wifiSecurity": "Sicherheit",
+    "wifiPassword": "Passwort",
+    "wifiHidden": "Verstecktes Netzwerk",
+    "wifiEnc": {
+      "WPA": "WPA / WPA2",
+      "WEP": "WEP",
+      "nopass": "Kein Passwort (offen)"
+    },
+    "vcardFirstName": "Vorname",
+    "vcardLastName": "Nachname",
+    "vcardOrg": "Organisation",
+    "vcardTitle": "Position",
+    "vcardPhone": "Telefon",
+    "vcardEmail": "E-Mail",
+    "vcardWebsite": "Website",
+    "vcardStreet": "Straße",
+    "vcardCity": "Stadt",
+    "vcardRegion": "Region / Bundesland",
+    "vcardPostalCode": "Postleitzahl",
+    "vcardCountry": "Land",
+    "vcardNote": "Notiz"
   }
 }

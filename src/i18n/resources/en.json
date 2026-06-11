@@ -42,14 +42,38 @@
       "rounded": "Rounded",
       "circle": "Circle",
       "droplet": "Droplet"
-    }
+    },
+    "contentTypes": {
+      "text": "Text",
+      "url": "URL",
+      "email": "Email",
+      "phone": "Phone",
+      "wifi": "Wi-Fi",
+      "vcard": "vCard"
+    },
+    "ecLabels": {
+      "auto": "Automatic",
+      "L": "Low",
+      "M": "Medium",
+      "Q": "Quartile",
+      "H": "High"
+    },
+    "ecDescriptions": {
+      "auto": "Picks the best level for your content.",
+      "L": "Recovers from ~7% damage — smallest, densest-looking code.",
+      "M": "Recovers from ~15% damage — a balanced default.",
+      "Q": "Recovers from ~25% damage.",
+      "H": "Recovers from ~30% damage — most robust, needed behind a logo."
+    },
+    "logoForcesHigh": "A logo is set — error correction is forced to High."
   },
   "preview": {
     "qrAlt": "QR code preview",
     "pngSize": "PNG size",
     "downloadPng": "Download PNG",
     "downloadSvg": "Download SVG",
-    "vectorSize": "Vector size: {{px}}×{{px}}"
+    "vectorSize": "Vector size: {{px}}×{{px}}",
+    "title": "Preview"
   },
   "color": {
     "hex": "Hex",
@@ -62,7 +86,9 @@
     "hexPlaceholder": "000000",
     "namedColour": "Named colour",
     "namedPlaceholder": "tomato, navy, …",
-    "swatch": "{{label}} swatch"
+    "swatch": "{{label}} swatch",
+    "dialCode": "Country dialling code",
+    "phonePlaceholder": "Phone number"
   },
   "sidebar": {
     "savedQrCodes": "Saved QR codes",
@@ -95,5 +121,38 @@
   "errors": {
     "enterText": "Enter some text or a URL to encode.",
     "couldNotRender": "Could not render QR code."
+  },
+  "content": {
+    "text": "Text",
+    "textPlaceholder": "Any text to encode",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "emailTo": "To",
+    "emailPlaceholder": "name@example.com",
+    "emailSubject": "Subject",
+    "emailBody": "Message",
+    "phoneNumber": "Phone number",
+    "wifiSsid": "Network name (SSID)",
+    "wifiSecurity": "Security",
+    "wifiPassword": "Password",
+    "wifiHidden": "Hidden network",
+    "wifiEnc": {
+      "WPA": "WPA / WPA2",
+      "WEP": "WEP",
+      "nopass": "No password (open)"
+    },
+    "vcardFirstName": "First name",
+    "vcardLastName": "Last name",
+    "vcardOrg": "Organisation",
+    "vcardTitle": "Job title",
+    "vcardPhone": "Phone",
+    "vcardEmail": "Email",
+    "vcardWebsite": "Website",
+    "vcardStreet": "Street",
+    "vcardCity": "City",
+    "vcardRegion": "Region / State",
+    "vcardPostalCode": "Postal code",
+    "vcardCountry": "Country",
+    "vcardNote": "Note"
   }
 }

@@ -7,6 +7,13 @@ import { Preview } from "./Preview";
 const SVG = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 
 describe("Preview", () => {
+  it("renders a section heading", () => {
+    render(<Preview svg={SVG} px={250} error={null} />);
+    expect(
+      screen.getByRole("heading", { name: "Preview" }),
+    ).toBeInTheDocument();
+  });
+
   it("renders the QR image from the svg data URI", () => {
     render(<Preview svg={SVG} px={250} error={null} />);
     const img = screen.getByAltText("QR code preview") as HTMLImageElement;

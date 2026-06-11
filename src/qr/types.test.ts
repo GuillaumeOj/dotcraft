@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { CONTENT_TYPES } from "./content";
 import {
   DEFAULT_OPTIONS,
   DOT_STYLES,
+  EC_DESCRIPTIONS,
+  EC_LABELS,
+  EC_SETTINGS,
   ERROR_LEVELS,
   EYE_STYLES,
   isTransparent,
@@ -27,12 +31,21 @@ describe("style tables", () => {
     expect(DOT_STYLES).toContain("dots");
     expect(EYE_STYLES).toContain("droplet");
     expect(ERROR_LEVELS).toEqual(["L", "M", "Q", "H"]);
+    expect(EC_SETTINGS).toEqual(["auto", "L", "M", "Q", "H"]);
   });
 
   it("DEFAULT_OPTIONS draws from valid members", () => {
     expect(DOT_STYLES).toContain(DEFAULT_OPTIONS.dotStyle);
     expect(EYE_STYLES).toContain(DEFAULT_OPTIONS.eyeStyle);
-    expect(ERROR_LEVELS).toContain(DEFAULT_OPTIONS.errorCorrection);
+    expect(EC_SETTINGS).toContain(DEFAULT_OPTIONS.errorCorrection);
+    expect(CONTENT_TYPES).toContain(DEFAULT_OPTIONS.contentType);
     expect(DEFAULT_OPTIONS.logo).toBeNull();
+  });
+
+  it("has a friendly label and description for every EC setting", () => {
+    for (const s of EC_SETTINGS) {
+      expect(EC_LABELS[s].length).toBeGreaterThan(0);
+      expect(EC_DESCRIPTIONS[s].length).toBeGreaterThan(0);
+    }
   });
 });

@@ -1,17 +1,9 @@
 import QRCode from "qrcode";
-import { type Corners, roundedRectPath } from "./paths";
-import {
-  type DotStyle,
-  type EyeStyle,
-  isTransparent,
-  type QrOptions,
-} from "./types";
-
-/** SVG units per module. The whole SVG scales freely, so this is arbitrary. */
-const MS = 10;
-
-/** A finder pattern (eye) spans EYE_MODULES×EYE_MODULES modules. */
-const EYE_MODULES = 7;
+import { encodeContent } from "./content";
+import { resolveEc } from "./ec";
+import { roundedRectPath } from "./paths";
+import { dotShape, EYE_MODULES, MS, pointedCorner, renderEye } from "./shapes";
+import { isTransparent, type QrOptions } from "./types";
 
 /** Escape a value before interpolating it into XML/SVG attribute markup.
  *  Colors and the logo href come from free-text user input, so this prevents
@@ -46,85 +38,6 @@ function isEye(size: number, row: number, col: number): boolean {
     (near(row) && far(col)) ||
     (far(row) && near(col))
   );
-}
-
-function dotShape(style: DotStyle, x: number, y: number): string {
-  switch (style) {
-    case "square":
-      return `<rect x="${x}" y="${y}" width="${MS}" height="${MS}"/>`;
-    case "gapped": {
-      const g = MS * 0.12;
-      return `<rect x="${x + g}" y="${y + g}" width="${MS - 2 * g}" height="${MS - 2 * g}"/>`;
-    }
-    case "rounded":
-      return `<rect x="${x}" y="${y}" width="${MS}" height="${MS}" rx="${MS * 0.35}"/>`;
-    case "circle":
-      return `<circle cx="${x + MS / 2}" cy="${y + MS / 2}" r="${MS / 2}"/>`;
-    case "dots":
-      return `<circle cx="${x + MS / 2}" cy="${y + MS / 2}" r="${MS * 0.42}"/>`;
-  }
-}
-
-const EYE_RATIO: Record<EyeStyle, number> = {
-  square: 0,
-  rounded: 0.3,
-  circle: 0.5,
-  droplet: 0.35,
-};
-
-/** Corner radii for an eye element of side `side`, pointing toward `pointed`. */
-function eyeCorners(
-  style: EyeStyle,
-  side: number,
-  pointed: keyof Corners | null,
-): Corners {
-  const r = EYE_RATIO[style] * side;
-  const c: Corners = { tl: r, tr: r, br: r, bl: r };
-  if (style === "droplet" && pointed) c[pointed] = 0; // sharp point -> teardrop
-  return c;
-}
-
-/** The corner of an eye that faces the QR center — the droplet's point. */
-function pointedCorner(r0: number, c0: number, size: number): keyof Corners {
-  const vertical = r0 < size / 2 ? "b" : "t";
-  const horizontal = c0 < size / 2 ? "r" : "l";
-  return `${vertical}${horizontal}` as keyof Corners;
-}
-
-function renderEye(
-  r0: number,
-  c0: number,
-  pointed: keyof Corners,
-  style: EyeStyle,
-  margin: number,
-): string {
-  const ox = (c0 + margin) * MS;
-  const oy = (r0 + margin) * MS;
-  const outer = EYE_MODULES * MS;
-  const inner = (EYE_MODULES - 2) * MS; // a one-module-wide ring
-  const pupil = (EYE_MODULES - 4) * MS;
-  const tip = style === "droplet" ? pointed : null;
-
-  // Outer ring = outer rounded rect with an inner rounded-rect hole (evenodd).
-  const ring =
-    roundedRectPath(ox, oy, outer, outer, eyeCorners(style, outer, tip)) +
-    " " +
-    roundedRectPath(
-      ox + MS,
-      oy + MS,
-      inner,
-      inner,
-      eyeCorners(style, inner, tip),
-    );
-  const dot = roundedRectPath(
-    ox + 2 * MS,
-    oy + 2 * MS,
-    pupil,
-    pupil,
-    eyeCorners(style, pupil, tip),
-  );
-
-  return `<path d="${ring}" fill-rule="evenodd"/><path d="${dot}"/>`;
 }
 
 function renderLogo(
@@ -164,10 +77,11 @@ export const EMPTY_CONTENT_ERROR = "Enter some text or a URL to encode.";
 /** Build the styled QR code as a self-contained SVG string. Throws if the data
  *  is empty or too large for the chosen error-correction level. */
 export function buildSvg(opts: QrOptions): RenderResult {
-  if (!opts.data) throw new Error(EMPTY_CONTENT_ERROR);
+  const data = encodeContent(opts.contents[opts.contentType]);
+  if (!data) throw new Error(EMPTY_CONTENT_ERROR);
 
-  const ec = opts.logo ? "H" : opts.errorCorrection;
-  const m = getMatrix(opts.data, ec);
+  const ec = resolveEc(opts.errorCorrection, data.length, !!opts.logo);
+  const m = getMatrix(data, ec);
   const n = m.size;
   const margin = Math.max(0, Math.round(opts.margin));
   const px = (n + 2 * margin) * MS;

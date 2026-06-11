@@ -3,9 +3,16 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import * as storage from "./qr/storage";
-import { DEFAULT_OPTIONS, type QrDocument } from "./qr/types";
+import { DEFAULT_OPTIONS, type QrDocument, type QrOptions } from "./qr/types";
 import type { Library } from "./qr/useLibrary";
 import { useLibrary } from "./qr/useLibrary";
+
+/** Options on the Text tab, pre-filled — the editor then shows a "Text" field. */
+const textOpts = (text: string): QrOptions => ({
+  ...DEFAULT_OPTIONS,
+  contentType: "text",
+  contents: { ...DEFAULT_OPTIONS.contents, text: { type: "text", text } },
+});
 
 // The logo blob store and the library hook are exercised in their own suites;
 // here we mock them to assert App wires the editor to them correctly.
@@ -99,16 +106,14 @@ describe("App", () => {
 
   it("loads the active document's settings into the editor", async () => {
     setLib({
-      documents: [
-        makeDoc({ options: { ...DEFAULT_OPTIONS, data: "restored" } }),
-      ],
+      documents: [makeDoc({ options: textOpts("restored") })],
       colorFormat: "rgb",
     });
     render(<App />);
     await waitFor(() =>
-      expect(
-        (screen.getByLabelText("Text or URL") as HTMLInputElement).value,
-      ).toBe("restored"),
+      expect((screen.getByLabelText("Text") as HTMLTextAreaElement).value).toBe(
+        "restored",
+      ),
     );
     // colorFormat rgb -> RGB channel inputs are shown.
     expect((await screen.findAllByLabelText("R")).length).toBeGreaterThan(0);
@@ -127,12 +132,12 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByAltText("QR code preview");
-    const input = screen.getByLabelText("Text or URL");
+    const input = screen.getByLabelText("URL");
     await user.clear(input);
     await user.type(input, "hi");
     await waitFor(() => {
       const calls = vi.mocked(lib.persistActiveOptions).mock.calls;
-      expect(calls[calls.length - 1]?.[0].data).toBe("hi");
+      expect(calls[calls.length - 1]?.[0].contents.url.url).toBe("hi");
     });
   });
 
@@ -164,21 +169,20 @@ describe("App", () => {
 
   it("resets the active document to defaults", async () => {
     setLib({
-      documents: [
-        makeDoc({ options: { ...DEFAULT_OPTIONS, data: "to-reset" } }),
-      ],
+      documents: [makeDoc({ options: textOpts("to-reset") })],
     });
     const user = userEvent.setup();
     render(<App />);
     await waitFor(() =>
-      expect(
-        (screen.getByLabelText("Text or URL") as HTMLInputElement).value,
-      ).toBe("to-reset"),
+      expect((screen.getByLabelText("Text") as HTMLTextAreaElement).value).toBe(
+        "to-reset",
+      ),
     );
     await user.click(screen.getByRole("button", { name: /Reset/ }));
-    expect(
-      (screen.getByLabelText("Text or URL") as HTMLInputElement).value,
-    ).toBe(DEFAULT_OPTIONS.data);
+    // Reset returns to the default URL tab.
+    expect((screen.getByLabelText("URL") as HTMLInputElement).value).toBe(
+      DEFAULT_OPTIONS.contents.url.url,
+    );
   });
 
   it("randomizes the style without breaking the preview", async () => {
@@ -219,7 +223,7 @@ describe("App", () => {
   it("surfaces a render error when the content is emptied", async () => {
     const user = userEvent.setup();
     render(<App />);
-    await user.clear(screen.getByLabelText("Text or URL"));
+    await user.clear(screen.getByLabelText("URL"));
     expect(
       await screen.findByText(/Enter some text or a URL/i),
     ).toBeInTheDocument();

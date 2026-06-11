@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ColorFormat } from "./color";
+import { detectCountryCode } from "./countries";
 import { randomStyle } from "./random";
 import {
   copyLogo,
@@ -25,7 +26,7 @@ import {
   saveFolder,
   setPrefs,
 } from "./storage";
-import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "./types";
+import { defaultOptions, type Folder, type QrDocument } from "./types";
 
 const newId = (): string => crypto.randomUUID();
 const now = (): number => Date.now();
@@ -75,7 +76,7 @@ function makeStarter(labels: LibraryLabels): {
     id: newId(),
     name: labels.myQrCode,
     folderId: folder.id,
-    options: { ...DEFAULT_OPTIONS, ...randomStyle() },
+    options: { ...defaultOptions(detectCountryCode()), ...randomStyle() },
     createdAt: t,
     updatedAt: t,
   };
@@ -252,7 +253,7 @@ export function useLibrary(
       id: newId(),
       name: labelsRef.current.untitledQr,
       folderId,
-      options: { ...DEFAULT_OPTIONS },
+      options: defaultOptions(detectCountryCode()),
       createdAt: t,
       updatedAt: t,
     };

@@ -18,6 +18,7 @@ export function Preview({
 
   return (
     <section className="preview">
+      <h2 className="preview__title">{t("preview.title")}</h2>
       <div className="preview__stage">
         {error ? (
           <p className="preview__error">{error}</p>

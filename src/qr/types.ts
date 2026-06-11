@@ -1,16 +1,24 @@
+import { type ContentDrafts, type ContentType, emptyDrafts } from "./content";
+
 export type DotStyle = "square" | "gapped" | "rounded" | "circle" | "dots";
 export type EyeStyle = "square" | "rounded" | "circle" | "droplet";
 export type ErrorCorrection = "L" | "M" | "Q" | "H";
+/** The user-facing error-correction setting, including the "auto" mode that the
+ *  renderer resolves to a concrete {@link ErrorCorrection} from content length. */
+export type EcSetting = ErrorCorrection | "auto";
 
 export interface QrOptions {
-  data: string;
+  /** The active content tab. */
+  contentType: ContentType;
+  /** A draft per content type, so switching tabs preserves what was typed. */
+  contents: ContentDrafts;
   dotStyle: DotStyle;
   eyeStyle: EyeStyle;
   fillColor: string;
   bgColor: string;
   /** Quiet-zone width, in modules. */
   margin: number;
-  errorCorrection: ErrorCorrection;
+  errorCorrection: EcSetting;
 
   /** Center logo as a data URL, or null for none. */
   logo: string | null;
@@ -44,6 +52,27 @@ export const EYE_STYLES: EyeStyle[] = [
 ];
 export const ERROR_LEVELS: ErrorCorrection[] = ["L", "M", "Q", "H"];
 
+/** Selectable error-correction settings, "auto" first (the default). */
+export const EC_SETTINGS: EcSetting[] = ["auto", "L", "M", "Q", "H"];
+
+/** Friendly, non-technical names for each error-correction setting. */
+export const EC_LABELS: Record<EcSetting, string> = {
+  auto: "Automatic",
+  L: "Low",
+  M: "Medium",
+  Q: "Quartile",
+  H: "High",
+};
+
+/** One-line, plain-language explanation of each error-correction setting. */
+export const EC_DESCRIPTIONS: Record<EcSetting, string> = {
+  auto: "Picks the best level for your content.",
+  L: "Recovers from ~7% damage — smallest, densest-looking code.",
+  M: "Recovers from ~15% damage — a balanced default.",
+  Q: "Recovers from ~25% damage.",
+  H: "Recovers from ~30% damage — most robust, needed behind a logo.",
+};
+
 /** A folder in the library. A folder with `parentId === null` is a top-level
  *  "project"; any other folder is nested beneath its parent. Nesting is
  *  unlimited. */
@@ -68,14 +97,30 @@ export interface QrDocument {
   updatedAt: number;
 }
 
+/** The blank per-type drafts with the URL tab pre-filled, used by the default
+ *  options and as the starting point for a fresh document. `country` seeds the
+ *  phone/address selectors (the UI passes the detected country). */
+export function defaultContents(country: string): ContentDrafts {
+  return {
+    ...emptyDrafts(country),
+    url: { type: "url", url: "https://example.com" },
+  };
+}
+
+/** The default options seeded for a given country (phone/address selectors). */
+export function defaultOptions(country: string): QrOptions {
+  return { ...DEFAULT_OPTIONS, contents: defaultContents(country) };
+}
+
 export const DEFAULT_OPTIONS: QrOptions = {
-  data: "https://example.com",
+  contentType: "url",
+  contents: defaultContents("US"),
   dotStyle: "circle",
   eyeStyle: "droplet",
   fillColor: "#000000",
   bgColor: "#ffffff",
   margin: 4,
-  errorCorrection: "M",
+  errorCorrection: "auto",
   logo: null,
   logoRatio: 0.25,
   logoBg: "#ffffff",

@@ -20,12 +20,7 @@ import {
   saveLogo,
   setPrefs,
 } from "./storage";
-import {
-  DEFAULT_OPTIONS,
-  type Folder,
-  type QrDocument,
-  type QrOptions,
-} from "./types";
+import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "./types";
 
 let counter = 0;
 const newId = () => `id-${counter++}`;
@@ -129,17 +124,44 @@ describe("preferences", () => {
 describe("normalizeOptions", () => {
   it("merges over defaults, snaps unknown enums and drops the logo", () => {
     const opts = normalizeOptions({
-      data: "hi",
+      contentType: "text",
+      contents: DEFAULT_OPTIONS.contents,
       dotStyle: "bogus",
       eyeStyle: "bogus",
       errorCorrection: "Z",
       logo: "data:image/png;base64,AAAA",
     });
-    expect(opts.data).toBe("hi");
     expect(opts.dotStyle).toBe(DEFAULT_OPTIONS.dotStyle);
     expect(opts.eyeStyle).toBe(DEFAULT_OPTIONS.eyeStyle);
     expect(opts.errorCorrection).toBe(DEFAULT_OPTIONS.errorCorrection);
     expect(opts.logo).toBeNull();
+  });
+
+  it("accepts the auto error-correction setting", () => {
+    expect(normalizeOptions({ errorCorrection: "auto" }).errorCorrection).toBe(
+      "auto",
+    );
+  });
+
+  it("migrates a legacy `data` string into a typed content draft", () => {
+    const url = normalizeOptions({ data: "https://a.test" });
+    expect(url.contentType).toBe("url");
+    expect(url.contents.url).toEqual({ type: "url", url: "https://a.test" });
+    expect((url as unknown as Record<string, unknown>).data).toBeUndefined();
+
+    const text = normalizeOptions({ data: "hello there" });
+    expect(text.contentType).toBe("text");
+    expect(text.contents.text).toEqual({ type: "text", text: "hello there" });
+  });
+
+  it("validates each stored draft, defaulting invalid ones", () => {
+    const opts = normalizeOptions({
+      contentType: "wifi",
+      contents: { wifi: { type: "wifi", ssid: "N", encryption: "bad" } },
+    });
+    expect(opts.contents.wifi).toMatchObject({ ssid: "N", encryption: "WPA" });
+    // A missing draft falls back to its empty default.
+    expect(opts.contents.email).toMatchObject({ to: "", subject: "" });
   });
 });
 
@@ -319,7 +341,9 @@ describe("migrateLegacy", () => {
   });
 
   it("turns a legacy record into a project + document and clears the key", async () => {
-    const options: QrOptions = { ...DEFAULT_OPTIONS, data: "legacy" };
+    // A genuine legacy options object: a `data` string, no typed `contents`.
+    const { contents, contentType, ...rest } = DEFAULT_OPTIONS;
+    const options = { ...rest, data: "legacy" };
     localStorage.setItem(
       LEGACY_KEY,
       JSON.stringify({ version: 1, options, colorFormat: "rgb" }),
@@ -334,7 +358,11 @@ describe("migrateLegacy", () => {
     expect(folders[0].name).toBe("My Project");
     expect(folders[0].parentId).toBeNull();
     expect(docs[0].folderId).toBe(folders[0].id);
-    expect(docs[0].options.data).toBe("legacy");
+    expect(docs[0].options.contentType).toBe("text");
+    expect(docs[0].options.contents.text).toEqual({
+      type: "text",
+      text: "legacy",
+    });
     expect(getPrefs()).toEqual({
       colorFormat: "rgb",
       lastOpenedDocId: id,

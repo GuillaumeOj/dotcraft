@@ -171,13 +171,20 @@ describe("useLibrary — tree editing", () => {
     act(() =>
       result.current.persistActiveOptions({
         ...DEFAULT_OPTIONS,
-        data: "edited",
+        contentType: "text",
+        contents: {
+          ...DEFAULT_OPTIONS.contents,
+          text: { type: "text", text: "edited" },
+        },
       }),
     );
     const active = result.current.documents.find(
       (d) => d.id === result.current.activeDocId,
     );
-    expect(active?.options.data).toBe("edited");
+    expect(active?.options.contents.text).toEqual({
+      type: "text",
+      text: "edited",
+    });
   });
 });
 
@@ -227,14 +234,17 @@ describe("useLibrary — migration", () => {
       "qr-studio:state",
       JSON.stringify({
         version: 1,
-        options: { ...DEFAULT_OPTIONS, data: "legacy" },
+        options: { dotStyle: "circle", data: "legacy" },
         colorFormat: "named",
       }),
     );
     const { result } = await mounted();
     expect(result.current.folders[0].name).toBe("My Project");
     expect(result.current.documents[0].name).toBe("My QR code");
-    expect(result.current.documents[0].options.data).toBe("legacy");
+    expect(result.current.documents[0].options.contents.text).toEqual({
+      type: "text",
+      text: "legacy",
+    });
     expect(result.current.activeDocId).toBe(result.current.documents[0].id);
     expect(result.current.colorFormat).toBe("named");
   });

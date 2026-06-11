@@ -2,20 +2,18 @@ import { Dices } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { COLOR_FORMATS, type ColorFormat } from "../qr/color";
+import { CONTENT_TYPES, type QrContent } from "../qr/content";
 import {
   DOT_STYLES,
-  ERROR_LEVELS,
+  EC_SETTINGS,
   EYE_STYLES,
   isTransparent,
   type QrOptions,
 } from "../qr/types";
-import {
-  ColorField,
-  Field,
-  RangeField,
-  SelectField,
-  TextField,
-} from "./fields";
+import { ContentFields } from "./ContentFields";
+import { ColorField, Field, RangeField, SelectField } from "./fields";
+import { dotSwatch, eyeSwatch, StylePicker } from "./StylePicker";
+import { Tabs } from "./Tabs";
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
@@ -36,6 +34,11 @@ export function Controls({
 }) {
   const { t } = useTranslation();
 
+  const contentTabs = CONTENT_TYPES.map((id) => ({
+    id,
+    label: t(`controls.contentTypes.${id}`),
+  }));
+
   const onLogoFile = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -48,35 +51,49 @@ export function Controls({
     <section className="controls">
       <fieldset className="panel">
         <legend>{t("controls.content")}</legend>
-        <TextField
-          label={t("controls.textOrUrl")}
-          value={options.data}
-          placeholder={t("controls.urlPlaceholder")}
-          onChange={(data) => onChange({ data })}
+        <Tabs
+          value={options.contentType}
+          tabs={contentTabs}
+          onChange={(contentType) => onChange({ contentType })}
+        />
+        <ContentFields
+          content={options.contents[options.contentType]}
+          onChange={(content: QrContent) =>
+            onChange({
+              contents: { ...options.contents, [content.type]: content },
+            })
+          }
         />
         <SelectField
           label={t("controls.errorCorrection")}
-          value={options.logo ? "H" : options.errorCorrection}
-          options={ERROR_LEVELS}
+          value={options.errorCorrection}
+          options={EC_SETTINGS}
+          getLabel={(s) => t(`controls.ecLabels.${s}`)}
           onChange={(errorCorrection) => onChange({ errorCorrection })}
           disabled={!!options.logo}
         />
-        {options.logo && <p className="hint">{t("controls.logoForcesH")}</p>}
+        <p className="hint">
+          {options.logo
+            ? t("controls.logoForcesHigh")
+            : t(`controls.ecDescriptions.${options.errorCorrection}`)}
+        </p>
       </fieldset>
 
       <fieldset className="panel">
         <legend>{t("controls.style")}</legend>
-        <SelectField
+        <StylePicker
           label={t("controls.dotStyle")}
           value={options.dotStyle}
           options={DOT_STYLES}
+          renderSwatch={dotSwatch}
           onChange={(dotStyle) => onChange({ dotStyle })}
           getLabel={(s) => t(`controls.dotStyles.${s}`)}
         />
-        <SelectField
+        <StylePicker
           label={t("controls.eyeStyle")}
           value={options.eyeStyle}
           options={EYE_STYLES}
+          renderSwatch={eyeSwatch}
           onChange={(eyeStyle) => onChange({ eyeStyle })}
           getLabel={(s) => t(`controls.eyeStyles.${s}`)}
         />

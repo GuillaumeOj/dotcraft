@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { ColorFormat } from "../qr/color";
@@ -29,19 +35,39 @@ function setup(
 const LOGO = "data:image/png;base64,aaaa";
 
 describe("Controls — content & style", () => {
-  it("edits the encoded text", async () => {
-    const user = userEvent.setup();
-    const { onChange } = setup({ data: "" });
-    await user.type(screen.getByLabelText("Text or URL"), "Q");
-    expect(onChange).toHaveBeenLastCalledWith({ data: "Q" });
-  });
-
-  it("changes dot and eye styles", async () => {
+  it("switches the active content tab", async () => {
     const user = userEvent.setup();
     const { onChange } = setup();
-    await user.selectOptions(screen.getByLabelText("Dot style"), "square");
+    await user.click(screen.getByRole("tab", { name: "Text" }));
+    expect(onChange).toHaveBeenLastCalledWith({ contentType: "text" });
+  });
+
+  it("edits the active content draft, preserving the others", async () => {
+    const user = userEvent.setup();
+    const { onChange } = setup({
+      contentType: "text",
+      contents: {
+        ...DEFAULT_OPTIONS.contents,
+        text: { type: "text", text: "" },
+      },
+    });
+    await user.type(screen.getByLabelText("Text"), "Q");
+    expect(onChange).toHaveBeenLastCalledWith({
+      contents: {
+        ...DEFAULT_OPTIONS.contents,
+        text: { type: "text", text: "Q" },
+      },
+    });
+  });
+
+  it("changes dot and eye styles via the swatch pickers", async () => {
+    const user = userEvent.setup();
+    const { onChange } = setup();
+    const dots = screen.getByRole("radiogroup", { name: "Dot style" });
+    await user.click(within(dots).getByRole("radio", { name: /square/i }));
     expect(onChange).toHaveBeenCalledWith({ dotStyle: "square" });
-    await user.selectOptions(screen.getByLabelText("Eye style"), "circle");
+    const eyes = screen.getByRole("radiogroup", { name: "Eye style" });
+    await user.click(within(eyes).getByRole("radio", { name: /circle/i }));
     expect(onChange).toHaveBeenCalledWith({ eyeStyle: "circle" });
   });
 
@@ -73,6 +99,22 @@ describe("Controls — content & style", () => {
 });
 
 describe("Controls — error correction", () => {
+  it("offers friendly labels and defaults to Automatic", () => {
+    setup({ errorCorrection: "auto" });
+    const select = screen.getByLabelText(
+      "Error correction",
+    ) as HTMLSelectElement;
+    expect(select.value).toBe("auto");
+    expect(
+      screen.getByRole("option", { name: "Automatic" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("option", { name: "Quartile" }),
+    ).toBeInTheDocument();
+    // The description line reflects the selected setting.
+    expect(screen.getByText(/Picks the best level/i)).toBeInTheDocument();
+  });
+
   it("emits the chosen level when no logo is set", async () => {
     const user = userEvent.setup();
     const { onChange } = setup({ logo: null, errorCorrection: "M" });
@@ -82,15 +124,11 @@ describe("Controls — error correction", () => {
     expect(onChange).toHaveBeenCalledWith({ errorCorrection: "Q" });
   });
 
-  it("is forced to H and disabled while a logo is set", () => {
+  it("is disabled and shows the forced-High hint while a logo is set", () => {
     setup({ logo: LOGO, errorCorrection: "M" });
-    const select = screen.getByLabelText(
-      "Error correction",
-    ) as HTMLSelectElement;
-    expect(select).toBeDisabled();
-    expect(select.value).toBe("H");
+    expect(screen.getByLabelText("Error correction")).toBeDisabled();
     expect(
-      screen.getByText(/error correction is forced to H/i),
+      screen.getByText(/error correction is forced to High/i),
     ).toBeInTheDocument();
   });
 });

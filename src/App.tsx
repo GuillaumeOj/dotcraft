@@ -6,6 +6,7 @@ import { Preview } from "./components/Preview";
 import { Sidebar } from "./components/Sidebar";
 import { describeRenderError } from "./i18n/errors";
 import { LOCALE_LABELS, LOCALES, type Locale } from "./i18n/locales";
+import { detectCountryCode } from "./qr/countries";
 import { randomStyle } from "./qr/random";
 import { buildSvg } from "./qr/render";
 import {
@@ -15,7 +16,7 @@ import {
   saveLogo,
   setPrefs,
 } from "./qr/storage";
-import { DEFAULT_OPTIONS, type QrOptions } from "./qr/types";
+import { defaultOptions, type QrOptions } from "./qr/types";
 import { type LibraryLabels, useLibrary } from "./qr/useLibrary";
 
 function GithubMark() {
@@ -67,9 +68,12 @@ export function App() {
       ?.setAttribute("content", t("app.metaDescription"));
   }, [t, i18n.language]);
 
+  // The user's country, used to seed phone/address selectors in fresh drafts.
+  const defaults = useMemo(() => defaultOptions(detectCountryCode()), []);
+
   // The live editor working copy for the active document. It carries the logo
   // (hydrated from IndexedDB); the persisted snapshot in the library never does.
-  const [options, setOptions] = useState<QrOptions>(DEFAULT_OPTIONS);
+  const [options, setOptions] = useState<QrOptions>(defaults);
 
   // Gate the save effects until the active document's logo has loaded, so they
   // don't clobber the stored logo with the pre-hydration `logo: null`.
@@ -104,14 +108,14 @@ export function App() {
     loadedDocId.current = activeDocId;
     setReady(false);
     const doc = documents.find((d) => d.id === activeDocId);
-    setOptions(doc ? { ...doc.options, logo: null } : DEFAULT_OPTIONS);
+    setOptions(doc ? { ...doc.options, logo: null } : defaults);
     loadLogo(activeDocId).then((logo) => {
       if (loadedDocId.current !== activeDocId) return;
       lastSavedLogo.current = logo;
       if (logo) setOptions((prev) => ({ ...prev, logo }));
       setReady(true);
     });
-  }, [activeDocId, documents]);
+  }, [activeDocId, documents, defaults]);
 
   // Persist the active document's settings (debounced so typing doesn't thrash).
   useEffect(() => {
@@ -196,7 +200,7 @@ export function App() {
           onColorFormatChange={lib.setColorFormat}
           onChange={patch}
           onRandomize={() => patch(randomStyle())}
-          onReset={() => setOptions(DEFAULT_OPTIONS)}
+          onReset={() => setOptions(defaults)}
         />
         <Preview svg={result.svg} px={result.px} error={error} />
       </main>
