@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+.vercel
+.DS_Store
+
+# python (archived)
+python/.venv
+python/__pycache__
+python/**/__pycache__
