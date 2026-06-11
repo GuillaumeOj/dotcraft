@@ -42,11 +42,8 @@ body {
   flex-direction: column;
 }
 
-.app__brand {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+.app__header {
+  position: relative;
 }
 
 .app__header h1 {
@@ -56,17 +53,42 @@ body {
 }
 
 .app__lang {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+}
+
+.app__lang-icon,
+.app__lang-caret {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.app__lang-icon {
+  left: 10px;
+}
+
+.app__lang-caret {
+  right: 10px;
+}
+
+.app__lang-select {
+  width: 100%;
   appearance: none;
   background: var(--panel);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 6px 10px;
+  padding: 6px 32px;
   font: inherit;
   cursor: pointer;
 }
 
-.app__lang:hover {
+.app__lang-select:hover {
   border-color: var(--accent);
 }
 

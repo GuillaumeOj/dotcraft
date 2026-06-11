@@ -1,3 +1,4 @@
+import { ChevronDown, Languages } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Controls } from "./components/Controls";
@@ -146,10 +147,10 @@ export function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <div className="app__brand">
-          <h1>Dotcraft</h1>
+        <div className="app__lang">
+          <Languages className="app__lang-icon" size={15} aria-hidden="true" />
           <select
-            className="app__lang"
+            className="app__lang-select"
             aria-label={t("app.language")}
             value={i18n.language}
             onChange={(e) => changeLocale(e.target.value as Locale)}
@@ -160,7 +161,13 @@ export function App() {
               </option>
             ))}
           </select>
+          <ChevronDown
+            className="app__lang-caret"
+            size={15}
+            aria-hidden="true"
+          />
         </div>
+        <h1>Dotcraft</h1>
         <p>{t("app.tagline")}</p>
       </header>
 
