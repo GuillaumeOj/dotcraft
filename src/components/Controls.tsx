@@ -1,3 +1,4 @@
+import { Dices } from "lucide-react";
 import type { ChangeEvent } from "react";
 import {
   COLOR_FORMAT_LABELS,
@@ -187,8 +188,9 @@ export function Controls({
       </fieldset>
 
       <div className="controls__actions">
-        <button type="button" className="btn" onClick={onRandomize}>
-          🎲 Randomize
+        <button type="button" className="btn btn--icon" onClick={onRandomize}>
+          <Dices size={16} aria-hidden="true" />
+          Randomize
         </button>
         <button type="button" className="btn btn--ghost" onClick={onReset}>
           Reset to defaults
