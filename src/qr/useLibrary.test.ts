@@ -39,6 +39,7 @@ describe("useLibrary — first run", () => {
         colorFormat: "hsl",
         lastOpenedDocId: result.current.activeDocId,
         collapsedFolderIds: [],
+        collapsedPanelIds: [],
       }),
     );
   });

@@ -58,6 +58,7 @@ describe("preferences", () => {
       colorFormat: "hex",
       lastOpenedDocId: null,
       collapsedFolderIds: [],
+      collapsedPanelIds: [],
     });
   });
 
@@ -66,15 +67,17 @@ describe("preferences", () => {
       colorFormat: "rgb",
       lastOpenedDocId: "abc",
       collapsedFolderIds: ["f1", "f2"],
+      collapsedPanelIds: ["style", "logo"],
     });
     expect(getPrefs()).toEqual({
       colorFormat: "rgb",
       lastOpenedDocId: "abc",
       collapsedFolderIds: ["f1", "f2"],
+      collapsedPanelIds: ["style", "logo"],
     });
   });
 
-  it("drops non-string entries from a stored fold-state list", () => {
+  it("drops non-string entries from the stored fold-state lists", () => {
     localStorage.setItem(
       PREFS_KEY,
       JSON.stringify({
@@ -82,9 +85,25 @@ describe("preferences", () => {
         colorFormat: "hex",
         lastOpenedDocId: null,
         collapsedFolderIds: ["ok", 5, null],
+        collapsedPanelIds: ["style", 7, null],
       }),
     );
     expect(getPrefs().collapsedFolderIds).toEqual(["ok"]);
+    expect(getPrefs().collapsedPanelIds).toEqual(["style"]);
+  });
+
+  it("defaults the panel fold list when it is absent or malformed", () => {
+    localStorage.setItem(
+      PREFS_KEY,
+      JSON.stringify({
+        version: 1,
+        colorFormat: "hex",
+        lastOpenedDocId: null,
+        collapsedFolderIds: [],
+        collapsedPanelIds: "nope",
+      }),
+    );
+    expect(getPrefs().collapsedPanelIds).toEqual([]);
   });
 
   it("falls back on corrupt JSON, version mismatch and bad fields", () => {
@@ -100,6 +119,7 @@ describe("preferences", () => {
       colorFormat: "hex",
       lastOpenedDocId: null,
       collapsedFolderIds: [],
+      collapsedPanelIds: [],
     });
   });
 
@@ -116,6 +136,7 @@ describe("preferences", () => {
         colorFormat: "hex",
         lastOpenedDocId: null,
         collapsedFolderIds: [],
+        collapsedPanelIds: [],
       }),
     ).not.toThrow();
   });
@@ -367,6 +388,7 @@ describe("migrateLegacy", () => {
       colorFormat: "rgb",
       lastOpenedDocId: id,
       collapsedFolderIds: [],
+      collapsedPanelIds: [],
     });
     expect(localStorage.getItem(LEGACY_KEY)).toBeNull();
   });

@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { downloadPng, downloadSvg } from "../qr/export";
+import { CollapsiblePanel, type FoldProps } from "./CollapsiblePanel";
 
 const PNG_SIZES = [512, 1024, 2048];
 
 /** Export settings and download buttons for the current QR code. */
-export function ExportPanel({ svg, px }: { svg: string; px: number }) {
+export function ExportPanel({
+  svg,
+  px,
+  ...fold
+}: { svg: string; px: number } & Partial<FoldProps>) {
   const [pngSize, setPngSize] = useState(1024);
   const { t } = useTranslation();
 
   return (
-    <fieldset className="panel">
-      <legend>{t("export.title")}</legend>
+    <CollapsiblePanel title={t("export.title")} {...fold}>
       <label className="field field--inline">
         <span className="field__label">{t("preview.pngSize")}</span>
         <select
@@ -44,6 +48,6 @@ export function ExportPanel({ svg, px }: { svg: string; px: number }) {
         </button>
       </div>
       {px > 0 && <p className="hint">{t("preview.vectorSize", { px })}</p>}
-    </fieldset>
+    </CollapsiblePanel>
   );
 }

@@ -775,6 +775,8 @@ button.logo-dropzone:hover {
   z-index: 1;
   width: 100%;
   max-width: 380px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
   padding: 20px;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -931,4 +933,151 @@ button.logo-dropzone:hover {
 
 .preview__buttons .btn {
   flex: 1;
+}
+
+/* Collapsible panels (foldable on mobile). The body wraps the panel's fields so
+   it can be hidden as a unit; its flex layout reproduces the panel's own gap. */
+.panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* The legend doubles as a disclosure toggle on mobile. It inherits the legend's
+   uppercase styling and adds a chevron that points right once folded. */
+.panel__toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.panel__toggle:hover {
+  color: var(--text);
+}
+
+.panel__chevron {
+  transition: transform 0.15s ease;
+}
+
+.panel.is-collapsed .panel__chevron {
+  transform: rotate(-90deg);
+}
+
+.panel.is-collapsed > .panel__body {
+  display: none;
+}
+
+/* Mobile navbar: a hamburger + stacked menu, hidden on desktop. */
+.navbar {
+  display: none;
+  position: relative;
+}
+
+.navbar__toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.navbar__toggle:hover {
+  border-color: var(--accent);
+}
+
+.navbar__menu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  z-index: 30;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.navbar__item {
+  appearance: none;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.navbar__item:hover {
+  background: var(--panel-2);
+}
+
+/* The language picker in the menu: full width, separated from the links, and
+   reset from the desktop pill's absolute top-right positioning. */
+.app__lang.navbar__lang {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 100%;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* The library sidebar drops its sticky/viewport sizing inside the modal, which
+   owns the scrolling instead. */
+.modal .sidebar {
+  position: static;
+  max-height: none;
+}
+
+/* The dialog already supplies the title and the bordered surface, so a panel's
+   own legend and chrome would duplicate them. Strip the panel to bare content
+   when it sits inside a modal. */
+.modal .panel {
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+}
+
+.modal .panel legend {
+  display: none;
+}
+
+/* Reveal the hamburger on mobile. This override must come *after* the base
+   `.navbar { display: none }` above, so source order lets it win (a media query
+   doesn't raise specificity). It is pinned to the top-right of the viewport so
+   it stays in reach on the title row and while scrolling. */
+@media (max-width: 1080px) {
+  .navbar {
+    display: block;
+    position: fixed;
+    top: 26px;
+    right: 24px;
+    z-index: 50;
+  }
 }

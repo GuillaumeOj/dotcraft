@@ -12,6 +12,7 @@ describe("initialLocale", () => {
       colorFormat: "hex",
       lastOpenedDocId: null,
       collapsedFolderIds: [],
+      collapsedPanelIds: [],
       locale: "de",
     });
     expect(initialLocale()).toBe("de");

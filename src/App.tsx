@@ -1,4 +1,3 @@
-import { ChevronDown, Languages } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -9,10 +8,15 @@ import {
   StylePanel,
 } from "./components/Controls";
 import { ExportPanel } from "./components/ExportPanel";
+import { LanguageSelect } from "./components/LanguageSelect";
+import { Modal } from "./components/Modal";
+import { Navbar } from "./components/Navbar";
 import { Preview } from "./components/Preview";
 import { Sidebar } from "./components/Sidebar";
+import { type PanelId, useCollapsedPanels } from "./hooks/useCollapsedPanels";
+import { useMediaQuery } from "./hooks/useMediaQuery";
 import { describeRenderError } from "./i18n/errors";
-import { LOCALE_LABELS, LOCALES, type Locale } from "./i18n/locales";
+import type { Locale } from "./i18n/locales";
 import { detectCountryCode } from "./qr/countries";
 import { randomStyle } from "./qr/random";
 import { buildSvg } from "./qr/render";
@@ -59,6 +63,21 @@ export function App() {
   );
   const lib = useLibrary(libraryLabels);
   const { activeDocId, documents, persistActiveOptions } = lib;
+
+  // Below this width the library and settings move into navbar-triggered modals,
+  // and the remaining editor panels become foldable. Above it the desktop
+  // two-column layout is untouched.
+  const isMobile = useMediaQuery("(max-width: 1080px)");
+  const { collapsed, toggle } = useCollapsedPanels();
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  /** Fold props for a foldable panel: only collapsible on mobile. */
+  const foldProps = (id: PanelId) => ({
+    collapsible: isMobile,
+    collapsed: collapsed.has(id),
+    onToggle: () => toggle(id),
+  });
 
   const changeLocale = (next: Locale) => {
     void i18n.changeLanguage(next);
@@ -141,10 +160,12 @@ export function App() {
   }, [ready, logo, activeDocId]);
 
   // Flush the current document before opening another, so edits made within the
-  // debounce window aren't lost on the switch.
+  // debounce window aren't lost on the switch. Selecting a document also closes
+  // the library modal (mobile) so the chosen QR code is revealed in the editor.
   const selectDocument = (id: string) => {
     if (activeDocId && activeDocId !== id) persistActiveOptions(options);
     lib.selectDocument(id);
+    setLibraryOpen(false);
   };
 
   // Flush the live edits into the source first so the copy includes them.
@@ -155,57 +176,65 @@ export function App() {
 
   const error = result.error ? describeRenderError(result.error, t) : null;
 
+  // Library and settings render either in their desktop spot or inside a modal —
+  // never both at once, so their inputs keep unique ids. Defined once here and
+  // placed by the `isMobile` branches below.
+  const sidebar = (
+    <Sidebar
+      folders={lib.folders}
+      documents={documents}
+      activeDocId={activeDocId}
+      collapsedFolders={lib.collapsedFolders}
+      onCreateProject={lib.createProject}
+      onCreateFolder={lib.createFolder}
+      onCreateDocument={lib.createDocument}
+      onDuplicateDocument={duplicateDocument}
+      onMoveDocument={lib.moveDocument}
+      onToggleFolder={lib.toggleFolder}
+      onExpandFolder={lib.expandFolder}
+      onRenameFolder={lib.renameFolder}
+      onRenameDocument={lib.renameDocument}
+      onDeleteFolder={lib.deleteFolder}
+      onDeleteDocument={lib.removeDocument}
+      onSelectDocument={selectDocument}
+    />
+  );
+  const settingsPanel = (
+    <SettingsPanel
+      options={options}
+      colorFormat={lib.colorFormat}
+      onColorFormatChange={lib.setColorFormat}
+      onChange={patch}
+    />
+  );
+
   return (
     <div className="app">
       <header className="app__header">
-        <div className="app__lang">
-          <Languages className="app__lang-icon" size={15} aria-hidden="true" />
-          <select
-            className="app__lang-select"
-            aria-label={t("app.language")}
-            value={i18n.language}
-            onChange={(e) => changeLocale(e.target.value as Locale)}
-          >
-            {LOCALES.map((l) => (
-              <option key={l} value={l}>
-                {LOCALE_LABELS[l]}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            className="app__lang-caret"
-            size={15}
-            aria-hidden="true"
-          />
-        </div>
+        <Navbar
+          language={i18n.language}
+          onChangeLanguage={changeLocale}
+          onOpenLibrary={() => setLibraryOpen(true)}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+        {!isMobile && (
+          <LanguageSelect value={i18n.language} onChange={changeLocale} />
+        )}
         <h1>Dotcraft</h1>
         <p>{t("app.tagline")}</p>
       </header>
 
       <main className="app__main">
-        <Sidebar
-          folders={lib.folders}
-          documents={documents}
-          activeDocId={activeDocId}
-          collapsedFolders={lib.collapsedFolders}
-          onCreateProject={lib.createProject}
-          onCreateFolder={lib.createFolder}
-          onCreateDocument={lib.createDocument}
-          onDuplicateDocument={duplicateDocument}
-          onMoveDocument={lib.moveDocument}
-          onToggleFolder={lib.toggleFolder}
-          onExpandFolder={lib.expandFolder}
-          onRenameFolder={lib.renameFolder}
-          onRenameDocument={lib.renameDocument}
-          onDeleteFolder={lib.deleteFolder}
-          onDeleteDocument={lib.removeDocument}
-          onSelectDocument={selectDocument}
-        />
+        {!isMobile && sidebar}
         <div className="workspace">
           <div className="workspace__top">
             <Preview svg={result.svg} error={error} />
             <div className="workspace__tools">
-              <ExportPanel svg={result.svg} px={result.px} />
+              <ExportPanel
+                svg={result.svg}
+                px={result.px}
+                {...foldProps("export")}
+              />
               <EditorActions
                 onRandomize={() => patch(randomStyle())}
                 onReset={() => setOptions(defaults)}
@@ -213,28 +242,48 @@ export function App() {
             </div>
           </div>
           <div className="workspace__bottom">
-            <ContentPanel options={options} onChange={patch} />
+            <ContentPanel
+              options={options}
+              onChange={patch}
+              {...foldProps("content")}
+            />
             <div className="workspace__side">
-              <SettingsPanel
-                options={options}
-                colorFormat={lib.colorFormat}
-                onColorFormatChange={lib.setColorFormat}
-                onChange={patch}
-              />
+              {!isMobile && settingsPanel}
               <StylePanel
                 options={options}
                 colorFormat={lib.colorFormat}
                 onChange={patch}
+                {...foldProps("style")}
               />
               <LogoPanel
                 options={options}
                 colorFormat={lib.colorFormat}
                 onChange={patch}
+                {...foldProps("logo")}
               />
             </div>
           </div>
         </div>
       </main>
+
+      {isMobile && (
+        <>
+          <Modal
+            open={libraryOpen}
+            title={t("sidebar.library")}
+            onClose={() => setLibraryOpen(false)}
+          >
+            {sidebar}
+          </Modal>
+          <Modal
+            open={settingsOpen}
+            title={t("controls.settings")}
+            onClose={() => setSettingsOpen(false)}
+          >
+            {settingsPanel}
+          </Modal>
+        </>
+      )}
 
       <footer className="app__footer">
         <a

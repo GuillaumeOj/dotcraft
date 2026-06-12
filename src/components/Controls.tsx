@@ -9,6 +9,7 @@ import {
   isTransparent,
   type QrOptions,
 } from "../qr/types";
+import { CollapsiblePanel, type FoldProps } from "./CollapsiblePanel";
 import { ContentFields } from "./ContentFields";
 import { ColorField, RangeField, SelectField } from "./fields";
 import { LogoField } from "./LogoField";
@@ -22,10 +23,11 @@ const pct = (v: number) => `${Math.round(v * 100)}%`;
 export function ContentPanel({
   options,
   onChange,
+  ...fold
 }: {
   options: QrOptions;
   onChange: (patch: Partial<QrOptions>) => void;
-}) {
+} & Partial<FoldProps>) {
   const { t } = useTranslation();
   const contentTabs = CONTENT_TYPES.map((id) => ({
     id,
@@ -33,8 +35,7 @@ export function ContentPanel({
   }));
 
   return (
-    <fieldset className="panel">
-      <legend>{t("controls.content")}</legend>
+    <CollapsiblePanel title={t("controls.content")} {...fold}>
       <Tabs
         value={options.contentType}
         tabs={contentTabs}
@@ -48,7 +49,7 @@ export function ContentPanel({
           })
         }
       />
-    </fieldset>
+    </CollapsiblePanel>
   );
 }
 
@@ -97,15 +98,15 @@ export function StylePanel({
   options,
   colorFormat,
   onChange,
+  ...fold
 }: {
   options: QrOptions;
   colorFormat: ColorFormat;
   onChange: (patch: Partial<QrOptions>) => void;
-}) {
+} & Partial<FoldProps>) {
   const { t } = useTranslation();
   return (
-    <fieldset className="panel">
-      <legend>{t("controls.style")}</legend>
+    <CollapsiblePanel title={t("controls.style")} {...fold}>
       <StylePicker
         label={t("controls.dotStyle")}
         value={options.dotStyle}
@@ -142,7 +143,7 @@ export function StylePanel({
         step={1}
         onChange={(margin) => onChange({ margin })}
       />
-    </fieldset>
+    </CollapsiblePanel>
   );
 }
 
@@ -151,16 +152,16 @@ export function LogoPanel({
   options,
   colorFormat,
   onChange,
+  ...fold
 }: {
   options: QrOptions;
   colorFormat: ColorFormat;
   onChange: (patch: Partial<QrOptions>) => void;
-}) {
+} & Partial<FoldProps>) {
   const { t } = useTranslation();
 
   return (
-    <fieldset className="panel">
-      <legend>{t("controls.logo")}</legend>
+    <CollapsiblePanel title={t("controls.logo")} {...fold}>
       <LogoField logo={options.logo} onChange={(logo) => onChange({ logo })} />
       {options.logo && (
         <>
@@ -209,7 +210,7 @@ export function LogoPanel({
           </label>
         </>
       )}
-    </fieldset>
+    </CollapsiblePanel>
   );
 }
 

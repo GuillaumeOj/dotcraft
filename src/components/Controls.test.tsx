@@ -34,9 +34,12 @@ function Controls({
   onRandomize: () => void;
   onReset: () => void;
 }) {
+  // Render the foldable panels in their always-open (desktop) form, the way
+  // these tests exercise their fields; folding is covered in CollapsiblePanel.
+  const fold = { collapsible: false, collapsed: false, onToggle: () => {} };
   return (
     <section>
-      <ContentPanel options={options} onChange={onChange} />
+      <ContentPanel options={options} onChange={onChange} {...fold} />
       <SettingsPanel
         options={options}
         colorFormat={colorFormat}
@@ -47,11 +50,13 @@ function Controls({
         options={options}
         colorFormat={colorFormat}
         onChange={onChange}
+        {...fold}
       />
       <LogoPanel
         options={options}
         colorFormat={colorFormat}
         onChange={onChange}
+        {...fold}
       />
       <EditorActions onRandomize={onRandomize} onReset={onReset} />
     </section>
