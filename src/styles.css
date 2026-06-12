@@ -747,7 +747,10 @@ input[type="color"] {
   width: 100%;
   display: grid;
   place-items: center;
-  min-height: 280px;
+  /* Reserve room for a full-size QR (max-width 360px, square) plus the 20px
+     padding so the stage keeps a constant height whether it shows the QR or the
+     empty/error state. */
+  min-height: 400px;
   padding: 20px;
   background:
     linear-gradient(45deg, #1c2029 25%, transparent 25%) -8px 0 / 16px 16px,
