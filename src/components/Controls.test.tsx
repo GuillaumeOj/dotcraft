@@ -181,11 +181,14 @@ describe("Controls — error correction", () => {
 });
 
 describe("Controls — logo", () => {
-  it("reads an uploaded file into a data URL", async () => {
+  it("wires the logo dropzone to patch the logo option", async () => {
     const user = userEvent.setup();
     const { onChange } = setup();
+    const input = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
     const file = new File(["logo-bytes"], "logo.png", { type: "image/png" });
-    await user.upload(screen.getByLabelText(/Image/), file);
+    await user.upload(input, file);
     await waitFor(() =>
       expect(onChange).toHaveBeenCalledWith(
         expect.objectContaining({ logo: expect.stringMatching(/^data:/) }),
@@ -193,9 +196,10 @@ describe("Controls — logo", () => {
     );
   });
 
-  it("hides logo controls until a logo is present", () => {
+  it("hides the sizing controls until a logo is present", () => {
     setup({ logo: null });
     expect(screen.queryByRole("button", { name: "Remove logo" })).toBeNull();
+    expect(screen.queryByText(/Corner radius/)).toBeNull();
   });
 
   it("shows logo controls and removes the logo", async () => {

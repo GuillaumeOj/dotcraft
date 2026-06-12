@@ -667,10 +667,79 @@ input[type="color"] {
   color: var(--muted);
 }
 
-.logo-row {
+/* Logo drag-and-drop dropzone. The empty state is a <button>; the filled state
+   is a <div> holding the thumbnail and its action buttons. Both share the look. */
+.logo-dropzone {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  padding: 14px;
+  background: var(--panel-2);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+}
+
+/* The empty state is clickable and centred. */
+button.logo-dropzone {
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+button.logo-dropzone:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.logo-dropzone--dragover {
+  border-color: var(--accent);
+  border-style: solid;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--text);
+}
+
+/* Visually hidden file input — triggered programmatically by the dropzone. */
+.logo-dropzone__input {
+  display: none;
+}
+
+.logo-dropzone__actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.logo-dropzone__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.logo-dropzone__action:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+  color: var(--text);
 }
 
 .logo-thumb {
@@ -680,6 +749,80 @@ input[type="color"] {
   background: #fff;
   border-radius: 8px;
   border: 1px solid var(--border);
+}
+
+/* Modal dialog */
+.modal__root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modal__backdrop {
+  position: fixed;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgb(0 0 0 / 0.55);
+  cursor: default;
+}
+
+.modal {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 380px;
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+}
+
+.modal:focus {
+  outline: none;
+}
+
+.modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal__title {
+  margin: 0;
+  font-size: 16px;
+}
+
+.modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.modal__close:hover {
+  color: var(--text);
+}
+
+.modal__message {
+  margin: 12px 0 20px;
+  color: var(--muted);
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .hint {

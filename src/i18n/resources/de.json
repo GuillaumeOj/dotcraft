@@ -6,6 +6,10 @@
     "documentTitle": "Dotcraft — Editor für stilvolle QR-Codes",
     "metaDescription": "Gestalte stilvolle QR-Codes mit individuellen Punkt- und Tropfen-Augenstilen, Farben und einem zentralen Logo."
   },
+  "common": {
+    "cancel": "Abbrechen",
+    "close": "Schließen"
+  },
   "controls": {
     "content": "Inhalt",
     "textOrUrl": "Text oder URL",
@@ -20,9 +24,13 @@
     "background": "Hintergrund",
     "quietZone": "Ruhezonen-Rand",
     "logo": "Logo",
-    "image": "Bild (PNG / JPG / SVG)",
+    "logoDropPrompt": "Bild hierher ziehen oder zum Auswählen klicken (PNG / JPG / SVG)",
     "logoPreview": "Logo-Vorschau",
     "removeLogo": "Logo entfernen",
+    "changeLogo": "Logo ändern",
+    "replaceLogoTitle": "Aktuelles Logo ersetzen?",
+    "replaceLogoMessage": "Das neue Bild ersetzt das aktuelle Logo.",
+    "replace": "Ersetzen",
     "size": "Größe",
     "padding": "Innenabstand",
     "cornerRadius": "Eckenradius",

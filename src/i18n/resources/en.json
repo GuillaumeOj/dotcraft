@@ -6,6 +6,10 @@
     "documentTitle": "Dotcraft — styled QR code editor",
     "metaDescription": "Design styled QR codes with custom dot and droplet eye styles, colors, and a center logo."
   },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close"
+  },
   "controls": {
     "content": "Content",
     "textOrUrl": "Text or URL",
@@ -20,9 +24,13 @@
     "background": "Background",
     "quietZone": "Quiet-zone margin",
     "logo": "Logo",
-    "image": "Image (PNG / JPG / SVG)",
+    "logoDropPrompt": "Drag an image here, or click to browse (PNG / JPG / SVG)",
     "logoPreview": "logo preview",
     "removeLogo": "Remove logo",
+    "changeLogo": "Change logo",
+    "replaceLogoTitle": "Replace current logo?",
+    "replaceLogoMessage": "The new image will replace the current logo.",
+    "replace": "Replace",
     "size": "Size",
     "padding": "Padding",
     "cornerRadius": "Corner radius",

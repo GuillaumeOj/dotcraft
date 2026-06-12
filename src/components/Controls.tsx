@@ -1,5 +1,4 @@
 import { Dices } from "lucide-react";
-import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { COLOR_FORMATS, type ColorFormat } from "../qr/color";
 import { CONTENT_TYPES, type QrContent } from "../qr/content";
@@ -11,7 +10,8 @@ import {
   type QrOptions,
 } from "../qr/types";
 import { ContentFields } from "./ContentFields";
-import { ColorField, Field, RangeField, SelectField } from "./fields";
+import { ColorField, RangeField, SelectField } from "./fields";
+import { LogoField } from "./LogoField";
 import { dotSwatch, eyeSwatch, StylePicker } from "./StylePicker";
 import { Tabs } from "./Tabs";
 
@@ -158,43 +158,12 @@ export function LogoPanel({
 }) {
   const { t } = useTranslation();
 
-  const onLogoFile = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => onChange({ logo: reader.result as string });
-    reader.readAsDataURL(file);
-  };
-
   return (
     <fieldset className="panel">
       <legend>{t("controls.logo")}</legend>
-      <Field label={t("controls.image")}>
-        {(id) => (
-          <input
-            id={id}
-            type="file"
-            accept="image/png,image/jpeg,image/svg+xml"
-            onChange={onLogoFile}
-          />
-        )}
-      </Field>
+      <LogoField logo={options.logo} onChange={(logo) => onChange({ logo })} />
       {options.logo && (
         <>
-          <div className="logo-row">
-            <img
-              className="logo-thumb"
-              src={options.logo}
-              alt={t("controls.logoPreview")}
-            />
-            <button
-              type="button"
-              className="btn btn--ghost"
-              onClick={() => onChange({ logo: null })}
-            >
-              {t("controls.removeLogo")}
-            </button>
-          </div>
           <RangeField
             label={t("controls.size")}
             value={options.logoRatio}
