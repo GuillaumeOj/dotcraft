@@ -23,6 +23,7 @@ import {
   normalizeContent,
 } from "./content";
 import { FALLBACK_COUNTRY } from "./countries";
+import { fileToDataUrl } from "./image";
 import {
   DEFAULT_OPTIONS,
   DOT_STYLES,
@@ -272,7 +273,7 @@ export async function loadLogo(docId: string): Promise<string | null> {
   const blob = await withStore<Blob | undefined>(LOGO_STORE, "readonly", (s) =>
     s.get(docId),
   );
-  return blob ? blobToDataUrl(blob) : null;
+  return blob ? fileToDataUrl(blob) : null;
 }
 
 /** Store a document's logo (a data URL) as a Blob. No-op on failure. */
@@ -412,13 +413,4 @@ export async function migrateLegacy(
   });
   removeLegacyState();
   return doc.id;
-}
-
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
 }

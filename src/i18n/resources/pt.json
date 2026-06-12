@@ -6,6 +6,10 @@
     "documentTitle": "Dotcraft — editor de QR codes estilizados",
     "metaDescription": "Crie QR codes estilizados com estilos de pontos e olhos em gota personalizados, cores e um logótipo central."
   },
+  "common": {
+    "cancel": "Cancelar",
+    "close": "Fechar"
+  },
   "controls": {
     "content": "Conteúdo",
     "textOrUrl": "Texto ou URL",
@@ -20,9 +24,13 @@
     "background": "Fundo",
     "quietZone": "Margem da zona de silêncio",
     "logo": "Logótipo",
-    "image": "Imagem (PNG / JPG / SVG)",
+    "logoDropPrompt": "Arraste uma imagem para aqui ou clique para procurar (PNG / JPG / SVG)",
     "logoPreview": "pré-visualização do logótipo",
     "removeLogo": "Remover logótipo",
+    "changeLogo": "Alterar logótipo",
+    "replaceLogoTitle": "Substituir o logótipo atual?",
+    "replaceLogoMessage": "A nova imagem substituirá o logótipo atual.",
+    "replace": "Substituir",
     "size": "Tamanho",
     "padding": "Espaçamento",
     "cornerRadius": "Raio dos cantos",

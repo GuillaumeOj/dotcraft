@@ -157,7 +157,10 @@ describe("App", () => {
     render(<App />);
     await screen.findByAltText("QR code preview");
     const file = new File(["bytes"], "logo.png", { type: "image/png" });
-    await user.upload(screen.getByLabelText(/Image/), file);
+    const input = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    await user.upload(input, file);
     await waitFor(() =>
       expect(mockedStorage.saveLogo).toHaveBeenCalledWith(
         "d1",

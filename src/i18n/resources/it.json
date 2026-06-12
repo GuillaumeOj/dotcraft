@@ -6,6 +6,10 @@
     "documentTitle": "Dotcraft — editor di codici QR stilizzati",
     "metaDescription": "Progetta codici QR stilizzati con stili di punti e occhi a goccia personalizzati, colori e un logo centrale."
   },
+  "common": {
+    "cancel": "Annulla",
+    "close": "Chiudi"
+  },
   "controls": {
     "content": "Contenuto",
     "textOrUrl": "Testo o URL",
@@ -20,9 +24,13 @@
     "background": "Sfondo",
     "quietZone": "Margine zona di silenzio",
     "logo": "Logo",
-    "image": "Immagine (PNG / JPG / SVG)",
+    "logoDropPrompt": "Trascina un'immagine qui o clicca per sfogliare (PNG / JPG / SVG)",
     "logoPreview": "anteprima del logo",
     "removeLogo": "Rimuovi logo",
+    "changeLogo": "Cambia logo",
+    "replaceLogoTitle": "Sostituire il logo attuale?",
+    "replaceLogoMessage": "La nuova immagine sostituirà il logo attuale.",
+    "replace": "Sostituisci",
     "size": "Dimensione",
     "padding": "Spaziatura",
     "cornerRadius": "Raggio degli angoli",
