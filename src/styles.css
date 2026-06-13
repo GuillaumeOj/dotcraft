@@ -196,7 +196,7 @@ body {
   min-height: 0;
 }
 
-/* The bordered surface is a panel, so its title sits on the border like the
+/* The bordered surface is a panel, so its title heading sits at the top like the
    editor panels. It fills the sticky aside; only the tree inside it scrolls. */
 .sidebar__panel {
   flex: 1 1 auto;
@@ -392,13 +392,15 @@ input.tree__edit {
   gap: 14px;
 }
 
-.panel legend {
+/* The title is a heading inside the surface, at the top of the card. The panel's
+   own flex gap spaces it from the body below. */
+.panel__title {
+  margin: 0;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--muted);
-  padding: 0 6px;
 }
 
 /* Content-type tab strip */
@@ -911,14 +913,12 @@ button.logo-dropzone:hover {
 }
 
 /* Preview */
-/* The preview is a standard panel; its title is the fieldset legend. The stage
-   stretches to fill the panel so the QR sits centred in the available space. */
-.preview {
-  justify-content: center;
-}
-
+/* The preview is a standard panel; its title heading sits at the top of the
+   surface. The stage fills the remaining height so the QR stays centred in the
+   available space below the title. */
 .preview__stage {
   width: 100%;
+  flex: 1;
   display: grid;
   place-items: center;
   /* Reserve room for a full-size QR (max-width 360px, square) plus the 20px
@@ -972,12 +972,16 @@ button.logo-dropzone:hover {
   gap: 14px;
 }
 
-/* The legend doubles as a disclosure toggle on mobile. It inherits the legend's
-   uppercase styling and adds a chevron that points right once folded. */
+/* On mobile the title heading doubles as a disclosure toggle: a full-width row
+   with the chevron pinned right so the whole header is a comfortable tap target.
+   It inherits the heading's uppercase styling and the chevron points right once
+   folded. */
 .panel__toggle {
   appearance: none;
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   padding: 0;
   margin: 0;
@@ -1084,16 +1088,18 @@ button.logo-dropzone:hover {
 }
 
 /* The dialog already supplies the title and the bordered surface, so a panel's
-   own legend and chrome would duplicate them. Strip the panel to bare content
-   when it sits inside a modal. */
+   own title and chrome would duplicate them. Strip the panel to bare content
+   when it sits inside a modal, and space it off the dialog header so the content
+   doesn't crowd the title. */
 .modal .panel {
   border: none;
   border-radius: 0;
   background: none;
   padding: 0;
+  margin-top: 16px;
 }
 
-.modal .panel legend {
+.modal .panel__title {
   display: none;
 }
 

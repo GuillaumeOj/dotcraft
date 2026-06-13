@@ -1,33 +1,28 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { CollapsiblePanel } from "./CollapsiblePanel";
+import { Panel } from "./Panel";
 
-describe("CollapsiblePanel", () => {
+describe("Panel", () => {
   it("renders a plain, always-open panel when not collapsible", () => {
     render(
-      <CollapsiblePanel title="Style">
+      <Panel title="Style">
         <p>fields</p>
-      </CollapsiblePanel>,
+      </Panel>,
     );
     // No disclosure toggle on desktop.
     expect(screen.queryByRole("button")).toBeNull();
     expect(screen.getByText("fields")).toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Style" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Style" })).toBeInTheDocument();
   });
 
   it("exposes an expanded disclosure toggle that fires onToggle", async () => {
     const onToggle = vi.fn();
     const user = userEvent.setup();
     render(
-      <CollapsiblePanel
-        title="Style"
-        collapsible
-        collapsed={false}
-        onToggle={onToggle}
-      >
+      <Panel title="Style" collapsible collapsed={false} onToggle={onToggle}>
         <p>fields</p>
-      </CollapsiblePanel>,
+      </Panel>,
     );
     const toggle = screen.getByRole("button", { name: "Style" });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
@@ -35,18 +30,15 @@ describe("CollapsiblePanel", () => {
     expect(onToggle).toHaveBeenCalledOnce();
   });
 
-  it("marks the fieldset collapsed and the toggle closed when folded", () => {
+  it("keeps the title visible and marks the surface collapsed when folded", () => {
     render(
-      <CollapsiblePanel title="Style" collapsible collapsed onToggle={() => {}}>
+      <Panel title="Style" collapsible collapsed onToggle={() => {}}>
         <p>fields</p>
-      </CollapsiblePanel>,
+      </Panel>,
     );
-    expect(screen.getByRole("button", { name: "Style" })).toHaveAttribute(
-      "aria-expanded",
-      "false",
-    );
-    expect(screen.getByRole("group", { name: "Style" })).toHaveClass(
-      "is-collapsed",
-    );
+    const toggle = screen.getByRole("button", { name: "Style" });
+    // The title stays visible while folded; only the body hides.
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle.closest(".panel")).toHaveClass("is-collapsed");
   });
 });

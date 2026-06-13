@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { downloadPng, downloadSvg } from "../qr/export";
-import { CollapsiblePanel, type FoldProps } from "./CollapsiblePanel";
+import { type FoldProps, Panel } from "./Panel";
 
 const PNG_SIZES = [512, 1024, 2048];
 
@@ -15,7 +15,7 @@ export function ExportPanel({
   const { t } = useTranslation();
 
   return (
-    <CollapsiblePanel title={t("export.title")} {...fold}>
+    <Panel title={t("export.title")} {...fold}>
       <label className="field field--inline">
         <span className="field__label">{t("preview.pngSize")}</span>
         <select
@@ -48,6 +48,6 @@ export function ExportPanel({
         </button>
       </div>
       {px > 0 && <p className="hint">{t("preview.vectorSize", { px })}</p>}
-    </CollapsiblePanel>
+    </Panel>
   );
 }
