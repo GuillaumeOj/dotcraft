@@ -24,6 +24,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { MAX_FOLDER_DEPTH } from "../qr/storage";
 import type { Folder, QrDocument } from "../qr/types";
+import { InfoLink } from "./InfoLink";
 import { Panel } from "./Panel";
 
 const ICON = 15;
@@ -160,7 +161,11 @@ export function Sidebar(props: SidebarProps) {
           )}
         </button>
       )}
-      <Panel title={t("sidebar.library")} className="sidebar__panel">
+      <Panel
+        title={t("sidebar.library")}
+        className="sidebar__panel"
+        info={<InfoLink anchor="library" label={t("info.library")} />}
+      >
         <button
           type="button"
           className="btn btn--ghost sidebar__new"

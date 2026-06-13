@@ -5,7 +5,7 @@
  *  storage suite uses, giving browser-like Blob behaviour end to end. */
 
 import { Blob as NodeBlob } from "node:buffer";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
@@ -19,6 +19,7 @@ import {
 } from "./qr/storage";
 import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "./qr/types";
 import { resetDb } from "./test/db";
+import { renderWithRouter as render } from "./test/router";
 
 const DATA_URL = "data:image/png;base64,aGVsbG8="; // "hello"
 

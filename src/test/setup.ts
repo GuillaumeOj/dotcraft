@@ -24,6 +24,13 @@ if (typeof window.matchMedia !== "function") {
   window.matchMedia = () => createMatchMedia(false);
 }
 
+// jsdom implements no scrollIntoView. Install a no-op so components that scroll
+// to an anchored element (e.g. the Help Center) don't throw, and so tests can
+// vi.spyOn it to assert the call.
+if (typeof Element.prototype.scrollIntoView !== "function") {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();

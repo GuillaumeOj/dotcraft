@@ -1,7 +1,6 @@
 {
   "app": {
     "tagline": "Diseña un código QR con estilo y expórtalo como PNG o SVG.",
-    "viewOnGithub": "Ver en GitHub",
     "language": "Idioma",
     "documentTitle": "Dotcraft — editor de códigos QR con estilo",
     "metaDescription": "Diseña códigos QR con estilo con puntos y ojos en forma de gota personalizados, colores y un logotipo central."
@@ -178,6 +177,81 @@
     "title": "Exportar"
   },
   "nav": {
-    "menu": "Menú"
+    "menu": "Menú",
+    "backToEditor": "Volver al editor"
+  },
+  "footer": {
+    "label": "Pie de página",
+    "faq": "Preguntas frecuentes",
+    "helpCenter": "Centro de ayuda",
+    "blog": "Blog",
+    "github": "GitHub",
+    "madeWithPrefix": "Hecho con",
+    "madeWithSuffix": "en Lyon",
+    "love": "amor"
+  },
+  "info": {
+    "library": "Aprende a importar y exportar tu biblioteca",
+    "exportQr": "Aprende a exportar tu código QR",
+    "errorCorrection": "Más información sobre la corrección de errores"
+  },
+  "faq": {
+    "title": "Preguntas frecuentes",
+    "subtitle": "Respuestas rápidas sobre privacidad, precio y cómo funciona Dotcraft.",
+    "items": {
+      "privacy": {
+        "q": "¿Cómo se guarda mi biblioteca?",
+        "a": "Todo permanece en tu navegador. Tus proyectos y códigos QR se guardan localmente en tu dispositivo (almacenamiento local e IndexedDB); nada se envía a un servidor y nosotros no podemos acceder a ello de ninguna manera."
+      },
+      "free": {
+        "q": "¿Dotcraft es gratis?",
+        "a": "Sí. Dotcraft es completamente gratuito, sin límites ni planes de pago."
+      },
+      "account": {
+        "q": "¿Necesito una cuenta?",
+        "a": "No. No hay registro ni inicio de sesión: Dotcraft funciona por completo en tu navegador, así que puedes empezar a diseñar de inmediato."
+      },
+      "expire": {
+        "q": "¿Mis códigos QR caducarán?",
+        "a": "No. Los códigos son estáticos y codifican tus datos directamente, por lo que nunca caducan, no redirigen ni se comunican con nadie. Una vez exportados, funcionan para siempre."
+      },
+      "formats": {
+        "q": "¿En qué formatos puedo exportar?",
+        "a": "PNG y SVG. Elige PNG para una imagen lista para usar con un tamaño fijo, y SVG cuando necesites un vector nítido que se adapte a cualquier tamaño, para impresión o para seguir editándolo."
+      },
+      "clearData": {
+        "q": "¿Qué pasa si borro los datos de mi navegador?",
+        "a": "Tu biblioteca se guarda en el almacenamiento local del navegador, así que borrar los datos del sitio o usar la navegación privada la eliminará. Usa el botón Exportar de la biblioteca para guardar un archivo de copia de seguridad que puedas volver a importar más tarde."
+      }
+    }
+  },
+  "helpCenter": {
+    "title": "Centro de ayuda",
+    "subtitle": "Guías para sacar el máximo partido a Dotcraft.",
+    "articles": {
+      "library": {
+        "title": "Importar y exportar tu biblioteca",
+        "body": "Toda tu biblioteca —cada proyecto, carpeta y código QR— se puede guardar en un único archivo .dotcraft. En la biblioteca, usa Exportar para descargar ese archivo como copia de seguridad o para llevar tu trabajo a otro navegador o dispositivo.\n\nUsa Importar para restaurar un archivo .dotcraft. La importación reemplaza tu biblioteca actual por el contenido del archivo, así que exporta primero una copia de seguridad si quieres conservar lo que tienes.",
+        "warning": "Importa solo archivos .dotcraft cuya procedencia conozcas. Hacemos todo lo posible para procesar las importaciones de forma segura, pero un archivo de biblioteca contiene, en última instancia, lo que haya puesto su creador: trata un archivo de origen desconocido con la misma precaución que cualquier archivo que no hayas creado tú."
+      },
+      "exportQr": {
+        "title": "Exportar un código QR",
+        "body": "Abre el panel de Exportar para descargar el código QR que estás editando. Elige un tamaño PNG (512, 1024 o 2048 px) y selecciona Descargar PNG para una imagen lista para usar, o Descargar SVG para un vector nítido que se adapta a cualquier tamaño.\n\nUsa PNG cuando necesites una imagen de tamaño fijo para insertar en un documento o publicar en línea. Usa SVG para impresión, gran formato o cuando quieras seguir editando el diseño en una herramienta vectorial."
+      },
+      "errorCorrection": {
+        "title": "La corrección de errores explicada",
+        "body": "La corrección de errores añade redundancia para que un código QR se siga leyendo aunque parte de él esté sucia, dañada o cubierta. Los niveles más altos resisten más daño, pero hacen el código más denso, porque incluyen más datos.\n\nEl nivel Automático elige un nivel adecuado para tu contenido. Cuando añades un logotipo en el centro, la corrección de errores sube a Alta para que el logotipo no impida la lectura del código."
+      },
+      "requestFeature": {
+        "title": "Solicitar una función",
+        "body": "¿Tienes una idea que mejoraría Dotcraft? Abre una solicitud de función en GitHub. El formulario te guía para describir el problema que quieres resolver y la solución que tienes en mente, lo que ayuda a que se tenga en cuenta más rápido.",
+        "cta": "Abrir una solicitud de función"
+      },
+      "reportBug": {
+        "title": "Informar de un error",
+        "body": "¿Algo no funciona como esperabas? Abre un informe de error en GitHub. El formulario pide qué ocurrió, los pasos para reproducirlo, qué esperabas, y tu navegador y sistema operativo, para poder localizar el problema rápidamente.",
+        "cta": "Abrir un informe de error"
+      }
+    }
   }
 }

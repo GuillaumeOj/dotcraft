@@ -1,7 +1,8 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "../qr/types";
+import { renderWithRouter as render } from "../test/router";
 import { Sidebar, type SidebarProps } from "./Sidebar";
 
 function folder(over: Partial<Folder>): Folder {

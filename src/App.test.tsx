@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
@@ -9,6 +9,7 @@ import { DEFAULT_OPTIONS, type QrDocument, type QrOptions } from "./qr/types";
 import type { Library } from "./qr/useLibrary";
 import { useLibrary } from "./qr/useLibrary";
 import { createMatchMedia } from "./test/matchMedia";
+import { renderWithRouter as render } from "./test/router";
 
 /** Options on the Text tab, pre-filled — the editor then shows a "Text" field. */
 const textOpts = (text: string): QrOptions => ({
@@ -117,9 +118,10 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", { name: "Dotcraft" }),
     ).toBeInTheDocument();
-    // The library title is a panel heading, like the editor surfaces.
+    // The library title is a panel heading, like the editor surfaces. Its
+    // accessible name also carries the info link beside the title.
     expect(
-      screen.getByRole("heading", { name: "Library" }),
+      screen.getByRole("heading", { name: /Library/ }),
     ).toBeInTheDocument();
     expect(screen.getByText("My Project")).toBeInTheDocument();
     expect(await screen.findByAltText("QR code preview")).toBeInTheDocument();

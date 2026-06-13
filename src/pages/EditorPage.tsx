@@ -1,0 +1,356 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  ContentPanel,
+  EditorActions,
+  LogoPanel,
+  SettingsPanel,
+  StylePanel,
+} from "../components/Controls";
+import { ExportPanel } from "../components/ExportPanel";
+import { LanguageSelect } from "../components/LanguageSelect";
+import { ConfirmDialog, Modal } from "../components/Modal";
+import { Navbar } from "../components/Navbar";
+import { Preview } from "../components/Preview";
+import { Sidebar } from "../components/Sidebar";
+import { type PanelId, useCollapsedPanels } from "../hooks/useCollapsedPanels";
+import { useLibraryCollapsed } from "../hooks/useLibraryCollapsed";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import { describeRenderError } from "../i18n/errors";
+import type { Locale } from "../i18n/locales";
+import { detectCountryCode } from "../qr/countries";
+import { download } from "../qr/export";
+import { exportLibrary, importLibrary } from "../qr/libraryArchive";
+import { randomStyle } from "../qr/random";
+import { buildSvg } from "../qr/render";
+import {
+  clearLogo,
+  getPrefs,
+  loadLogo,
+  saveLogo,
+  setPrefs,
+} from "../qr/storage";
+import { defaultOptions, type QrOptions } from "../qr/types";
+import { type LibraryLabels, useLibrary } from "../qr/useLibrary";
+
+/** The QR-code editor: the home route. Renders the header, the two-column
+ *  workspace (or mobile modals) and the import dialogs. The surrounding `.app`
+ *  shell and the shared footer live in `App`. */
+export function EditorPage() {
+  const { t, i18n } = useTranslation();
+
+  // Default names for items the library creates, in the current language. New
+  // projects/documents are named in the active locale; existing ones keep their
+  // stored name.
+  const libraryLabels = useMemo<LibraryLabels>(
+    () => ({
+      myProject: t("library.myProject"),
+      myQrCode: t("library.myQrCode"),
+      newProject: t("library.newProject"),
+      newFolder: t("library.newFolder"),
+      untitledQr: t("library.untitledQr"),
+      copySuffix: (name) => t("library.copySuffix", { name }),
+    }),
+    [t],
+  );
+  const lib = useLibrary(libraryLabels);
+  const { activeDocId, documents, persistActiveOptions } = lib;
+
+  // Below this width the library and settings move into navbar-triggered modals,
+  // and the remaining editor panels become foldable. Above it the desktop
+  // two-column layout is untouched.
+  const isMobile = useMediaQuery("(max-width: 1080px)");
+  const { collapsed, toggle } = useCollapsedPanels();
+  const { collapsed: libraryCollapsed, toggle: toggleLibrary } =
+    useLibraryCollapsed();
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  // The pending import: the chosen file awaiting confirmation, plus whether the
+  // last import failed (both drive modals in place of native confirm/alert).
+  const [pendingImport, setPendingImport] = useState<File | null>(null);
+  const [importFailed, setImportFailed] = useState(false);
+
+  /** Fold props for a foldable panel: only collapsible on mobile. */
+  const foldProps = (id: PanelId) => ({
+    collapsible: isMobile,
+    collapsed: collapsed.has(id),
+    onToggle: () => toggle(id),
+  });
+
+  const changeLocale = (next: Locale) => {
+    void i18n.changeLanguage(next);
+    setPrefs({ ...getPrefs(), locale: next });
+  };
+
+  // Keep the document title, language attribute and meta description in sync
+  // with the selected locale (the static index.html is the English baseline).
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+    document.title = t("app.documentTitle");
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute("content", t("app.metaDescription"));
+  }, [t, i18n.language]);
+
+  // The user's country, used to seed phone/address selectors in fresh drafts.
+  const defaults = useMemo(() => defaultOptions(detectCountryCode()), []);
+
+  // The live editor working copy for the active document. It carries the logo
+  // (hydrated from IndexedDB); the persisted snapshot in the library never does.
+  const [options, setOptions] = useState<QrOptions>(defaults);
+
+  // Gate the save effects until the active document's logo has loaded, so they
+  // don't clobber the stored logo with the pre-hydration `logo: null`.
+  const [ready, setReady] = useState(false);
+  // The logo currently persisted for the active document, so the logo save
+  // effect can skip rewriting an unchanged value (e.g. the one just hydrated).
+  const lastSavedLogo = useRef<string | null>(null);
+  // The document whose options/logo are loaded into the editor, so the loader
+  // below re-runs only on a real switch — not when editing mutates `documents`.
+  const loadedDocId = useRef<string | null>(null);
+
+  const result = useMemo(() => {
+    try {
+      return { ...buildSvg(options), error: null as string | null };
+    } catch (err) {
+      return {
+        svg: "",
+        px: 0,
+        error: err instanceof Error ? err.message : "Could not render QR code.",
+      };
+    }
+  }, [options]);
+
+  const patch = (next: Partial<QrOptions>) =>
+    setOptions((prev) => ({ ...prev, ...next }));
+
+  // Load the active document into the editor on a real switch, then hydrate its
+  // logo from IndexedDB and open the save gate. A stale async resolution (the
+  // user switched again mid-load) is dropped via the id check.
+  useEffect(() => {
+    if (!activeDocId || activeDocId === loadedDocId.current) return;
+    loadedDocId.current = activeDocId;
+    setReady(false);
+    const doc = documents.find((d) => d.id === activeDocId);
+    setOptions(doc ? { ...doc.options, logo: null } : defaults);
+    loadLogo(activeDocId).then((logo) => {
+      if (loadedDocId.current !== activeDocId) return;
+      lastSavedLogo.current = logo;
+      if (logo) setOptions((prev) => ({ ...prev, logo }));
+      setReady(true);
+    });
+  }, [activeDocId, documents, defaults]);
+
+  // Persist the active document's settings (debounced so typing doesn't thrash).
+  useEffect(() => {
+    if (!ready) return;
+    const id = setTimeout(() => persistActiveOptions(options), 300);
+    return () => clearTimeout(id);
+  }, [ready, options, persistActiveOptions]);
+
+  // Persist the active document's logo Blob separately whenever it changes.
+  const logo = options.logo;
+  useEffect(() => {
+    if (!ready || !activeDocId || logo === lastSavedLogo.current) return;
+    lastSavedLogo.current = logo;
+    if (logo) void saveLogo(activeDocId, logo);
+    else void clearLogo(activeDocId);
+  }, [ready, logo, activeDocId]);
+
+  // Flush the current document before opening another, so edits made within the
+  // debounce window aren't lost on the switch. Selecting a document also closes
+  // the library modal (mobile) so the chosen QR code is revealed in the editor.
+  const selectDocument = (id: string) => {
+    if (activeDocId && activeDocId !== id) persistActiveOptions(options);
+    lib.selectDocument(id);
+    setLibraryOpen(false);
+  };
+
+  // Flush the live edits into the source first so the copy includes them.
+  const duplicateDocument = (id: string) => {
+    if (id === activeDocId) persistActiveOptions(options);
+    lib.duplicateDocument(id);
+  };
+
+  // Download the whole library as a single `.dotcraft` file. Flush the live
+  // edits first so the active document's latest options are included.
+  const exportLibraryFile = async () => {
+    if (activeDocId) persistActiveOptions(options);
+    const bytes = await exportLibrary();
+    const date = new Date().toISOString().slice(0, 10);
+    download(
+      new Blob([new Uint8Array(bytes)], { type: "application/octet-stream" }),
+      `dotcraft-library-${date}.dotcraft`,
+    );
+  };
+
+  // Restore a `.dotcraft` file, replacing the current library, then re-hydrate
+  // the library and editor in place (no full page reload). The two resets pair
+  // with the document-load effect above: clearing `loadedDocId` makes it re-run
+  // for the (possibly unchanged) active id so the restored logo loads, and
+  // `setReady(false)` closes the save gate first so the pre-import options/logo
+  // aren't written back onto the freshly restored document during the reload.
+  const confirmImport = async () => {
+    const file = pendingImport;
+    setPendingImport(null);
+    if (!file) return;
+    try {
+      await importLibrary(new Uint8Array(await file.arrayBuffer()));
+      loadedDocId.current = null;
+      setReady(false);
+      await lib.reload();
+    } catch {
+      setImportFailed(true);
+    }
+  };
+
+  const error = result.error ? describeRenderError(result.error, t) : null;
+
+  // Library and settings render either in their desktop spot or inside a modal —
+  // never both at once, so their inputs keep unique ids. Defined once here and
+  // placed by the `isMobile` branches below.
+  const sidebar = (
+    <Sidebar
+      collapsible={!isMobile}
+      collapsed={libraryCollapsed}
+      onToggleCollapse={toggleLibrary}
+      folders={lib.folders}
+      documents={documents}
+      activeDocId={activeDocId}
+      collapsedFolders={lib.collapsedFolders}
+      onCreateProject={lib.createProject}
+      onExportLibrary={exportLibraryFile}
+      onImportLibrary={setPendingImport}
+      onCreateFolder={lib.createFolder}
+      onCreateDocument={lib.createDocument}
+      onDuplicateDocument={duplicateDocument}
+      onMoveDocument={lib.moveDocument}
+      onToggleFolder={lib.toggleFolder}
+      onExpandFolder={lib.expandFolder}
+      onRenameFolder={lib.renameFolder}
+      onRenameDocument={lib.renameDocument}
+      onDeleteFolder={lib.deleteFolder}
+      onDeleteDocument={lib.removeDocument}
+      onSelectDocument={selectDocument}
+    />
+  );
+  const settingsPanel = (
+    <SettingsPanel
+      options={options}
+      colorFormat={lib.colorFormat}
+      onColorFormatChange={lib.setColorFormat}
+      onChange={patch}
+    />
+  );
+
+  // The library only has a collapsed form on desktop; on mobile it lives in a
+  // modal, so the modifier never applies there.
+  const mainClass = `app__main${
+    !isMobile && libraryCollapsed ? " app__main--library-collapsed" : ""
+  }`;
+
+  return (
+    <>
+      <header className="app__header">
+        <Navbar
+          language={i18n.language}
+          onChangeLanguage={changeLocale}
+          onOpenLibrary={() => setLibraryOpen(true)}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+        {!isMobile && (
+          <LanguageSelect value={i18n.language} onChange={changeLocale} />
+        )}
+        <h1>Dotcraft</h1>
+        <p>{t("app.tagline")}</p>
+      </header>
+
+      <main className={mainClass}>
+        {!isMobile && sidebar}
+        <div className="workspace">
+          <div className="workspace__top">
+            <Preview svg={result.svg} error={error} />
+            <div className="workspace__tools">
+              <ExportPanel
+                svg={result.svg}
+                px={result.px}
+                {...foldProps("export")}
+              />
+              <EditorActions
+                onRandomize={() => patch(randomStyle())}
+                onReset={() => setOptions(defaults)}
+              />
+            </div>
+          </div>
+          <div className="workspace__bottom">
+            <ContentPanel
+              options={options}
+              onChange={patch}
+              {...foldProps("content")}
+            />
+            <div className="workspace__side">
+              {!isMobile && settingsPanel}
+              <StylePanel
+                options={options}
+                colorFormat={lib.colorFormat}
+                onChange={patch}
+                {...foldProps("style")}
+              />
+              <LogoPanel
+                options={options}
+                colorFormat={lib.colorFormat}
+                onChange={patch}
+                {...foldProps("logo")}
+              />
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {isMobile && (
+        <>
+          <Modal
+            open={libraryOpen}
+            title={t("sidebar.library")}
+            onClose={() => setLibraryOpen(false)}
+          >
+            {sidebar}
+          </Modal>
+          <Modal
+            open={settingsOpen}
+            title={t("controls.settings")}
+            onClose={() => setSettingsOpen(false)}
+          >
+            {settingsPanel}
+          </Modal>
+        </>
+      )}
+
+      <ConfirmDialog
+        open={pendingImport !== null}
+        title={t("sidebar.confirmImportTitle")}
+        message={t("sidebar.confirmImport")}
+        confirmLabel={t("sidebar.importLibrary")}
+        cancelLabel={t("common.cancel")}
+        onConfirm={confirmImport}
+        onCancel={() => setPendingImport(null)}
+      />
+      <Modal
+        open={importFailed}
+        title={t("sidebar.importErrorTitle")}
+        onClose={() => setImportFailed(false)}
+      >
+        <p className="modal__message">{t("sidebar.importError")}</p>
+        <div className="modal__actions">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => setImportFailed(false)}
+          >
+            {t("common.close")}
+          </button>
+        </div>
+      </Modal>
+    </>
+  );
+}

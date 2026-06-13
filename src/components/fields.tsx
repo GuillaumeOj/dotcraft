@@ -20,17 +20,29 @@ import { COUNTRIES, countryByCode } from "../qr/countries";
  */
 export function Field({
   label,
+  info,
   children,
 }: {
   label: string;
+  info?: ReactNode;
   children: (id: string) => ReactNode;
 }) {
   const id = useId();
+  const labelEl = (
+    <label className="field__label" htmlFor={id}>
+      {label}
+    </label>
+  );
   return (
     <div className="field">
-      <label className="field__label" htmlFor={id}>
-        {label}
-      </label>
+      {info ? (
+        <div className="field__label-row">
+          {labelEl}
+          {info}
+        </div>
+      ) : (
+        labelEl
+      )}
       {children(id)}
     </div>
   );
@@ -64,6 +76,7 @@ export function TextField({
 
 export function SelectField<T extends string>({
   label,
+  info,
   value,
   options,
   onChange,
@@ -71,6 +84,7 @@ export function SelectField<T extends string>({
   getLabel,
 }: {
   label: string;
+  info?: ReactNode;
   value: T;
   options: readonly T[];
   onChange: (v: T) => void;
@@ -78,7 +92,7 @@ export function SelectField<T extends string>({
   getLabel?: (v: T) => string;
 }) {
   return (
-    <Field label={label}>
+    <Field label={label} info={info}>
       {(id) => (
         <select
           id={id}
