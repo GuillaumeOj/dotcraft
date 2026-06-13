@@ -1,6 +1,8 @@
 import {
   ChevronDown,
   ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Copy,
   Download,
   FilePlus2,
@@ -30,6 +32,11 @@ const AUTO_EXPAND_MS = 600;
 
 /** The public API: the data plus the library actions. */
 export interface SidebarProps {
+  /** Desktop-only: render the hide/show control and reflect its state. Omitted
+   *  (false) inside the mobile modal, where the library has no collapsed form. */
+  collapsible?: boolean;
+  collapsed?: boolean;
+  onToggleCollapse?(): void;
   folders: Folder[];
   documents: QrDocument[];
   activeDocId: string | null;
@@ -127,8 +134,32 @@ export function Sidebar(props: SidebarProps) {
   }, [draggingId, dropFolderId, collapsedFolders, onExpandFolder]);
 
   const projects = foldersByParent.get(null) ?? [];
+  const collapseLabel = t(
+    props.collapsed ? "sidebar.showLibrary" : "sidebar.hideLibrary",
+  );
   return (
-    <aside className="sidebar" aria-label={t("sidebar.savedQrCodes")}>
+    <aside
+      id="library"
+      className="sidebar"
+      aria-label={t("sidebar.savedQrCodes")}
+    >
+      {props.collapsible && (
+        <button
+          type="button"
+          className="sidebar__collapse"
+          aria-expanded={!props.collapsed}
+          aria-controls="library"
+          aria-label={collapseLabel}
+          title={collapseLabel}
+          onClick={props.onToggleCollapse}
+        >
+          {props.collapsed ? (
+            <ChevronsRight size={ICON} aria-hidden="true" />
+          ) : (
+            <ChevronsLeft size={ICON} aria-hidden="true" />
+          )}
+        </button>
+      )}
       <Panel title={t("sidebar.library")} className="sidebar__panel">
         <button
           type="button"

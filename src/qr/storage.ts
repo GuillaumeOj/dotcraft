@@ -58,6 +58,9 @@ export interface Prefs {
   /** Ids of editor panels the user has folded shut on mobile (panels default to
    *  open). Only affects the mobile layout; desktop always shows panel bodies. */
   collapsedPanelIds: string[];
+  /** Desktop-only: whether the user has hidden the library column. Absent until
+   *  they toggle it; defaults to shown. Ignored on the mobile (modal) layout. */
+  libraryCollapsed?: boolean;
   /** The user's chosen interface language. Absent until they pick one — the app
    *  then falls back to browser detection. */
   locale?: Locale;
@@ -104,6 +107,11 @@ export function getPrefs(): Prefs {
           : null,
       collapsedFolderIds: stringList(parsed.collapsedFolderIds),
       collapsedPanelIds: stringList(parsed.collapsedPanelIds),
+      // Only surface the collapsed-library flag when it was actually stored,
+      // mirroring the optional `locale` handling below.
+      ...(typeof parsed.libraryCollapsed === "boolean"
+        ? { libraryCollapsed: parsed.libraryCollapsed }
+        : {}),
       // Only surface a stored language when it's a supported one; otherwise omit
       // the key so callers fall back to browser detection.
       ...(locale ? { locale } : {}),

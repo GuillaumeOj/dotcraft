@@ -125,6 +125,27 @@ describe("App", () => {
     expect(await screen.findByAltText("QR code preview")).toBeInTheDocument();
   });
 
+  it("hides and shows the library from the desktop toggle", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const main = screen.getByRole("main");
+    const hide = screen.getByRole("button", { name: "Hide library" });
+    expect(hide).toHaveAttribute("aria-expanded", "true");
+    expect(main).not.toHaveClass("app__main--library-collapsed");
+
+    await user.click(hide);
+    const show = screen.getByRole("button", { name: "Show library" });
+    expect(show).toHaveAttribute("aria-expanded", "false");
+    expect(main).toHaveClass("app__main--library-collapsed");
+
+    await user.click(show);
+    expect(
+      screen.getByRole("button", { name: "Hide library" }),
+    ).toBeInTheDocument();
+    expect(main).not.toHaveClass("app__main--library-collapsed");
+  });
+
   it("loads the active document's settings into the editor", async () => {
     setLib({
       documents: [makeDoc({ options: textOpts("restored") })],

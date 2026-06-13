@@ -101,6 +101,9 @@ body {
 }
 
 .app__main {
+  /* Diameter of the round collapse button; also the width of the collapsed
+     library rail, which the button straddles via translateX(50%). */
+  --library-collapse-size: 30px;
   flex: 1;
   min-height: 0;
   display: grid;
@@ -109,6 +112,16 @@ body {
   grid-template-columns: 280px minmax(0, 1fr);
   gap: 24px;
   align-items: stretch;
+  /* Animate the column so hiding the library lets the workspace grow smoothly.
+     Both endpoints are fixed lengths, which browsers tween. */
+  transition: grid-template-columns 0.25s ease;
+}
+
+/* Library hidden (desktop): the column shrinks to the collapse button's
+   diameter, leaving an empty rail the button sits on while the workspace grows
+   to reclaim the rest. */
+.app__main--library-collapsed {
+  grid-template-columns: var(--library-collapse-size) minmax(0, 1fr);
 }
 
 /* Two rows that share one column grid, so the left/right columns line up:
@@ -161,6 +174,11 @@ body {
   .workspace__bottom {
     grid-template-columns: 1fr;
   }
+
+  /* The library lives in a navbar modal here, so the desktop toggle is moot. */
+  .sidebar__collapse {
+    display: none;
+  }
 }
 
 .app__footer {
@@ -204,6 +222,45 @@ body {
   min-height: 0;
   gap: 12px;
   padding: 14px 12px 16px;
+  /* Clip the content so it slides out of view as the column narrows. */
+  overflow: hidden;
+}
+
+/* Collapsed: keep the bordered rail (the button's diameter wide) but clear its
+   contents and drop the side padding so the rail is exactly that width. */
+.app__main--library-collapsed .sidebar__panel {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Round collapse button: vertically on the New Project row and centred on the
+   library's right border so it straddles it. Anchored to the aside, it tracks
+   the border inward as the column collapses. */
+.sidebar__collapse {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  transform: translateX(50%);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--library-collapse-size);
+  height: var(--library-collapse-size);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.sidebar__collapse:hover {
+  color: var(--text);
+  border-color: var(--text);
 }
 
 .sidebar__new {
@@ -1115,4 +1172,27 @@ button.logo-dropzone:hover {
     right: 24px;
     z-index: 50;
   }
+}
+
+/* --- Collapsible library overrides ---------------------------------------- *
+ * These reuse base selectors (`.sidebar__new`, `legend`, `.tree`, `.hint`) at
+ * a higher specificity, so they live here — after every base rule — to keep the
+ * cascade in ascending-specificity order. */
+
+/* Reserve room on the New Project row for the collapse button, so the gap to
+   the button matches the New Project button's gap to the left border. */
+.app__main .sidebar__new {
+  margin-right: calc(var(--library-collapse-size) / 2);
+}
+
+/* When collapsed, the library content fades out only after the slide finishes,
+   so it stays in view (and in the tab order) while the column animates, then
+   drops out once hidden. */
+.app__main--library-collapsed .sidebar__panel > .panel__title,
+.app__main--library-collapsed .sidebar__new,
+.app__main--library-collapsed .sidebar__library-actions,
+.app__main--library-collapsed .sidebar__panel > .tree,
+.app__main--library-collapsed .sidebar__panel > .hint {
+  visibility: hidden;
+  transition: visibility 0s linear 0.25s;
 }

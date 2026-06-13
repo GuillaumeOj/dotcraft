@@ -14,6 +14,7 @@ import { Navbar } from "./components/Navbar";
 import { Preview } from "./components/Preview";
 import { Sidebar } from "./components/Sidebar";
 import { type PanelId, useCollapsedPanels } from "./hooks/useCollapsedPanels";
+import { useLibraryCollapsed } from "./hooks/useLibraryCollapsed";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { describeRenderError } from "./i18n/errors";
 import type { Locale } from "./i18n/locales";
@@ -71,6 +72,8 @@ export function App() {
   // two-column layout is untouched.
   const isMobile = useMediaQuery("(max-width: 1080px)");
   const { collapsed, toggle } = useCollapsedPanels();
+  const { collapsed: libraryCollapsed, toggle: toggleLibrary } =
+    useLibraryCollapsed();
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   // The pending import: the chosen file awaiting confirmation, plus whether the
@@ -219,6 +222,9 @@ export function App() {
   // placed by the `isMobile` branches below.
   const sidebar = (
     <Sidebar
+      collapsible={!isMobile}
+      collapsed={libraryCollapsed}
+      onToggleCollapse={toggleLibrary}
       folders={lib.folders}
       documents={documents}
       activeDocId={activeDocId}
@@ -248,6 +254,12 @@ export function App() {
     />
   );
 
+  // The library only has a collapsed form on desktop; on mobile it lives in a
+  // modal, so the modifier never applies there.
+  const mainClass = `app__main${
+    !isMobile && libraryCollapsed ? " app__main--library-collapsed" : ""
+  }`;
+
   return (
     <div className="app">
       <header className="app__header">
@@ -264,7 +276,7 @@ export function App() {
         <p>{t("app.tagline")}</p>
       </header>
 
-      <main className="app__main">
+      <main className={mainClass}>
         {!isMobile && sidebar}
         <div className="workspace">
           <div className="workspace__top">
