@@ -55,6 +55,9 @@ export interface Prefs {
   lastOpenedDocId: string | null;
   /** Ids of folders the user has collapsed (folders default to expanded). */
   collapsedFolderIds: string[];
+  /** Ids of editor panels the user has folded shut on mobile (panels default to
+   *  open). Only affects the mobile layout; desktop always shows panel bodies. */
+  collapsedPanelIds: string[];
   /** The user's chosen interface language. Absent until they pick one — the app
    *  then falls back to browser detection. */
   locale?: Locale;
@@ -64,9 +67,17 @@ const DEFAULT_PREFS: Prefs = {
   colorFormat: "hex",
   lastOpenedDocId: null,
   collapsedFolderIds: [],
+  collapsedPanelIds: [],
 };
 
 // --- localStorage: preferences ---------------------------------------------
+
+/** Keep only the string entries of a stored array, or [] if it isn't one. */
+function stringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((id): id is string => typeof id === "string")
+    : [];
+}
 
 /** Read the app-wide preferences, falling back to defaults on missing/corrupt
  *  data or unavailable storage. */
@@ -91,11 +102,8 @@ export function getPrefs(): Prefs {
         typeof parsed.lastOpenedDocId === "string"
           ? parsed.lastOpenedDocId
           : null,
-      collapsedFolderIds: Array.isArray(parsed.collapsedFolderIds)
-        ? parsed.collapsedFolderIds.filter(
-            (id: unknown) => typeof id === "string",
-          )
-        : [],
+      collapsedFolderIds: stringList(parsed.collapsedFolderIds),
+      collapsedPanelIds: stringList(parsed.collapsedPanelIds),
       // Only surface a stored language when it's a supported one; otherwise omit
       // the key so callers fall back to browser detection.
       ...(locale ? { locale } : {}),
@@ -406,6 +414,7 @@ export async function migrateLegacy(
 
   setPrefs({
     collapsedFolderIds: [],
+    collapsedPanelIds: [],
     colorFormat: COLOR_FORMATS.includes(parsed.colorFormat as ColorFormat)
       ? (parsed.colorFormat as ColorFormat)
       : "hex",

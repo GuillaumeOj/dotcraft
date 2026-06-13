@@ -7,6 +7,7 @@ import { afterEach, vi } from "vitest";
 // render (in English) without each test wiring up a provider.
 import i18n from "../i18n/config";
 import { installCanvasColorShim } from "./canvasColorShim";
+import { createMatchMedia } from "./matchMedia";
 
 // jsdom ships no canvas 2D context. color.ts leans on the browser's CSS colour
 // parser (reached via `ctx.fillStyle`), so we install a faithful shim that
@@ -14,6 +15,14 @@ import { installCanvasColorShim } from "./canvasColorShim";
 // (opaque -> "#rrggbb", translucent -> "rgba(r, g, b, a)") and silently ignores
 // anything unrecognised — which is precisely the behaviour color.ts relies on.
 installCanvasColorShim();
+
+// jsdom ships no matchMedia. Install a default that reports "no match" (the
+// desktop branch) so useMediaQuery resolves without each test wiring it up. A
+// plain assignment (not vi.stubGlobal) keeps it past vi.unstubAllGlobals; tests
+// that need the mobile layout override it with vi.spyOn(window, "matchMedia").
+if (typeof window.matchMedia !== "function") {
+  window.matchMedia = () => createMatchMedia(false);
+}
 
 afterEach(() => {
   cleanup();

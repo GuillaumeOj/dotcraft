@@ -166,5 +166,8 @@
   },
   "export": {
     "title": "Export"
+  },
+  "nav": {
+    "menu": "Menu"
   }
 }

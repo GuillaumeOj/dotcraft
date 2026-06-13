@@ -6,6 +6,7 @@ import * as storage from "./qr/storage";
 import { DEFAULT_OPTIONS, type QrDocument, type QrOptions } from "./qr/types";
 import type { Library } from "./qr/useLibrary";
 import { useLibrary } from "./qr/useLibrary";
+import { createMatchMedia } from "./test/matchMedia";
 
 /** Options on the Text tab, pre-filled — the editor then shows a "Text" field. */
 const textOpts = (text: string): QrOptions => ({
@@ -24,6 +25,7 @@ vi.mock("./qr/storage", () => ({
     colorFormat: "hex",
     lastOpenedDocId: null,
     collapsedFolderIds: [],
+    collapsedPanelIds: [],
   })),
   setPrefs: vi.fn(),
   MAX_FOLDER_DEPTH: 5,
@@ -244,6 +246,88 @@ describe("App", () => {
     // ...and the choice is persisted.
     expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
       expect.objectContaining({ locale: "fr" }),
+    );
+  });
+});
+
+/** Force the mobile branch by making the media query match. */
+function setMobile() {
+  vi.spyOn(window, "matchMedia").mockImplementation(() =>
+    createMatchMedia(true),
+  );
+}
+
+describe("App — mobile layout", () => {
+  it("moves the library out of the page flow and into a modal", async () => {
+    setMobile();
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    // The library is not rendered in-flow on mobile...
+    expect(
+      screen.queryByRole("complementary", { name: "Saved QR codes" }),
+    ).toBeNull();
+    // ...but the navbar menu opens it in a dialog.
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Library" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("My Project")).toBeInTheDocument();
+  });
+
+  it("closes the library modal once a document is selected", async () => {
+    setMobile();
+    setLib({ documents: [makeDoc(), makeDoc({ id: "d2", name: "QR 2" })] });
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Library" }));
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "QR 2" }));
+    // Picking the document dismisses the modal.
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("moves the settings panel into a modal", async () => {
+    setMobile();
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    // Error correction lives in the settings panel, absent from the flow...
+    expect(screen.queryByLabelText("Error correction")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Settings" }));
+    const dialog = screen.getByRole("dialog");
+    expect(
+      within(dialog).getByLabelText("Error correction"),
+    ).toBeInTheDocument();
+  });
+
+  it("switches the language from the navbar menu", async () => {
+    setMobile();
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    // No language picker in the page flow until the menu is opened.
+    expect(screen.queryByLabelText("Language")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    await user.selectOptions(screen.getByLabelText("Language"), "fr");
+    expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
+      expect.objectContaining({ locale: "fr" }),
+    );
+  });
+
+  it("folds an editor panel and persists the collapsed set", async () => {
+    setMobile();
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    const toggle = screen.getByRole("button", { name: "Style" });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
+      expect.objectContaining({ collapsedPanelIds: ["style"] }),
     );
   });
 });
