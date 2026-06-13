@@ -104,7 +104,9 @@ body {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 244px minmax(0, 1fr);
+  /* Wide enough that the library's icon+label actions (Export/Import) fit on one
+     line in every locale, not just English's short labels. */
+  grid-template-columns: 280px minmax(0, 1fr);
   gap: 24px;
   align-items: stretch;
 }
@@ -207,6 +209,27 @@ body {
 .sidebar__new {
   padding: 7px 10px;
   font-size: 13px;
+}
+
+/* Whole-library download / import, secondary to the prominent "New project". */
+.sidebar__library-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.sidebar__library-action {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  /* Single-word labels (Export/Import, localised) sit beside their icon on one
+     line; the sidebar width is sized to fit the longest locale. */
+  white-space: nowrap;
+}
+
+/* The import file picker is driven by its button; the native input stays hidden. */
+.sidebar__import-input {
+  display: none;
 }
 
 .tree {
@@ -851,6 +874,12 @@ button.logo-dropzone:hover {
   transition:
     background 0.15s ease,
     border-color 0.15s ease;
+}
+
+/* Keep button icons at their intrinsic size: never let a long (translated) label
+   squeeze the icon down to nothing. */
+.btn svg {
+  flex-shrink: 0;
 }
 
 .btn:hover {

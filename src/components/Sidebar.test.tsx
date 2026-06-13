@@ -39,6 +39,8 @@ function setup(over: Partial<SidebarProps> = {}) {
     activeDocId: "d1",
     collapsedFolders: new Set<string>(),
     onCreateProject: vi.fn(),
+    onExportLibrary: vi.fn(),
+    onImportLibrary: vi.fn(),
     onCreateFolder: vi.fn(),
     onCreateDocument: vi.fn(),
     onDuplicateDocument: vi.fn(),
@@ -82,6 +84,25 @@ describe("Sidebar", () => {
     const props = setup();
     await user.click(screen.getByRole("button", { name: "New Project" }));
     expect(props.onCreateProject).toHaveBeenCalled();
+  });
+
+  it("exports the whole library", async () => {
+    const user = userEvent.setup();
+    const props = setup();
+    await user.click(screen.getByRole("button", { name: "Export" }));
+    expect(props.onExportLibrary).toHaveBeenCalled();
+  });
+
+  it("imports a library from the chosen file", async () => {
+    const user = userEvent.setup();
+    const props = setup();
+    const file = new File(["x"], "library.dotcraft");
+    const input = screen.getByLabelText(
+      "Replace your library with a .dotcraft file",
+      { selector: "input" },
+    );
+    await user.upload(input, file);
+    expect(props.onImportLibrary).toHaveBeenCalledWith(file);
   });
 
   it("adds a QR code and a subfolder to a folder", async () => {

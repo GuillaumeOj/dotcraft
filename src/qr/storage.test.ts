@@ -2,6 +2,7 @@ import { Blob as NodeBlob } from "node:buffer";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resetDb } from "../test/db";
 import {
+  clearLibrary,
   clearLogo,
   copyLogo,
   deleteDocument,
@@ -12,12 +13,14 @@ import {
   listDocuments,
   listFolders,
   loadLogo,
+  loadLogoBlob,
   migrateLegacy,
   normalizeOptions,
   PREFS_KEY,
   saveDocument,
   saveFolder,
   saveLogo,
+  saveLogoBlob,
   setPrefs,
 } from "./storage";
 import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "./types";
@@ -333,6 +336,15 @@ describe("logo IndexedDB storage (keyed by document id)", () => {
     expect(await loadLogo("doc-a")).toBeNull();
   });
 
+  it("stores and reads back a logo Blob directly", async () => {
+    const blob = new NodeBlob(["hello"], { type: "image/png" }) as Blob;
+    await saveLogoBlob("doc-a", blob);
+    const read = await loadLogoBlob("doc-a");
+    expect(read?.type).toBe("image/png");
+    expect(await read?.text()).toBe("hello");
+    expect(await loadLogoBlob("missing")).toBeUndefined();
+  });
+
   it("is a no-op when the data URL cannot be fetched", async () => {
     vi.stubGlobal(
       "fetch",
@@ -350,6 +362,22 @@ describe("logo IndexedDB storage (keyed by document id)", () => {
     expect(await listDocuments()).toEqual([]);
     expect(await loadLogo("doc-a")).toBeNull();
     await expect(saveLogo("doc-a", DATA_URL)).resolves.toBeUndefined();
+  });
+});
+
+describe("clearLibrary", () => {
+  it("wipes every folder, document, and logo", async () => {
+    const f = folder({ id: "f" });
+    const d = doc({ id: "d", folderId: "f" });
+    await saveFolder(f);
+    await saveDocument(d);
+    await saveLogoBlob("d", new NodeBlob(["x"], { type: "image/png" }) as Blob);
+
+    await clearLibrary();
+
+    expect(await listFolders()).toEqual([]);
+    expect(await listDocuments()).toEqual([]);
+    expect(await loadLogoBlob("d")).toBeUndefined();
   });
 });
 

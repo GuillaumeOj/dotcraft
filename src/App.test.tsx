@@ -2,6 +2,8 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
+import * as exportMod from "./qr/export";
+import * as archive from "./qr/libraryArchive";
 import * as storage from "./qr/storage";
 import { DEFAULT_OPTIONS, type QrDocument, type QrOptions } from "./qr/types";
 import type { Library } from "./qr/useLibrary";
@@ -31,9 +33,22 @@ vi.mock("./qr/storage", () => ({
   MAX_FOLDER_DEPTH: 5,
 }));
 vi.mock("./qr/useLibrary", () => ({ useLibrary: vi.fn() }));
+// The archive pack/unpack and the download helper have their own suites; here
+// we mock them to assert App wires the library buttons to them.
+vi.mock("./qr/libraryArchive", () => ({
+  exportLibrary: vi.fn(async () => new Uint8Array([1, 2, 3])),
+  importLibrary: vi.fn(async () => {}),
+}));
 
 const mockedStorage = vi.mocked(storage);
+const mockedArchive = vi.mocked(archive);
+const mockedExport = vi.mocked(exportMod);
 const LOGO = "data:image/png;base64,aaaa";
+
+/** The library aside, where the whole-library actions live. */
+function libraryAside(): HTMLElement {
+  return screen.getByRole("complementary", { name: "Saved QR codes" });
+}
 
 function makeDoc(over: Partial<QrDocument> = {}): QrDocument {
   return {
@@ -77,6 +92,7 @@ function makeLib(over: Partial<Library> = {}): Library {
     removeDocument: vi.fn(),
     selectDocument: vi.fn(),
     persistActiveOptions: vi.fn(),
+    reload: vi.fn(async () => {}),
     ...over,
   };
 }
@@ -90,6 +106,8 @@ function setLib(over: Partial<Library> = {}): Library {
 beforeEach(() => {
   vi.clearAllMocks();
   mockedStorage.loadLogo.mockResolvedValue(null);
+  // Stub the actual file download so clicking export doesn't touch the DOM/nav.
+  vi.spyOn(exportMod, "download").mockImplementation(() => {});
   setLib();
 });
 
@@ -159,8 +177,9 @@ describe("App", () => {
     render(<App />);
     await screen.findByAltText("QR code preview");
     const file = new File(["bytes"], "logo.png", { type: "image/png" });
+    // The logo picker, not the library import input (which accepts .dotcraft).
     const input = document.querySelector(
-      'input[type="file"]',
+      'input[type="file"][accept*="image"]',
     ) as HTMLInputElement;
     await user.upload(input, file);
     await waitFor(() =>
@@ -222,6 +241,69 @@ describe("App", () => {
     await user.click(within(library).getByLabelText("Duplicate QR code"));
     expect(lib.persistActiveOptions).toHaveBeenCalled();
     expect(lib.duplicateDocument).toHaveBeenCalledWith("d1");
+  });
+
+  /** The hidden import file input, found by its descriptive aria-label. */
+  function importInput(): HTMLElement {
+    return within(libraryAside()).getByLabelText(
+      "Replace your library with a .dotcraft file",
+      { selector: "input" },
+    );
+  }
+
+  it("downloads the whole library, flushing live edits first", async () => {
+    const lib = setLib();
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    await user.click(
+      within(libraryAside()).getByRole("button", { name: "Export" }),
+    );
+    await waitFor(() => expect(mockedArchive.exportLibrary).toHaveBeenCalled());
+    expect(lib.persistActiveOptions).toHaveBeenCalled();
+    const [blob, name] = mockedExport.download.mock.calls[0];
+    expect(blob).toBeInstanceOf(Blob);
+    expect(name).toMatch(/^dotcraft-library-.*\.dotcraft$/);
+  });
+
+  it("imports the chosen file after confirming in the modal", async () => {
+    const lib = setLib();
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    await user.upload(importInput(), new File(["data"], "lib.dotcraft"));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Import" }));
+    await waitFor(() =>
+      expect(mockedArchive.importLibrary).toHaveBeenCalledWith(
+        expect.any(Uint8Array),
+      ),
+    );
+    await waitFor(() => expect(lib.reload).toHaveBeenCalled());
+  });
+
+  it("does not import when the confirmation is cancelled", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    await user.upload(importInput(), new File(["data"], "lib.dotcraft"));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    expect(mockedArchive.importLibrary).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("shows an error modal when the import fails", async () => {
+    mockedArchive.importLibrary.mockRejectedValueOnce(new Error("bad"));
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+    await user.upload(importInput(), new File(["data"], "lib.dotcraft"));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Import" }));
+    expect(
+      await screen.findByText(/Could not import this file/i),
+    ).toBeInTheDocument();
   });
 
   it("surfaces a render error when the content is emptied", async () => {
