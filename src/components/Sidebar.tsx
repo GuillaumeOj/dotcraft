@@ -22,6 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { MAX_FOLDER_DEPTH } from "../qr/storage";
 import type { Folder, QrDocument } from "../qr/types";
+import { Panel } from "./Panel";
 
 const ICON = 15;
 /** How long a dragged document must hover a collapsed folder before it opens. */
@@ -128,8 +129,7 @@ export function Sidebar(props: SidebarProps) {
   const projects = foldersByParent.get(null) ?? [];
   return (
     <aside className="sidebar" aria-label={t("sidebar.savedQrCodes")}>
-      <fieldset className="panel sidebar__panel">
-        <legend>{t("sidebar.library")}</legend>
+      <Panel title={t("sidebar.library")} className="sidebar__panel">
         <button
           type="button"
           className="btn btn--ghost sidebar__new"
@@ -175,7 +175,7 @@ export function Sidebar(props: SidebarProps) {
             ))}
           </ul>
         )}
-      </fieldset>
+      </Panel>
     </aside>
   );
 }

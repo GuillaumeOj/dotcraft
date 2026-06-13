@@ -117,8 +117,10 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", { name: "Dotcraft" }),
     ).toBeInTheDocument();
-    // The library title is a panel legend, like the editor surfaces.
-    expect(screen.getByRole("group", { name: "Library" })).toBeInTheDocument();
+    // The library title is a panel heading, like the editor surfaces.
+    expect(
+      screen.getByRole("heading", { name: "Library" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("My Project")).toBeInTheDocument();
     expect(await screen.findByAltText("QR code preview")).toBeInTheDocument();
   });
@@ -408,6 +410,8 @@ describe("App — mobile layout", () => {
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     await user.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
+    // The title stays visible once folded, only its body collapses.
+    expect(screen.getByRole("heading", { name: "Style" })).toBeInTheDocument();
     expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
       expect.objectContaining({ collapsedPanelIds: ["style"] }),
     );

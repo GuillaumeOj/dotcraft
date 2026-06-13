@@ -9,10 +9,10 @@ import {
   isTransparent,
   type QrOptions,
 } from "../qr/types";
-import { CollapsiblePanel, type FoldProps } from "./CollapsiblePanel";
 import { ContentFields } from "./ContentFields";
 import { ColorField, RangeField, SelectField } from "./fields";
 import { LogoField } from "./LogoField";
+import { type FoldProps, Panel } from "./Panel";
 import { dotSwatch, eyeSwatch, StylePicker } from "./StylePicker";
 import { Tabs } from "./Tabs";
 
@@ -35,7 +35,7 @@ export function ContentPanel({
   }));
 
   return (
-    <CollapsiblePanel title={t("controls.content")} {...fold}>
+    <Panel title={t("controls.content")} {...fold}>
       <Tabs
         value={options.contentType}
         tabs={contentTabs}
@@ -49,7 +49,7 @@ export function ContentPanel({
           })
         }
       />
-    </CollapsiblePanel>
+    </Panel>
   );
 }
 
@@ -67,8 +67,7 @@ export function SettingsPanel({
 }) {
   const { t } = useTranslation();
   return (
-    <fieldset className="panel">
-      <legend>{t("controls.settings")}</legend>
+    <Panel title={t("controls.settings")}>
       <SelectField
         label={t("controls.colourFormat")}
         value={colorFormat}
@@ -89,7 +88,7 @@ export function SettingsPanel({
           ? t("controls.logoForcesHigh")
           : t(`controls.ecDescriptions.${options.errorCorrection}`)}
       </p>
-    </fieldset>
+    </Panel>
   );
 }
 
@@ -106,7 +105,7 @@ export function StylePanel({
 } & Partial<FoldProps>) {
   const { t } = useTranslation();
   return (
-    <CollapsiblePanel title={t("controls.style")} {...fold}>
+    <Panel title={t("controls.style")} {...fold}>
       <StylePicker
         label={t("controls.dotStyle")}
         value={options.dotStyle}
@@ -143,7 +142,7 @@ export function StylePanel({
         step={1}
         onChange={(margin) => onChange({ margin })}
       />
-    </CollapsiblePanel>
+    </Panel>
   );
 }
 
@@ -161,7 +160,7 @@ export function LogoPanel({
   const { t } = useTranslation();
 
   return (
-    <CollapsiblePanel title={t("controls.logo")} {...fold}>
+    <Panel title={t("controls.logo")} {...fold}>
       <LogoField logo={options.logo} onChange={(logo) => onChange({ logo })} />
       {options.logo && (
         <>
@@ -210,7 +209,7 @@ export function LogoPanel({
           </label>
         </>
       )}
-    </CollapsiblePanel>
+    </Panel>
   );
 }
 
