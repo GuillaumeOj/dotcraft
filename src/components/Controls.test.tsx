@@ -1,14 +1,9 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { ColorFormat } from "../qr/color";
 import { DEFAULT_OPTIONS, type QrOptions } from "../qr/types";
+import { renderWithRouter as render } from "../test/router";
 import {
   ContentPanel,
   EditorActions,

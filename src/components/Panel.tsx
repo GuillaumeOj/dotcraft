@@ -20,6 +20,7 @@ export interface FoldProps {
 export function Panel({
   title,
   className,
+  info,
   collapsible = false,
   collapsed = false,
   onToggle = () => {},
@@ -27,6 +28,7 @@ export function Panel({
 }: Partial<FoldProps> & {
   title: string;
   className?: string;
+  info?: ReactNode;
   children: ReactNode;
 }) {
   const bodyId = useId();
@@ -36,7 +38,7 @@ export function Panel({
   }`;
   return (
     <section className={cls}>
-      <h2 className="panel__title">
+      <h2 className={`panel__title${info ? " panel__title--with-info" : ""}`}>
         {collapsible ? (
           <button
             type="button"
@@ -52,9 +54,12 @@ export function Panel({
               aria-hidden="true"
             />
           </button>
+        ) : info ? (
+          <span className="panel__title-text">{title}</span>
         ) : (
           title
         )}
+        {info}
       </h2>
       {collapsible ? (
         <div id={bodyId} className="panel__body">

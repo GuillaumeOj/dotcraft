@@ -11,6 +11,7 @@ import {
 } from "../qr/types";
 import { ContentFields } from "./ContentFields";
 import { ColorField, RangeField, SelectField } from "./fields";
+import { InfoLink } from "./InfoLink";
 import { LogoField } from "./LogoField";
 import { type FoldProps, Panel } from "./Panel";
 import { dotSwatch, eyeSwatch, StylePicker } from "./StylePicker";
@@ -77,6 +78,12 @@ export function SettingsPanel({
       />
       <SelectField
         label={t("controls.errorCorrection")}
+        info={
+          <InfoLink
+            anchor="error-correction"
+            label={t("info.errorCorrection")}
+          />
+        }
         value={options.errorCorrection}
         options={EC_SETTINGS}
         getLabel={(s) => t(`controls.ecLabels.${s}`)}

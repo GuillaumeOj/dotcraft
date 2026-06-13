@@ -42,7 +42,13 @@ bun run test:coverage       # tests with coverage report
   (`storage.ts`), and hooks (`useLibrary.ts`). Put new pure logic here.
 - `src/components/` — React UI: `Controls.tsx`, `Preview.tsx`, `Sidebar.tsx`,
   `fields.tsx`. Put new UI here.
-- `src/test/` — Vitest setup and shared test utilities.
+- `src/pages/` — the routed pages (`react-router-dom`): `EditorPage.tsx` (the
+  editor, at `/`), `FaqPage.tsx` (`/faq`) and `HelpCenterPage.tsx`
+  (`/help-center`). `App.tsx` is just the shell (`<Routes>` + shared `Footer`).
+  Static deep links (`/faq`, `/help-center`) rely on the SPA rewrite in
+  `vercel.json`.
+- `src/test/` — Vitest setup and shared test utilities (e.g. `renderWithRouter`
+  in `router.tsx`, needed for any component that renders a react-router `<Link>`).
 
 ## Conventions
 
@@ -66,6 +72,14 @@ bun run test:coverage       # tests with coverage report
   in parallel, each comparing its file against `en.json` for accuracy,
   naturalness, placeholder integrity (`{{name}}`, `{{px}}`, …), and consistency.
   Skip this when no catalog changed.
+- **Keep the Help Center and FAQ in sync with the product.** Whenever you add or
+  change a user-facing feature, update the in-app docs so they don't drift:
+  revise the relevant Help Center article (`src/pages/HelpCenterPage.tsx` and the
+  `helpCenter.*` keys) and/or FAQ entry (`src/pages/FaqPage.tsx` and the `faq.*`
+  keys), across **every** locale. If a control gains a Help Center article, add
+  an `<InfoLink>` (`src/components/InfoLink.tsx`) pointing to its anchor. When
+  unsure whether a change is user-visible enough to document, surface it rather
+  than silently skip it.
 
 ## Worktrees
 

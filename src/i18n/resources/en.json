@@ -1,7 +1,6 @@
 {
   "app": {
     "tagline": "Design a styled QR code, then export it as PNG or SVG.",
-    "viewOnGithub": "View on GitHub",
     "language": "Language",
     "documentTitle": "Dotcraft — styled QR code editor",
     "metaDescription": "Design styled QR codes with custom dot and droplet eye styles, colors, and a center logo."
@@ -178,6 +177,81 @@
     "title": "Export"
   },
   "nav": {
-    "menu": "Menu"
+    "menu": "Menu",
+    "backToEditor": "Back to editor"
+  },
+  "footer": {
+    "label": "Footer",
+    "faq": "FAQ",
+    "helpCenter": "Help Center",
+    "blog": "Blog",
+    "github": "GitHub",
+    "madeWithPrefix": "Made with",
+    "madeWithSuffix": "in Lyon",
+    "love": "love"
+  },
+  "info": {
+    "library": "Learn how to import and export your library",
+    "exportQr": "Learn how to export your QR code",
+    "errorCorrection": "Learn about error correction"
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Quick answers about privacy, pricing and how Dotcraft works.",
+    "items": {
+      "privacy": {
+        "q": "How is my library kept?",
+        "a": "Everything stays in your browser. Your projects and QR codes are saved locally on your device (local storage and IndexedDB); nothing is uploaded to a server and we cannot access any of it."
+      },
+      "free": {
+        "q": "Is Dotcraft free?",
+        "a": "Yes. Dotcraft is completely free to use, with no limits and no paid tiers."
+      },
+      "account": {
+        "q": "Do I need an account?",
+        "a": "No. There is no sign-up or login — Dotcraft runs entirely in your browser, so you can start designing right away."
+      },
+      "expire": {
+        "q": "Will my QR codes expire?",
+        "a": "No. The codes are static and encode your data directly, so they never expire, redirect, or phone home. Once exported, they keep working forever."
+      },
+      "formats": {
+        "q": "Which formats can I export?",
+        "a": "PNG and SVG. Choose PNG for a ready-to-use image at a fixed size, and SVG when you need a sharp vector that scales to any size for print or further editing."
+      },
+      "clearData": {
+        "q": "What happens if I clear my browser data?",
+        "a": "Your library lives in your browser's local storage, so clearing site data or using private browsing will erase it. Use the Export button in the library to save a backup file you can re-import later."
+      }
+    }
+  },
+  "helpCenter": {
+    "title": "Help Center",
+    "subtitle": "Guides for getting the most out of Dotcraft.",
+    "articles": {
+      "library": {
+        "title": "Import and export your library",
+        "body": "Your whole library — every project, folder and QR code — can be saved to a single .dotcraft file. In the library, use Export to download that file as a backup or to move your work to another browser or device.\n\nUse Import to restore a .dotcraft file. Importing replaces your current library with the contents of the file, so export a backup first if you want to keep what you have.",
+        "warning": "Only import .dotcraft files from a source you trust. We do everything we can to handle imports safely, but a library file ultimately contains whatever its creator put in it — treat one from an unknown origin with the same caution as any file you didn't make yourself."
+      },
+      "exportQr": {
+        "title": "Export a QR code",
+        "body": "Open the Export panel to download the QR code you are editing. Pick a PNG size (512, 1024 or 2048 px) and choose Download PNG for a ready-to-use image, or Download SVG for a crisp vector that scales to any size.\n\nUse PNG when you need a fixed-size image to drop into a document or post online. Use SVG for print, large formats, or when you want to keep editing the artwork in a vector tool."
+      },
+      "errorCorrection": {
+        "title": "Error correction explained",
+        "body": "Error correction adds redundancy so a QR code still scans when part of it is dirty, damaged or covered. Higher levels survive more damage but make the code denser, because they pack in more data.\n\nAutomatic picks a sensible level for your content. When you add a center logo, error correction is raised to High so the logo doesn't stop the code from scanning."
+      },
+      "requestFeature": {
+        "title": "Request a feature",
+        "body": "Have an idea that would make Dotcraft better? Open a feature request on GitHub. The form walks you through describing the problem you're trying to solve and the solution you have in mind, which helps it get picked up faster.",
+        "cta": "Open a feature request"
+      },
+      "reportBug": {
+        "title": "Report a bug",
+        "body": "Something not working as expected? Open a bug report on GitHub. The form asks for what happened, the steps to reproduce it, what you expected, and your browser and operating system, so the issue can be tracked down quickly.",
+        "cta": "Open a bug report"
+      }
+    }
   }
 }

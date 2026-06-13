@@ -186,7 +186,17 @@ body {
   margin-top: auto;
   padding-top: 32px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.app__footer-links {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
+  gap: 8px 20px;
 }
 
 .app__footer-link {
@@ -201,6 +211,162 @@ body {
 
 .app__footer-link:hover {
   color: var(--text);
+}
+
+.app__footer-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.app__footer-heart {
+  color: #e25555;
+}
+
+/* Contextual info icon next to a panel title or field label: links to the
+   matching Help Center article. */
+.info-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
+
+.info-link:hover {
+  color: var(--text);
+}
+
+/* Panel title that hosts an info link: lay the title and the icon on one row.
+   The rules that stretch the title/toggle to fill that row live alongside
+   `.panel__toggle` further down, so selector specificity stays ascending. */
+.panel__title--with-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Field label row that hosts an info link. */
+.field__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Static content pages (FAQ, Help Center). */
+.page {
+  max-width: 760px;
+}
+
+.page__header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.15s ease;
+}
+
+.page__back:hover {
+  color: var(--text);
+}
+
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: 0;
+}
+
+.faq__question {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.faq__answer {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.help {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.help__article {
+  /* Offset for the in-page anchor jump so the heading clears the top edge. */
+  scroll-margin-top: 24px;
+}
+
+.help__title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.help__article p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.help__ec {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.help__ec-row {
+  display: flex;
+  gap: 10px;
+}
+
+.help__ec-row dt {
+  flex: 0 0 88px;
+  font-weight: 600;
+}
+
+.help__ec-row dd {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Caution callout (e.g. importing untrusted .dotcraft files). */
+.help__warning {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid #5a4316;
+  border-radius: var(--radius);
+  background: #2a210f;
+  color: #e8d9b0;
+  line-height: 1.5;
+}
+
+.help__warning-icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: #e0a52e;
 }
 
 /* Sidebar / library tree. It fills the column down to the footer but never
@@ -927,6 +1093,7 @@ button.logo-dropzone:hover {
   padding: 10px 16px;
   font: inherit;
   font-weight: 600;
+  text-decoration: none;
   background: var(--accent);
   color: #fff;
   cursor: pointer;
@@ -1063,6 +1230,13 @@ button.logo-dropzone:hover {
 
 .panel.is-collapsed .panel__chevron {
   transform: rotate(-90deg);
+}
+
+/* In a title that hosts an info link, let the title/toggle take the row so the
+   info icon settles at the trailing edge (see `.panel__title--with-info`). */
+.panel__title--with-info .panel__toggle,
+.panel__title--with-info .panel__title-text {
+  flex: 1 1 auto;
 }
 
 .panel.is-collapsed > .panel__body {
