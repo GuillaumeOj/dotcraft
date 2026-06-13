@@ -9,7 +9,7 @@ import {
 } from "./components/Controls";
 import { ExportPanel } from "./components/ExportPanel";
 import { LanguageSelect } from "./components/LanguageSelect";
-import { Modal } from "./components/Modal";
+import { ConfirmDialog, Modal } from "./components/Modal";
 import { Navbar } from "./components/Navbar";
 import { Preview } from "./components/Preview";
 import { Sidebar } from "./components/Sidebar";
@@ -18,6 +18,8 @@ import { useMediaQuery } from "./hooks/useMediaQuery";
 import { describeRenderError } from "./i18n/errors";
 import type { Locale } from "./i18n/locales";
 import { detectCountryCode } from "./qr/countries";
+import { download } from "./qr/export";
+import { exportLibrary, importLibrary } from "./qr/libraryArchive";
 import { randomStyle } from "./qr/random";
 import { buildSvg } from "./qr/render";
 import {
@@ -71,6 +73,10 @@ export function App() {
   const { collapsed, toggle } = useCollapsedPanels();
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // The pending import: the chosen file awaiting confirmation, plus whether the
+  // last import failed (both drive modals in place of native confirm/alert).
+  const [pendingImport, setPendingImport] = useState<File | null>(null);
+  const [importFailed, setImportFailed] = useState(false);
 
   /** Fold props for a foldable panel: only collapsible on mobile. */
   const foldProps = (id: PanelId) => ({
@@ -174,6 +180,38 @@ export function App() {
     lib.duplicateDocument(id);
   };
 
+  // Download the whole library as a single `.dotcraft` file. Flush the live
+  // edits first so the active document's latest options are included.
+  const exportLibraryFile = async () => {
+    if (activeDocId) persistActiveOptions(options);
+    const bytes = await exportLibrary();
+    const date = new Date().toISOString().slice(0, 10);
+    download(
+      new Blob([new Uint8Array(bytes)], { type: "application/octet-stream" }),
+      `dotcraft-library-${date}.dotcraft`,
+    );
+  };
+
+  // Restore a `.dotcraft` file, replacing the current library, then re-hydrate
+  // the library and editor in place (no full page reload). The two resets pair
+  // with the document-load effect above: clearing `loadedDocId` makes it re-run
+  // for the (possibly unchanged) active id so the restored logo loads, and
+  // `setReady(false)` closes the save gate first so the pre-import options/logo
+  // aren't written back onto the freshly restored document during the reload.
+  const confirmImport = async () => {
+    const file = pendingImport;
+    setPendingImport(null);
+    if (!file) return;
+    try {
+      await importLibrary(new Uint8Array(await file.arrayBuffer()));
+      loadedDocId.current = null;
+      setReady(false);
+      await lib.reload();
+    } catch {
+      setImportFailed(true);
+    }
+  };
+
   const error = result.error ? describeRenderError(result.error, t) : null;
 
   // Library and settings render either in their desktop spot or inside a modal —
@@ -186,6 +224,8 @@ export function App() {
       activeDocId={activeDocId}
       collapsedFolders={lib.collapsedFolders}
       onCreateProject={lib.createProject}
+      onExportLibrary={exportLibraryFile}
+      onImportLibrary={setPendingImport}
       onCreateFolder={lib.createFolder}
       onCreateDocument={lib.createDocument}
       onDuplicateDocument={duplicateDocument}
@@ -284,6 +324,32 @@ export function App() {
           </Modal>
         </>
       )}
+
+      <ConfirmDialog
+        open={pendingImport !== null}
+        title={t("sidebar.confirmImportTitle")}
+        message={t("sidebar.confirmImport")}
+        confirmLabel={t("sidebar.importLibrary")}
+        cancelLabel={t("common.cancel")}
+        onConfirm={confirmImport}
+        onCancel={() => setPendingImport(null)}
+      />
+      <Modal
+        open={importFailed}
+        title={t("sidebar.importErrorTitle")}
+        onClose={() => setImportFailed(false)}
+      >
+        <p className="modal__message">{t("sidebar.importError")}</p>
+        <div className="modal__actions">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => setImportFailed(false)}
+          >
+            {t("common.close")}
+          </button>
+        </div>
+      </Modal>
 
       <footer className="app__footer">
         <a

@@ -111,6 +111,9 @@ export interface Library {
   selectDocument(id: string): void;
   /** Write the given options back to the active document (logo stripped). */
   persistActiveOptions(options: QrDocument["options"]): void;
+  /** Re-read the whole library from storage (e.g. after a library import),
+   *  reseeding a starter project if it came back empty. */
+  reload(): Promise<void>;
 }
 
 export function useLibrary(
@@ -140,12 +143,12 @@ export function useLibrary(
   documentsRef.current = documents;
   activeIdRef.current = activeDocId;
 
-  // Initial load: migrate any legacy single-document state, then read the tree,
-  // seeding a starter project when the library is empty.
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      await migrateLegacy(newId, now());
+  // Read the whole tree from storage into state, seeding a starter project when
+  // the library is empty. Shared by the initial load and {@link reload}; the
+  // `isCancelled` guard lets the initial load bail if the component unmounts
+  // mid-read.
+  const hydrate = useCallback(
+    async (isCancelled: () => boolean = () => false) => {
       let [fs, ds] = await Promise.all([listFolders(), listDocuments()]);
       if (ds.length === 0) {
         const { folder, doc } = makeStarter(labelsRef.current);
@@ -154,7 +157,7 @@ export function useLibrary(
         fs = [...fs, folder];
         ds = [doc];
       }
-      if (cancelled) return;
+      if (isCancelled()) return;
       const prefs = getPrefs();
       setFolders(fs);
       setDocuments(ds);
@@ -164,11 +167,21 @@ export function useLibrary(
         ds.find((d) => d.id === prefs.lastOpenedDocId)?.id ?? ds[0]?.id ?? null,
       );
       setLoaded(true);
+    },
+    [],
+  );
+
+  // Initial load: migrate any legacy single-document state, then read the tree.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      await migrateLegacy(newId, now());
+      await hydrate(() => cancelled);
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hydrate]);
 
   // Persist preferences (colour format, last open document, folder fold state).
   useEffect(() => {
@@ -354,6 +367,8 @@ export function useLibrary(
     void saveDocument(updated);
   }, []);
 
+  const reload = useCallback(() => hydrate(), [hydrate]);
+
   return {
     folders,
     documents,
@@ -375,5 +390,6 @@ export function useLibrary(
     removeDocument,
     selectDocument,
     persistActiveOptions,
+    reload,
   };
 }

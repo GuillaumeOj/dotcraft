@@ -276,12 +276,24 @@ export async function deleteFolderTree(
 
 // --- Logos -----------------------------------------------------------------
 
-/** Read a document's logo as a data URL, or null if none / on any failure. */
-export async function loadLogo(docId: string): Promise<string | null> {
-  const blob = await withStore<Blob | undefined>(LOGO_STORE, "readonly", (s) =>
+/** Read a document's logo Blob (the at-rest form), or undefined if none / on any
+ *  failure. Used by the library export, which needs the raw bytes and mime. */
+export async function loadLogoBlob(docId: string): Promise<Blob | undefined> {
+  return withStore<Blob | undefined>(LOGO_STORE, "readonly", (s) =>
     s.get(docId),
   );
+}
+
+/** Read a document's logo as a data URL, or null if none / on any failure. */
+export async function loadLogo(docId: string): Promise<string | null> {
+  const blob = await loadLogoBlob(docId);
   return blob ? fileToDataUrl(blob) : null;
+}
+
+/** Store a document's logo Blob directly. No-op on failure. Used by import,
+ *  which already holds the Blob, and by {@link saveLogo}. */
+export async function saveLogoBlob(docId: string, blob: Blob): Promise<void> {
+  await withStore(LOGO_STORE, "readwrite", (s) => s.put(blob, docId));
 }
 
 /** Store a document's logo (a data URL) as a Blob. No-op on failure. */
@@ -292,7 +304,7 @@ export async function saveLogo(docId: string, dataUrl: string): Promise<void> {
   } catch {
     return;
   }
-  await withStore(LOGO_STORE, "readwrite", (s) => s.put(blob, docId));
+  await saveLogoBlob(docId, blob);
 }
 
 /** Remove a document's logo. No-op on failure. */
@@ -307,6 +319,16 @@ export async function copyLogo(fromId: string, toId: string): Promise<void> {
     s.get(fromId),
   );
   if (blob) await withStore(LOGO_STORE, "readwrite", (s) => s.put(blob, toId));
+}
+
+// --- Whole-library reset ---------------------------------------------------
+
+/** Wipe every folder, document, and logo. Used by library import, which then
+ *  restores the archive over the empty stores. No-op on failure. */
+export async function clearLibrary(): Promise<void> {
+  await withStore(FOLDER_STORE, "readwrite", (s) => s.clear());
+  await withStore(DOC_STORE, "readwrite", (s) => s.clear());
+  await withStore(LOGO_STORE, "readwrite", (s) => s.clear());
 }
 
 // --- Legacy migration ------------------------------------------------------

@@ -2,14 +2,23 @@ import {
   ChevronDown,
   ChevronRight,
   Copy,
+  Download,
   FilePlus2,
   FolderPlus,
   Pencil,
   Plus,
   QrCode,
   Trash2,
+  Upload,
 } from "lucide-react";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { MAX_FOLDER_DEPTH } from "../qr/storage";
 import type { Folder, QrDocument } from "../qr/types";
@@ -25,6 +34,8 @@ export interface SidebarProps {
   activeDocId: string | null;
   collapsedFolders: Set<string>;
   onCreateProject(): void;
+  onExportLibrary(): void;
+  onImportLibrary(file: File): void;
   onCreateFolder(parentId: string): void;
   onCreateDocument(folderId: string): void;
   onDuplicateDocument(id: string): void;
@@ -67,6 +78,13 @@ export function Sidebar(props: SidebarProps) {
   const { t } = useTranslation();
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dropFolderId, setDropFolderId] = useState<string | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  const onImportChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // let the user re-pick the same file later
+    if (file) props.onImportLibrary(file);
+  };
 
   // Index the tree once per change rather than filtering inside every node.
   const foldersByParent = useMemo(
@@ -120,6 +138,34 @@ export function Sidebar(props: SidebarProps) {
           <Plus size={ICON} aria-hidden="true" />
           {t("sidebar.newProject")}
         </button>
+        <div className="sidebar__library-actions">
+          <button
+            type="button"
+            className="btn btn--ghost sidebar__library-action"
+            title={t("sidebar.exportLibraryTitle")}
+            onClick={props.onExportLibrary}
+          >
+            <Download size={ICON} aria-hidden="true" />
+            {t("sidebar.exportLibrary")}
+          </button>
+          <button
+            type="button"
+            className="btn btn--ghost sidebar__library-action"
+            title={t("sidebar.importLibraryTitle")}
+            onClick={() => importInputRef.current?.click()}
+          >
+            <Upload size={ICON} aria-hidden="true" />
+            {t("sidebar.importLibrary")}
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".dotcraft"
+            className="sidebar__import-input"
+            aria-label={t("sidebar.importLibraryTitle")}
+            onChange={onImportChange}
+          />
+        </div>
         {projects.length === 0 ? (
           <p className="hint">{t("sidebar.noProjects")}</p>
         ) : (
