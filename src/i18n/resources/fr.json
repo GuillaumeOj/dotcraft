@@ -102,6 +102,8 @@
   "sidebar": {
     "savedQrCodes": "QR codes enregistrés",
     "library": "Bibliothèque",
+    "hideLibrary": "Masquer la bibliothèque",
+    "showLibrary": "Afficher la bibliothèque",
     "newProject": "Nouveau projet",
     "exportLibrary": "Exporter",
     "exportLibraryTitle": "Téléchargez toute votre bibliothèque dans un fichier .dotcraft",
