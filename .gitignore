@@ -1,3 +1,4 @@
+# frontend
 node_modules
 dist
 dist-ssr
@@ -7,10 +8,20 @@ coverage
 .vercel
 .DS_Store
 
+# backend
+.venv
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.sqlite3
+backend/media/
+backend/staticfiles/
+.tox/
+.env
+
 # Claude Code worktrees
 .claude/worktrees/
-
-# python (archived)
-python/.venv
-python/__pycache__
-python/**/__pycache__
