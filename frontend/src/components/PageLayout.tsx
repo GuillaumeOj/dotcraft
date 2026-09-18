@@ -3,7 +3,7 @@ import { type ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import type { Locale } from "../i18n/locales";
-import { getPrefs, setPrefs } from "../qr/storage";
+import { updateSyncedSettings } from "../qr/storage";
 import { LanguageSelect } from "./LanguageSelect";
 
 /** The chrome for the static content pages (FAQ, Help Center): a back link to
@@ -23,7 +23,7 @@ export function PageLayout({
 
   const changeLocale = (next: Locale) => {
     void i18n.changeLanguage(next);
-    setPrefs({ ...getPrefs(), locale: next });
+    updateSyncedSettings({ locale: next });
   };
 
   useEffect(() => {

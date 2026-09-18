@@ -25,8 +25,14 @@ import {
   saveDocument,
   saveFolder,
   setPrefs,
+  updateSyncedSettings,
 } from "./storage";
-import { defaultOptions, type Folder, type QrDocument } from "./types";
+import {
+  defaultOptions,
+  type Folder,
+  type QrDocument,
+  sameOptions,
+} from "./types";
 
 const newId = (): string => crypto.randomUUID();
 const now = (): number => Date.now();
@@ -52,14 +58,6 @@ export const DEFAULT_LIBRARY_LABELS: LibraryLabels = {
   untitledQr: "Untitled QR",
   copySuffix: (name) => `${name} copy`,
 };
-
-/** Deep equality of two options snapshots, ignoring the (never persisted) logo. */
-function sameOptions(a: QrDocument["options"], b: QrDocument["options"]) {
-  return (
-    JSON.stringify({ ...a, logo: null }) ===
-    JSON.stringify({ ...b, logo: null })
-  );
-}
 
 /** Return `arr` with the item sharing `item.id` replaced by `item`. */
 function replaceById<T extends { id: string }>(arr: T[], item: T): T[] {
@@ -139,7 +137,7 @@ export function useLibrary(
   const [folders, setFolders] = useState<Folder[]>([]);
   const [documents, setDocuments] = useState<QrDocument[]>([]);
   const [activeDocId, setActiveDocId] = useState<string | null>(null);
-  const [colorFormat, setColorFormat] = useState<ColorFormat>("hex");
+  const [colorFormat, setColorFormatState] = useState<ColorFormat>("hex");
   const [collapsedFolders, setCollapsedFolders] = useState<Set<string>>(
     () => new Set(),
   );
@@ -159,7 +157,13 @@ export function useLibrary(
   // `isCancelled` guard lets the initial load bail if the component unmounts
   // mid-read.
   const hydrate = useCallback(
-    async (isCancelled: () => boolean = () => false, keepActive = false) => {
+    async ({
+      isCancelled = () => false,
+      keepActive = false,
+    }: {
+      isCancelled?: () => boolean;
+      keepActive?: boolean;
+    } = {}) => {
       let [fs, ds] = await Promise.all([listFolders(), listDocuments()]);
       if (ds.length === 0) {
         const { folder, doc } = makeStarter(labelsRef.current);
@@ -172,7 +176,7 @@ export function useLibrary(
       const prefs = getPrefs();
       setFolders(fs);
       setDocuments(ds);
-      setColorFormat(prefs.colorFormat);
+      setColorFormatState(prefs.colorFormat);
       setCollapsedFolders(new Set(prefs.collapsedFolderIds));
       const preferred = keepActive
         ? activeIdRef.current
@@ -190,7 +194,7 @@ export function useLibrary(
     let cancelled = false;
     (async () => {
       await migrateLegacy(newId, now());
-      await hydrate(() => cancelled);
+      await hydrate({ isCancelled: () => cancelled });
     })();
     return () => {
       cancelled = true;
@@ -209,6 +213,12 @@ export function useLibrary(
       collapsedFolderIds: [...collapsedFolders],
     });
   }, [loaded, colorFormat, activeDocId, collapsedFolders]);
+
+  // The colour format follows the account, so a user change is synced.
+  const setColorFormat = useCallback((format: ColorFormat) => {
+    setColorFormatState(format);
+    updateSyncedSettings({ colorFormat: format });
+  }, []);
 
   const toggleFolder = useCallback((id: string) => {
     setCollapsedFolders((prev) => {
@@ -382,7 +392,7 @@ export function useLibrary(
   }, []);
 
   const reload = useCallback(() => hydrate(), [hydrate]);
-  const refresh = useCallback(() => hydrate(undefined, true), [hydrate]);
+  const refresh = useCallback(() => hydrate({ keepActive: true }), [hydrate]);
 
   return {
     folders,

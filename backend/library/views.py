@@ -26,7 +26,7 @@ class SyncView(APIView):
         serializer = SyncRequest(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = request_user(request)
-        return Response(sync(user, serializer.validated_data).as_response())
+        return Response(sync(user, serializer.validated_data))
 
 
 class DocumentLogoView(APIView):

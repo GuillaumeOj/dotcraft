@@ -2,7 +2,7 @@ import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { InputField } from "../components/fields";
+import { TextField } from "../components/fields";
 import { FormFeedback, useSubmit } from "../components/forms";
 import { PageLayout } from "../components/PageLayout";
 import { Panel } from "../components/Panel";
@@ -27,7 +27,7 @@ export function ForgotPasswordPage() {
         <Panel title={t("auth.forgot.title")}>
           <p className="hint">{t("auth.forgot.intro")}</p>
           <form className="form" onSubmit={onSubmit}>
-            <InputField
+            <TextField
               label={t("account.email")}
               type="email"
               autoComplete="email"

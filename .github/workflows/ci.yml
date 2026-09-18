@@ -35,9 +35,6 @@ jobs:
 
   backend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     services:
       postgres:
         image: postgres:17-alpine
@@ -64,20 +61,15 @@ jobs:
           enable-cache: true
           cache-dependency-glob: backend/uv.lock
 
-      - name: Install dependencies
-        run: uv sync --locked
+      - name: Install tox
+        run: uv tool install tox
 
-      - name: Lint & import sorting (ruff)
-        run: uv run ruff check .
-
-      - name: Format check (ruff)
-        run: uv run ruff format --check .
+      # Every step runs a tox env, so CI and `tox` locally share one definition.
+      - name: Lint, format & import sorting (ruff)
+        run: tox -e backend-lint
 
       - name: Type check (ty)
-        run: uv run ty check
+        run: tox -e backend-types
 
-      - name: Migrations are up to date
-        run: uv run python manage.py makemigrations --check --dry-run --settings=config.settings_test
-
-      - name: Test (with coverage gate)
-        run: uv run pytest --cov --cov-report=term-missing --cov-fail-under=90
+      - name: Migrations + tests (coverage gate)
+        run: tox -e backend-test

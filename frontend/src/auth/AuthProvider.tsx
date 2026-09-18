@@ -44,15 +44,13 @@ export interface Auth {
 export const AuthContext = createContext<Auth | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<ApiUser | null>(null);
-  const [status, setStatus] = useState<AuthStatus>("loading");
+  // undefined while the session is being restored; null when signed out.
+  const [user, setUser] = useState<ApiUser | null | undefined>(undefined);
+  const status: AuthStatus =
+    user === undefined ? "loading" : user ? "authenticated" : "anonymous";
 
   useEffect(
-    () =>
-      onSessionChange((session) => {
-        setUser(session?.user ?? null);
-        setStatus(session ? "authenticated" : "anonymous");
-      }),
+    () => onSessionChange((session) => setUser(session?.user ?? null)),
     [],
   );
 
@@ -65,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await refreshSession();
       } catch (err) {
         if (!(err instanceof ApiError)) throw err;
-        if (!cancelled) setStatus((s) => (s === "loading" ? "anonymous" : s));
+        if (!cancelled) setUser((u) => (u === undefined ? null : u));
         window.addEventListener("online", restore, { once: true });
       }
     };
@@ -86,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<Auth>(
     () => ({
       status,
-      user,
+      user: user ?? null,
       login: authApi.login,
       register: authApi.register,
       endSession: authApi.logout,

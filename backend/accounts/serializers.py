@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.contrib.auth import authenticate, password_validation
+from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
@@ -8,10 +9,10 @@ from rest_framework import serializers
 from rest_framework.exceptions import ErrorDetail
 
 from accounts.models import User, normalize_email_address
-from accounts.tokens import password_reset_token
 
 
-def _validate_password(password: str, user: User | None = None) -> str:
+def _validate_password(password: str, user: User, *, field: str | None = None) -> str:
+    """Run Django's password validators; errors are reported under ``field`` if given."""
     try:
         password_validation.validate_password(password, user)
     except DjangoValidationError as exc:
@@ -22,7 +23,7 @@ def _validate_password(password: str, user: User | None = None) -> str:
             for error in exc.error_list
             for message in error.messages
         ]
-        raise serializers.ValidationError(details) from exc
+        raise serializers.ValidationError({field: details} if field else details) from exc
     return password
 
 
@@ -51,10 +52,7 @@ class RegisterSerializer(serializers.Serializer):
         return _ensure_email_available(value)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        try:
-            _validate_password(attrs["password"], User(email=attrs["email"]))
-        except serializers.ValidationError as exc:
-            raise serializers.ValidationError({"password": exc.detail}) from exc
+        _validate_password(attrs["password"], User(email=attrs["email"]), field="password")
         return attrs
 
     def create(self, validated_data: dict[str, Any]) -> User:
@@ -119,11 +117,8 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             user = User.objects.get(pk=user_id, is_active=True)
         except (ValueError, TypeError, OverflowError, DjangoValidationError, User.DoesNotExist) as exc:
             raise invalid from exc
-        if not password_reset_token.check_token(user, attrs["token"]):
+        if not default_token_generator.check_token(user, attrs["token"]):
             raise invalid
-        try:
-            _validate_password(attrs["new_password"], user)
-        except serializers.ValidationError as exc:
-            raise serializers.ValidationError({"new_password": exc.detail}) from exc
+        _validate_password(attrs["new_password"], user, field="new_password")
         attrs["user"] = user
         return attrs

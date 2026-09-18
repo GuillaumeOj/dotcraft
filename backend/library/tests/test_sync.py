@@ -152,9 +152,9 @@ def test_unknown_tombstone_is_stored(auth_api: APIClient) -> None:
     post(auth_api, documents=[{"id": doc_id, "updatedAt": 5000, "deletedAt": 5000}])
 
     stored = Document.objects.get(pk=doc_id)
-    assert stored.is_deleted
+    assert stored.deleted_at == 5000
     assert stored.created_at == 5000
-    assert stored.folder_id == uuid.UUID(int=0)
+    assert stored.folder_id is None
 
 
 def test_foreign_ids_are_rejected(

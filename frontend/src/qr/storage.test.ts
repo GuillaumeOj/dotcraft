@@ -23,12 +23,17 @@ import {
   normalizeOptions,
   onLocalChange,
   PREFS_KEY,
+  putDocument,
+  putFolder,
+  putLogoBlob,
+  removeDocument,
   saveDocument,
   saveFolder,
   saveLogo,
   saveLogoBlob,
   setPrefs,
   settleOutbox,
+  updateSyncedSettings,
   updateSyncState,
   wipeLocalLibrary,
 } from "./storage";
@@ -86,8 +91,6 @@ describe("preferences", () => {
       lastOpenedDocId: "abc",
       collapsedFolderIds: ["f1", "f2"],
       collapsedPanelIds: ["style", "logo"],
-      // Changing a synced setting (the colour format) stamps it for sync.
-      settingsUpdatedAt: expect.any(Number),
     });
   });
 
@@ -428,7 +431,6 @@ describe("migrateLegacy", () => {
       lastOpenedDocId: id,
       collapsedFolderIds: [],
       collapsedPanelIds: [],
-      settingsUpdatedAt: expect.any(Number),
     });
     expect(localStorage.getItem(LEGACY_KEY)).toBeNull();
   });
@@ -516,9 +518,9 @@ describe("sync bookkeeping", () => {
 
   it("does not queue untracked writes", async () => {
     const f = folder();
-    await saveFolder(f, { track: false });
-    await saveDocument(doc(), { track: false });
-    await deleteDocument("x", { track: false });
+    await putFolder(f);
+    await putDocument(doc());
+    await removeDocument("x");
 
     expect(await listOutbox()).toEqual([]);
     expect(await listTombstones()).toEqual([]);
@@ -545,9 +547,7 @@ describe("sync bookkeeping", () => {
   });
 
   it("copies logos as a tracked change of the target", async () => {
-    await saveLogoBlob("a", new NodeBlob(["x"]) as unknown as Blob, {
-      track: false,
-    });
+    await putLogoBlob("a", new NodeBlob(["x"]) as unknown as Blob);
     await copyLogo("a", "b");
 
     expect(await keys()).toEqual(["logo:b"]);
@@ -566,8 +566,8 @@ describe("sync bookkeeping", () => {
 
   it("tombstones the replaced library on import-style clears", async () => {
     const f = folder();
-    await saveFolder(f, { track: false });
-    await saveDocument(doc({ id: "d1" }), { track: false });
+    await putFolder(f);
+    await putDocument(doc({ id: "d1" }));
 
     await clearLibrary();
 
@@ -579,16 +579,19 @@ describe("sync bookkeeping", () => {
 
   it("stamps and queues synced settings only when they change", async () => {
     setPrefs({ ...getPrefs(), collapsedFolderIds: ["x"] });
+    updateSyncedSettings({ colorFormat: "hex" });
     expect(getPrefs().settingsUpdatedAt).toBeUndefined();
+    expect(await keys()).toEqual([]);
 
-    setPrefs({ ...getPrefs(), locale: "de" });
-    expect(getPrefs().settingsUpdatedAt).toEqual(expect.any(Number));
+    updateSyncedSettings({ locale: "de" });
+    expect(getPrefs()).toMatchObject({
+      locale: "de",
+      collapsedFolderIds: ["x"],
+      settingsUpdatedAt: expect.any(Number),
+    });
     await vi.waitFor(async () =>
       expect(await keys()).toEqual(["settings:settings"]),
     );
-
-    setPrefs({ ...getPrefs(), colorFormat: "hsl" }, { track: false });
-    expect(getPrefs().colorFormat).toBe("hsl");
   });
 
   it("stores the sync state and wipes everything on sign-out", async () => {
@@ -607,7 +610,7 @@ describe("sync bookkeeping", () => {
 
     await saveFolder(folder());
     await deleteDocument("gone");
-    setPrefs({ ...getPrefs(), colorFormat: "rgb" });
+    updateSyncedSettings({ colorFormat: "rgb" });
 
     await wipeLocalLibrary();
 

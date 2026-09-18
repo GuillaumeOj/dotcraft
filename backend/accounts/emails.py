@@ -8,12 +8,12 @@ Each template directory holds ``subject.txt``, ``body.txt`` and ``body.html``.
 from typing import Any
 
 from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode
 
 from accounts.models import User
-from accounts.tokens import password_reset_token
 
 
 def send_templated_email(template: str, to: str, context: dict[str, Any]) -> None:
@@ -29,7 +29,7 @@ def send_templated_email(template: str, to: str, context: dict[str, Any]) -> Non
 
 def password_reset_link(user: User) -> str:
     uid = urlsafe_base64_encode(str(user.pk).encode())
-    token = password_reset_token.make_token(user)
+    token = default_token_generator.make_token(user)
     return f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
 
 

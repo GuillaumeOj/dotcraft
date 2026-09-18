@@ -3,8 +3,8 @@ import { type FormEvent, type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { type Auth, useAuth } from "../auth/AuthProvider";
-import { InputField } from "../components/fields";
-import { FormFeedback, useSubmit } from "../components/forms";
+import { TextField } from "../components/fields";
+import { FormFeedback, useNewPassword, useSubmit } from "../components/forms";
 import { InfoLink } from "../components/InfoLink";
 import { ConfirmDialog } from "../components/Modal";
 import { PageLayout } from "../components/PageLayout";
@@ -21,20 +21,18 @@ function SignInForm({ auth }: { auth: Auth }) {
   const [mode, setMode] = useState<AuthMode>("signIn");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const { pending, errors, submit, setErrors } = useSubmit();
+  const newPassword = useNewPassword();
+  const { pending, errors, submit, clearErrors } = useSubmit();
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (mode === "signUp" && password !== confirm) {
-      setErrors([t("account.passwordMismatch")]);
-      return;
-    }
-    const ok = await submit(() =>
+    const ok =
       mode === "signIn"
-        ? auth.login(email, password)
-        : auth.register(email, password),
-    );
+        ? await submit(() => auth.login(email, password))
+        : await submit(
+            () => auth.register(email, newPassword.password),
+            newPassword.mismatch,
+          );
     if (ok) navigate("/");
   };
 
@@ -49,11 +47,11 @@ function SignInForm({ auth }: { auth: Auth }) {
         ]}
         onChange={(next) => {
           setMode(next);
-          setErrors([]);
+          clearErrors();
         }}
       />
       <form className="form" onSubmit={onSubmit}>
-        <InputField
+        <TextField
           label={t("account.email")}
           type="email"
           autoComplete="email"
@@ -61,23 +59,17 @@ function SignInForm({ auth }: { auth: Auth }) {
           value={email}
           onChange={setEmail}
         />
-        <InputField
-          label={t("account.password")}
-          type="password"
-          autoComplete={mode === "signIn" ? "current-password" : "new-password"}
-          required
-          value={password}
-          onChange={setPassword}
-        />
-        {mode === "signUp" && (
-          <InputField
-            label={t("account.confirmPassword")}
+        {mode === "signIn" ? (
+          <TextField
+            label={t("account.password")}
             type="password"
-            autoComplete="new-password"
+            autoComplete="current-password"
             required
-            value={confirm}
-            onChange={setConfirm}
+            value={password}
+            onChange={setPassword}
           />
+        ) : (
+          newPassword.fields(t("account.password"))
         )}
         <FormFeedback errors={errors} />
         <button type="submit" className="btn" disabled={pending}>
@@ -138,7 +130,7 @@ function EmailForm({ auth }: { auth: Auth }) {
   return (
     <Panel title={t("account.emailTitle")}>
       <form className="form" onSubmit={onSubmit}>
-        <InputField
+        <TextField
           label={t("account.newEmail")}
           type="email"
           autoComplete="email"
@@ -146,7 +138,7 @@ function EmailForm({ auth }: { auth: Auth }) {
           value={email}
           onChange={setEmail}
         />
-        <InputField
+        <TextField
           label={t("account.currentPassword")}
           type="password"
           autoComplete="current-password"
@@ -169,27 +161,25 @@ function EmailForm({ auth }: { auth: Auth }) {
 function PasswordForm({ auth }: { auth: Auth }) {
   const { t } = useTranslation();
   const [current, setCurrent] = useState("");
-  const [next, setNext] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const { pending, errors, succeeded, submit, setErrors } = useSubmit();
+  const newPassword = useNewPassword();
+  const { pending, errors, succeeded, submit } = useSubmit();
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (next !== confirm) {
-      setErrors([t("account.passwordMismatch")]);
-      return;
-    }
-    if (await submit(() => auth.changePassword(current, next))) {
+    const changed = await submit(
+      () => auth.changePassword(current, newPassword.password),
+      newPassword.mismatch,
+    );
+    if (changed) {
       setCurrent("");
-      setNext("");
-      setConfirm("");
+      newPassword.reset();
     }
   };
 
   return (
     <Panel title={t("account.passwordTitle")}>
       <form className="form" onSubmit={onSubmit}>
-        <InputField
+        <TextField
           label={t("account.currentPassword")}
           type="password"
           autoComplete="current-password"
@@ -197,22 +187,7 @@ function PasswordForm({ auth }: { auth: Auth }) {
           value={current}
           onChange={setCurrent}
         />
-        <InputField
-          label={t("account.newPassword")}
-          type="password"
-          autoComplete="new-password"
-          required
-          value={next}
-          onChange={setNext}
-        />
-        <InputField
-          label={t("account.confirmPassword")}
-          type="password"
-          autoComplete="new-password"
-          required
-          value={confirm}
-          onChange={setConfirm}
-        />
+        {newPassword.fields(t("account.newPassword"))}
         <FormFeedback
           errors={errors}
           success={succeeded ? t("account.passwordUpdated") : null}

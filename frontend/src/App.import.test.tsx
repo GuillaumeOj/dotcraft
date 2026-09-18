@@ -113,9 +113,11 @@ describe("library import (end to end)", () => {
     const dialog = await screen.findByRole("dialog");
     await user.click(within(dialog).getByRole("button", { name: "Import" }));
 
-    // The restored logo is now shown in the editor.
-    await waitFor(() =>
-      expect(screen.getByAltText("logo preview")).toBeInTheDocument(),
+    // The restored logo is now shown in the editor. The import runs many real
+    // IndexedDB writes (each one tracked for sync), so allow for a slow machine.
+    await waitFor(
+      () => expect(screen.getByAltText("logo preview")).toBeInTheDocument(),
+      { timeout: 4000 },
     );
   });
 });

@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { type Auth, AuthContext } from "../auth/AuthProvider";
+import type { RemoteChanges } from "../sync/engine";
 import {
-  ListenersContext,
   type RemoteChangesListener,
   type Sync,
   SyncContext,
@@ -24,26 +24,28 @@ export function fakeAuth(over: Partial<Auth> = {}): Auth {
   };
 }
 
-/** An idle sync context whose actions are spies (override as needed). */
-export function fakeSync(over: Partial<Sync> = {}): Sync {
+/** An idle sync context whose actions are spies (override as needed). Call
+ *  `emit` to simulate changes pulled from the cloud. */
+export function fakeSync(
+  over: Partial<Sync> = {},
+): Sync & { emit(changes: RemoteChanges): void } {
+  const listeners = new Set<RemoteChangesListener>();
   return {
     status: "idle",
     lastSyncedAt: null,
     syncNow: vi.fn(async () => {}),
     signOut: vi.fn(async () => true),
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    emit: (changes) => {
+      for (const listener of listeners) listener(changes);
+    },
     ...over,
   };
-}
-
-/** Subscribers registered through `useRemoteChanges` under
- *  {@link TestProviders}: call {@link emitRemoteChanges} to notify them. */
-export const remoteChangeListeners = new Set<RemoteChangesListener>();
-
-/** Simulate changes pulled from the cloud. */
-export function emitRemoteChanges(
-  changes: Parameters<RemoteChangesListener>[0],
-): void {
-  for (const listener of remoteChangeListeners) listener(changes);
 }
 
 /** Provide fixed auth and sync contexts, so components using `useAuth` /
@@ -59,11 +61,7 @@ export function TestProviders({
 }) {
   return (
     <AuthContext.Provider value={auth}>
-      <SyncContext.Provider value={sync}>
-        <ListenersContext.Provider value={remoteChangeListeners}>
-          {children}
-        </ListenersContext.Provider>
-      </SyncContext.Provider>
+      <SyncContext.Provider value={sync}>{children}</SyncContext.Provider>
     </AuthContext.Provider>
   );
 }

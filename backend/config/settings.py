@@ -150,13 +150,11 @@ REST_FRAMEWORK = {
     "UNAUTHENTICATED_USER": None,
 }
 
+# Refresh rotation, blacklisting and last-login updates are done by the views in
+# accounts/views.py (the refresh token lives in a cookie, not a request body).
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "UPDATE_LAST_LOGIN": True,
-    "USER_ID_FIELD": "id",
 }
 
 # The refresh token travels in an HttpOnly cookie scoped to the auth endpoints;

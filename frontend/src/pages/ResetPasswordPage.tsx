@@ -1,9 +1,8 @@
-import { type FormEvent, useState } from "react";
+import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
-import { InputField } from "../components/fields";
-import { FormFeedback, useSubmit } from "../components/forms";
+import { FormFeedback, useNewPassword, useSubmit } from "../components/forms";
 import { PageLayout } from "../components/PageLayout";
 import { Panel } from "../components/Panel";
 
@@ -13,17 +12,15 @@ export function ResetPasswordPage() {
   const { t } = useTranslation();
   const { uid = "", token = "" } = useParams();
   const { confirmPasswordReset } = useAuth();
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const { pending, errors, succeeded, submit, setErrors } = useSubmit();
+  const newPassword = useNewPassword();
+  const { pending, errors, succeeded, submit } = useSubmit();
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (password !== confirm) {
-      setErrors([t("account.passwordMismatch")]);
-      return;
-    }
-    await submit(() => confirmPasswordReset(uid, token, password));
+    await submit(
+      () => confirmPasswordReset(uid, token, newPassword.password),
+      newPassword.mismatch,
+    );
   };
 
   return (
@@ -39,22 +36,7 @@ export function ResetPasswordPage() {
             </>
           ) : (
             <form className="form" onSubmit={onSubmit}>
-              <InputField
-                label={t("account.newPassword")}
-                type="password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={setPassword}
-              />
-              <InputField
-                label={t("account.confirmPassword")}
-                type="password"
-                autoComplete="new-password"
-                required
-                value={confirm}
-                onChange={setConfirm}
-              />
+              {newPassword.fields(t("account.newPassword"))}
               <FormFeedback errors={errors} />
               <button type="submit" className="btn" disabled={pending}>
                 {t("auth.reset.submit")}

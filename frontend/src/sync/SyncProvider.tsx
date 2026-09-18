@@ -42,14 +42,13 @@ export interface Sync {
    *  first pushes pending changes and resolves to false — without signing out —
    *  when some could not be pushed. */
   signOut(options?: { force?: boolean }): Promise<boolean>;
+  /** Be told about changes pulled from the cloud; returns the unsubscribe. */
+  subscribe(listener: RemoteChangesListener): () => void;
 }
 
 export type RemoteChangesListener = (changes: RemoteChanges) => void;
-type Listener = RemoteChangesListener;
 
 export const SyncContext = createContext<Sync | null>(null);
-/** The subscribers of {@link useRemoteChanges} (exported for tests). */
-export const ListenersContext = createContext<Set<Listener> | null>(null);
 
 export function SyncProvider({ children }: { children: ReactNode }) {
   const { user, endSession } = useAuth();
@@ -58,7 +57,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
   const [status, setStatus] = useState<SyncStatus>("idle");
   const [lastSyncedAt, setLastSyncedAt] = useState<number | null>(null);
-  const [listeners] = useState(() => new Set<Listener>());
+  const [listeners] = useState(() => new Set<RemoteChangesListener>());
 
   // Mutable scheduler state, shared by the callbacks below.
   const running = useRef<Promise<void> | null>(null);
@@ -167,16 +166,22 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     [run, endSession, broadcast],
   );
 
-  const value = useMemo<Sync>(
-    () => ({ status, lastSyncedAt, syncNow: run, signOut }),
-    [status, lastSyncedAt, run, signOut],
+  const subscribe = useCallback(
+    (listener: RemoteChangesListener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    [listeners],
   );
 
-  return (
-    <ListenersContext.Provider value={listeners}>
-      <SyncContext.Provider value={value}>{children}</SyncContext.Provider>
-    </ListenersContext.Provider>
+  const value = useMemo<Sync>(
+    () => ({ status, lastSyncedAt, syncNow: run, signOut, subscribe }),
+    [status, lastSyncedAt, run, signOut, subscribe],
   );
+
+  return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 }
 
 /** The sync context. Must be used under {@link SyncProvider}. */
@@ -187,16 +192,9 @@ export function useSync(): Sync {
 }
 
 /** Call `listener` whenever changes from the cloud were applied locally. */
-export function useRemoteChanges(listener: Listener): void {
-  const listeners = useContext(ListenersContext);
+export function useRemoteChanges(listener: RemoteChangesListener): void {
+  const { subscribe } = useSync();
   const latest = useRef(listener);
   latest.current = listener;
-  useEffect(() => {
-    if (!listeners) return;
-    const forward: Listener = (changes) => latest.current(changes);
-    listeners.add(forward);
-    return () => {
-      listeners.delete(forward);
-    };
-  }, [listeners]);
+  useEffect(() => subscribe((changes) => latest.current(changes)), [subscribe]);
 }

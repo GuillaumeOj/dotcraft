@@ -111,3 +111,13 @@ export const DEFAULT_OPTIONS: QrOptions = {
   logoPadding: 0.12,
   logoRadius: 0.2,
 };
+
+/** Whether two options snapshots persist the same document: the logo lives
+ *  apart, so it is ignored. Stored options are always normalized (same shape
+ *  and key order), which makes the serialised comparison reliable. */
+export function sameOptions(a: QrOptions, b: QrOptions): boolean {
+  return (
+    JSON.stringify({ ...a, logo: null }) ===
+    JSON.stringify({ ...b, logo: null })
+  );
+}

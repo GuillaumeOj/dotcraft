@@ -1,7 +1,7 @@
 """Wire format of the sync endpoint (camelCase, mirroring the SPA's records)."""
 
 import json
-from typing import Any
+from typing import Any, ClassVar
 
 from rest_framework import serializers
 
@@ -14,22 +14,21 @@ COLOR_FORMATS = ("hex", "rgb", "hsl", "named")
 
 
 class _RecordIn(serializers.Serializer):
-    # Fields a live record must send; a tombstone only needs id + dates.
-    live_required: tuple[str, ...] = ("name", "createdAt")
+    # Content a live record must send (a tombstone only needs id + dates), and
+    # the values tombstones get instead.
+    live_fields: ClassVar[dict[str, Any]] = {"name": "", "createdAt": 0}
 
     id = serializers.UUIDField()
-    name = serializers.CharField(max_length=200, allow_blank=True, required=False, default="")
-    createdAt = serializers.IntegerField(min_value=0, required=False, default=0)
+    name = serializers.CharField(max_length=200, allow_blank=True, required=False)
+    createdAt = serializers.IntegerField(min_value=0, required=False)
     updatedAt = serializers.IntegerField(min_value=0)
     deletedAt = serializers.IntegerField(min_value=0, required=False, allow_null=True, default=None)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        if attrs["deletedAt"] is None:
-            sent = set(self.initial_data)
-            missing = [field for field in self.live_required if field not in sent]
-            if missing:
-                raise serializers.ValidationError({field: ["This field is required."] for field in missing})
-        return attrs
+        missing = [field for field in self.live_fields if field not in attrs]
+        if attrs["deletedAt"] is None and missing:
+            raise serializers.ValidationError({field: ["This field is required."] for field in missing})
+        return {**self.live_fields, **attrs}
 
 
 class FolderIn(_RecordIn):
@@ -37,10 +36,10 @@ class FolderIn(_RecordIn):
 
 
 class DocumentIn(_RecordIn):
-    folderId = serializers.UUIDField(required=False, allow_null=True, default=None)
-    options = serializers.DictField(required=False, default=dict)
+    live_fields: ClassVar[dict[str, Any]] = {"name": "", "createdAt": 0, "folderId": None, "options": {}}
 
-    live_required = ("name", "createdAt", "folderId", "options")
+    folderId = serializers.UUIDField(required=False, allow_null=True)
+    options = serializers.DictField(required=False)
 
     def validate_options(self, value: dict[str, Any]) -> dict[str, Any]:
         if len(json.dumps(value)) > MAX_OPTIONS_BYTES:
@@ -60,37 +59,9 @@ class SettingsIn(serializers.Serializer):
 
 class SyncRequest(serializers.Serializer):
     cursor = serializers.IntegerField(min_value=0, default=0)
-    folders = serializers.ListField(child=serializers.DictField(), max_length=MAX_BATCH, required=False, default=list)
-    documents = serializers.ListField(child=serializers.DictField(), max_length=MAX_BATCH, required=False, default=list)
-    settings = serializers.DictField(required=False, allow_null=True, default=None)
-
-    def _validate_each(
-        self, items: list[dict[str, Any]], serializer: type[serializers.Serializer]
-    ) -> list[dict[str, Any]]:
-        validated: list[dict[str, Any]] = []
-        errors: dict[str, Any] = {}
-        for index, item in enumerate(items):
-            child = serializer(data=item)
-            if child.is_valid():
-                validated.append(dict(child.validated_data))
-            else:
-                errors[str(index)] = child.errors
-        if errors:
-            raise serializers.ValidationError(errors)
-        return validated
-
-    def validate_folders(self, value: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        return self._validate_each(value, FolderIn)
-
-    def validate_documents(self, value: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        return self._validate_each(value, DocumentIn)
-
-    def validate_settings(self, value: dict[str, Any] | None) -> dict[str, Any] | None:
-        if value is None:
-            return None
-        child = SettingsIn(data=value)
-        child.is_valid(raise_exception=True)
-        return dict(child.validated_data)
+    folders = serializers.ListField(child=FolderIn(), max_length=MAX_BATCH, required=False, default=list)
+    documents = serializers.ListField(child=DocumentIn(), max_length=MAX_BATCH, required=False, default=list)
+    settings = SettingsIn(required=False, allow_null=True, default=None)
 
 
 def folder_out(folder: Folder) -> dict[str, Any]:
@@ -108,7 +79,7 @@ def document_out(document: Document) -> dict[str, Any]:
     return {
         "id": str(document.id),
         "name": document.name,
-        "folderId": str(document.folder_id),
+        "folderId": str(document.folder_id) if document.folder_id else None,
         "options": document.options,
         "createdAt": document.created_at,
         "updatedAt": document.updated_at,

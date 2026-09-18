@@ -28,12 +28,13 @@ def next_change_seq() -> int:
 
 
 class SyncedRecord(UUIDModel):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
+    # Indexed through the (owner, server_seq) index declared on each model.
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+", db_index=False)
     name = models.CharField(max_length=200)
     created_at = models.BigIntegerField()
     updated_at = models.BigIntegerField()
     deleted_at = models.BigIntegerField(null=True, blank=True)
-    server_seq = models.BigIntegerField(db_index=True)
+    server_seq = models.BigIntegerField()
 
     owner_id: uuid.UUID
 
@@ -42,10 +43,6 @@ class SyncedRecord(UUIDModel):
 
     def __str__(self) -> str:
         return self.name
-
-    @property
-    def is_deleted(self) -> bool:
-        return self.deleted_at is not None
 
 
 class Folder(SyncedRecord):
@@ -60,7 +57,8 @@ def logo_upload_path(instance: "Document", _filename: str) -> str:
 
 
 class Document(SyncedRecord):
-    folder_id = models.UUIDField()
+    # Null only for the tombstone of a document the server never had.
+    folder_id = models.UUIDField(null=True, blank=True)
     options = models.JSONField(default=dict)
     logo = models.FileField(upload_to=logo_upload_path, null=True, blank=True, max_length=255)
     logo_hash = models.CharField(max_length=64, blank=True, default="")

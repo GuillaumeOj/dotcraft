@@ -18,10 +18,14 @@ import {
   listTombstones,
   loadLogoBlob,
   markDirty,
+  putDocument,
+  putFolder,
+  putLogoBlob,
   saveDocument,
   saveFolder,
   saveLogoBlob,
   setPrefs,
+  updateSyncedSettings,
   updateSyncState,
 } from "../qr/storage";
 import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "../qr/types";
@@ -171,8 +175,8 @@ describe("syncOnce", () => {
   });
 
   it("applies newer remote records and ignores older ones", async () => {
-    await saveFolder(folder({ updatedAt: 500 }), { track: false });
-    await saveDocument(doc({ updatedAt: 100 }), { track: false });
+    await putFolder(folder({ updatedAt: 500 }));
+    await putDocument(doc({ updatedAt: 100 }));
     await adopted();
     postSync.mockResolvedValueOnce(
       response({
@@ -197,9 +201,9 @@ describe("syncOnce", () => {
   });
 
   it("applies remote deletions newer than the local copy", async () => {
-    await saveFolder(folder(), { track: false });
-    await saveDocument(doc(), { track: false });
-    await saveLogoBlob("d1", new Blob(["x"]), { track: false });
+    await putFolder(folder());
+    await putDocument(doc());
+    await putLogoBlob("d1", new Blob(["x"]));
     await adopted();
     postSync.mockResolvedValueOnce(
       response({
@@ -265,7 +269,7 @@ describe("syncOnce", () => {
   describe("settings", () => {
     it("pushes the colour format and language once changed", async () => {
       await adopted();
-      setPrefs({ ...getPrefs(), colorFormat: "rgb", locale: "fr" });
+      updateSyncedSettings({ colorFormat: "rgb", locale: "fr" });
       await vi.waitFor(async () =>
         expect(await hasPendingChanges()).toBe(true),
       );
@@ -313,10 +317,7 @@ describe("syncOnce", () => {
 
     it("keeps local settings that are newer, and a missing remote locale", async () => {
       await adopted();
-      setPrefs(
-        { ...getPrefs(), colorFormat: "rgb", settingsUpdatedAt: 5000 },
-        { track: false },
-      );
+      setPrefs({ ...getPrefs(), colorFormat: "rgb", settingsUpdatedAt: 5000 });
       postSync
         .mockResolvedValueOnce(
           response({
@@ -340,7 +341,7 @@ describe("syncOnce", () => {
 
   describe("logos", () => {
     it("uploads a changed logo and remembers its hash", async () => {
-      await saveDocument(doc(), { track: false });
+      await putDocument(doc());
       await adopted();
       await saveLogoBlob("d1", new Blob(["png"], { type: "image/png" }));
       uploadLogo.mockResolvedValue({ logoHash: "h1", logoMime: "image/png" });
@@ -354,7 +355,7 @@ describe("syncOnce", () => {
     });
 
     it("deletes a removed logo remotely", async () => {
-      await saveDocument(doc(), { track: false });
+      await putDocument(doc());
       await updateSyncState({
         userId: "u1",
         cursor: 5,
@@ -369,7 +370,7 @@ describe("syncOnce", () => {
     });
 
     it("skips logos of deleted documents and tolerates a 404", async () => {
-      await saveDocument(doc(), { track: false });
+      await putDocument(doc());
       await adopted();
       await markDirty("logo", "gone");
       await markDirty("logo", "d1");
@@ -382,7 +383,7 @@ describe("syncOnce", () => {
     });
 
     it("keeps the logo queued when the upload fails", async () => {
-      await saveDocument(doc(), { track: false });
+      await putDocument(doc());
       await adopted();
       await markDirty("logo", "d1");
       deleteLogo.mockRejectedValue(new ApiError(0, "network", "x"));
@@ -392,9 +393,9 @@ describe("syncOnce", () => {
     });
 
     it("downloads changed remote logos and clears removed ones", async () => {
-      await saveDocument(doc(), { track: false });
-      await saveDocument(doc({ id: "d2" }), { track: false });
-      await saveLogoBlob("d2", new Blob(["old"]), { track: false });
+      await putDocument(doc());
+      await putDocument(doc({ id: "d2" }));
+      await putLogoBlob("d2", new Blob(["old"]));
       await updateSyncState({
         userId: "u1",
         cursor: 5,
@@ -421,7 +422,7 @@ describe("syncOnce", () => {
     });
 
     it("never overwrites a logo with unpushed local changes", async () => {
-      await saveDocument(doc(), { track: false });
+      await putDocument(doc());
       await adopted();
       await saveLogoBlob("d1", new Blob(["mine"]));
       uploadLogo.mockResolvedValue({ logoHash: "mine", logoMime: "x" });
@@ -447,10 +448,10 @@ describe("adoptAccount", () => {
   });
 
   it("merges the cloud copy and uploads the existing library", async () => {
-    await saveFolder(folder({ updatedAt: 150 }), { track: false });
-    await saveDocument(doc({ updatedAt: 150 }), { track: false });
-    await saveLogoBlob("d1", new Blob(["x"]), { track: false });
-    setPrefs({ ...getPrefs(), colorFormat: "rgb" });
+    await putFolder(folder({ updatedAt: 150 }));
+    await putDocument(doc({ updatedAt: 150 }));
+    await putLogoBlob("d1", new Blob(["x"]));
+    updateSyncedSettings({ colorFormat: "rgb" });
     postSync.mockResolvedValueOnce(
       response({
         cursor: 42,

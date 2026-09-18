@@ -2,10 +2,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { resetDb } from "../test/db";
 import {
-  deleteDocument,
   getPrefs,
   listDocuments,
-  saveDocument,
+  putDocument,
+  removeDocument,
 } from "./storage";
 import { DEFAULT_OPTIONS } from "./types";
 import { useLibrary } from "./useLibrary";
@@ -276,10 +276,11 @@ describe("useLibrary — cloud sync support", () => {
 
     // Another device renamed the first document.
     const [first] = await listDocuments();
-    await saveDocument(
-      { ...first, name: "Renamed remotely", updatedAt: first.updatedAt + 1 },
-      { track: false },
-    );
+    await putDocument({
+      ...first,
+      name: "Renamed remotely",
+      updatedAt: first.updatedAt + 1,
+    });
     await act(() => result.current.refresh());
 
     expect(result.current.activeDocId).toBe(opened);
@@ -295,7 +296,7 @@ describe("useLibrary — cloud sync support", () => {
     const opened = result.current.activeDocId as string;
     await waitFor(async () => expect(await listDocuments()).toHaveLength(2));
 
-    await deleteDocument(opened, { track: false });
+    await removeDocument(opened);
     await act(() => result.current.refresh());
 
     expect(result.current.activeDocId).not.toBe(opened);

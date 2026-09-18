@@ -17,7 +17,8 @@ export interface RemoteFolder {
 export interface RemoteDocument {
   id: string;
   name: string;
-  folderId: string;
+  /** Null only on the tombstone of a document the server never had. */
+  folderId: string | null;
   options: Record<string, unknown>;
   createdAt: number;
   updatedAt: number;
@@ -37,7 +38,9 @@ export type FolderChange =
   | Omit<RemoteFolder, "deletedAt">
   | { id: string; updatedAt: number; deletedAt: number };
 export type DocumentChange =
-  | Omit<RemoteDocument, "deletedAt" | "logoHash" | "logoMime">
+  | (Omit<RemoteDocument, "deletedAt" | "logoHash" | "logoMime" | "options"> & {
+      options: object;
+    })
   | { id: string; updatedAt: number; deletedAt: number };
 
 export interface SyncPayload {

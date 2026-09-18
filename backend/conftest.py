@@ -37,13 +37,6 @@ def user(make_user: Callable[..., User]) -> User:
 
 
 @pytest.fixture
-def auth_api(user: User) -> APIClient:
-    client = APIClient()
-    client.credentials(HTTP_AUTHORIZATION=f"Bearer {RefreshToken.for_user(user).access_token}")
-    return client
-
-
-@pytest.fixture
 def client_for() -> Callable[[User], APIClient]:
     def factory(owner: User) -> APIClient:
         client = APIClient()
@@ -51,3 +44,8 @@ def client_for() -> Callable[[User], APIClient]:
         return client
 
     return factory
+
+
+@pytest.fixture
+def auth_api(user: User, client_for: Callable[[User], APIClient]) -> APIClient:
+    return client_for(user)

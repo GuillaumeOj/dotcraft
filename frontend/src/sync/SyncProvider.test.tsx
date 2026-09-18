@@ -219,8 +219,15 @@ describe("SyncProvider", () => {
     expect(() => render(<Orphan />)).toThrow(/SyncProvider/);
   });
 
-  it("lets remote-change subscribers render without a provider", () => {
-    const { unmount } = renderHook(() => useRemoteChanges(() => {}));
+  it("stops notifying unsubscribed listeners", async () => {
+    syncOnce.mockResolvedValue({ ...NONE, library: true });
+    const { result, listener, unmount } = setup();
+    await waitFor(() => expect(listener).toHaveBeenCalledTimes(1));
+    const later = vi.fn();
+    const unsubscribe = result.current.subscribe(later);
+    unsubscribe();
+    await act(() => result.current.syncNow());
+    expect(later).not.toHaveBeenCalled();
     unmount();
   });
 });

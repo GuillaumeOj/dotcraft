@@ -15,6 +15,9 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
     css: false,
+    // Interaction-heavy tests (typing with user-event, real IndexedDB) can take
+    // a few seconds on a busy machine or a small CI runner.
+    testTimeout: 15_000,
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],

@@ -62,11 +62,6 @@ export function setSession(session: Session | null): void {
   for (const listener of sessionListeners) listener(session);
 }
 
-/** Whether an access token is currently held. */
-export function hasSession(): boolean {
-  return accessToken !== null;
-}
-
 /** Subscribe to session changes (sign-in, refresh, expiry, sign-out). */
 export function onSessionChange(
   listener: (session: Session | null) => void,
@@ -118,7 +113,7 @@ async function toApiError(response: Response): Promise<ApiError> {
     fields?: Record<string, FieldError[]>;
   } = {};
   try {
-    data = await response.json();
+    data = (await response.json()) ?? {};
   } catch {
     // Not JSON (e.g. a proxy error page): fall back to the status alone.
   }

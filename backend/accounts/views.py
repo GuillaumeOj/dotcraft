@@ -61,21 +61,32 @@ def _session_response(user: User, *, status_code: int = status.HTTP_200_OK) -> R
     return response
 
 
-def revoke_all_refresh_tokens(user: User) -> None:
-    """Blacklist every outstanding refresh token, signing the user out everywhere."""
-    for token in OutstandingToken.objects.filter(user=user).exclude(blacklistedtoken__isnull=False):
-        BlacklistedToken.objects.get_or_create(token=token)
+def set_password_everywhere(user: User, password: str) -> None:
+    """Set a new password and sign every session out (blacklist all refresh tokens)."""
+    with transaction.atomic():
+        user.set_password(password)
+        user.save(update_fields=["password"])
+        BlacklistedToken.objects.bulk_create(
+            [BlacklistedToken(token=token) for token in OutstandingToken.objects.filter(user=user)],
+            ignore_conflicts=True,
+        )
 
 
-class AuthThrottleMixin:
+class PublicView(APIView):
+    """An endpoint reachable without an access token."""
+
+    permission_classes = (AllowAny,)
+    authentication_classes = ()
+
+
+class ThrottledPublicView(PublicView):
+    """A public endpoint that accepts credentials: rate-limited."""
+
     throttle_classes = (ScopedRateThrottle,)
     throttle_scope = "auth"
 
 
-class RegisterView(AuthThrottleMixin, APIView):
-    permission_classes = (AllowAny,)
-    authentication_classes = ()
-
+class RegisterView(ThrottledPublicView):
     def post(self, request: Request) -> Response:
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -83,10 +94,7 @@ class RegisterView(AuthThrottleMixin, APIView):
         return _session_response(user, status_code=status.HTTP_201_CREATED)
 
 
-class LoginView(AuthThrottleMixin, APIView):
-    permission_classes = (AllowAny,)
-    authentication_classes = ()
-
+class LoginView(ThrottledPublicView):
     def post(self, request: Request) -> Response:
         serializer = LoginSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
@@ -95,9 +103,8 @@ class LoginView(AuthThrottleMixin, APIView):
         return _session_response(user)
 
 
-class RefreshView(APIView):
-    permission_classes = (AllowAny,)
-    authentication_classes = ()
+class RefreshView(PublicView):
+    """Exchange the refresh cookie for a new session, rotating the refresh token."""
 
     def post(self, request: Request) -> Response:
         raw = request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
@@ -118,10 +125,7 @@ class RefreshView(APIView):
         return response
 
 
-class LogoutView(APIView):
-    permission_classes = (AllowAny,)
-    authentication_classes = ()
-
+class LogoutView(PublicView):
     def post(self, request: Request) -> Response:
         raw = request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
         if raw:
@@ -133,10 +137,7 @@ class LogoutView(APIView):
         return response
 
 
-class PasswordResetRequestView(AuthThrottleMixin, APIView):
-    permission_classes = (AllowAny,)
-    authentication_classes = ()
-
+class PasswordResetRequestView(ThrottledPublicView):
     def post(self, request: Request) -> Response:
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -148,18 +149,11 @@ class PasswordResetRequestView(AuthThrottleMixin, APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PasswordResetConfirmView(AuthThrottleMixin, APIView):
-    permission_classes = (AllowAny,)
-    authentication_classes = ()
-
+class PasswordResetConfirmView(ThrottledPublicView):
     def post(self, request: Request) -> Response:
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user: User = serializer.validated_data["user"]
-        with transaction.atomic():
-            user.set_password(serializer.validated_data["new_password"])
-            user.save(update_fields=["password"])
-            revoke_all_refresh_tokens(user)
+        set_password_everywhere(serializer.validated_data["user"], serializer.validated_data["new_password"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -189,9 +183,6 @@ class ChangePasswordView(APIView):
         user = request_user(request)
         serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        with transaction.atomic():
-            user.set_password(serializer.validated_data["new_password"])
-            user.save(update_fields=["password"])
-            # Sign out every other device, then hand this one a fresh session.
-            revoke_all_refresh_tokens(user)
+        # Sign out every other device, then hand this one a fresh session.
+        set_password_everywhere(user, serializer.validated_data["new_password"])
         return _session_response(user)

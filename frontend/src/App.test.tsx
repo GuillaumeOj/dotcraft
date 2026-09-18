@@ -9,7 +9,7 @@ import { DEFAULT_OPTIONS, type QrDocument, type QrOptions } from "./qr/types";
 import type { Library } from "./qr/useLibrary";
 import { useLibrary } from "./qr/useLibrary";
 import { createMatchMedia } from "./test/matchMedia";
-import { emitRemoteChanges } from "./test/providers";
+import { fakeSync } from "./test/providers";
 import { renderWithRouter as render } from "./test/router";
 
 /** Options on the Text tab, pre-filled — the editor then shows a "Text" field. */
@@ -32,6 +32,7 @@ vi.mock("./qr/storage", () => ({
     collapsedPanelIds: [],
   })),
   setPrefs: vi.fn(),
+  updateSyncedSettings: vi.fn(),
   MAX_FOLDER_DEPTH: 5,
 }));
 vi.mock("./qr/useLibrary", () => ({ useLibrary: vi.fn() }));
@@ -353,9 +354,9 @@ describe("App", () => {
     ).toBeInTheDocument();
     expect(document.title).toBe("Dotcraft — éditeur de QR codes stylisés");
     // ...and the choice is persisted.
-    expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: "fr" }),
-    );
+    expect(mockedStorage.updateSyncedSettings).toHaveBeenCalledWith({
+      locale: "fr",
+    });
   });
 });
 
@@ -421,9 +422,9 @@ describe("App — mobile layout", () => {
     expect(screen.queryByLabelText("Language")).toBeNull();
     await user.click(screen.getByRole("button", { name: "Menu" }));
     await user.selectOptions(screen.getByLabelText("Language"), "fr");
-    expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
-      expect.objectContaining({ locale: "fr" }),
-    );
+    expect(mockedStorage.updateSyncedSettings).toHaveBeenCalledWith({
+      locale: "fr",
+    });
   });
 
   it("folds an editor panel and persists the collapsed set", async () => {
@@ -467,7 +468,8 @@ describe("App — mobile layout", () => {
 
   it("refreshes the library and reloads the open document on remote changes", async () => {
     const lib = setLib({ documents: [makeDoc({ options: textOpts("old") })] });
-    render(<App />);
+    const sync = fakeSync();
+    render(<App />, { sync });
     await waitFor(() =>
       expect(screen.getByLabelText("Text")).toHaveValue("old"),
     );
@@ -478,7 +480,7 @@ describe("App — mobile layout", () => {
       refresh: lib.refresh,
     });
     act(() =>
-      emitRemoteChanges({ library: true, documentIds: ["d1"], settings: null }),
+      sync.emit({ library: true, documentIds: ["d1"], settings: null }),
     );
 
     expect(lib.refresh).toHaveBeenCalled();
@@ -489,14 +491,15 @@ describe("App — mobile layout", () => {
 
   it("keeps unsaved edits when the open document changes remotely", async () => {
     const lib = setLib({ documents: [makeDoc({ options: textOpts("old") })] });
+    const sync = fakeSync();
     const user = userEvent.setup();
-    render(<App />);
+    render(<App />, { sync });
     const text = await screen.findByLabelText("Text");
     await waitFor(() => expect(text).toHaveValue("old"));
     await user.type(text, " + mine");
 
     act(() =>
-      emitRemoteChanges({
+      sync.emit({
         library: false,
         documentIds: ["d1"],
         settings: null,

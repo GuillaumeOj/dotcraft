@@ -3,6 +3,13 @@ import * as auth from "./auth";
 import * as client from "./client";
 import * as library from "./library";
 
+/** The latest session broadcast by the client (null when signed out). */
+let latest: unknown = null;
+client.onSessionChange((session) => {
+  latest = session;
+});
+const currentSession = () => latest !== null;
+
 const USER = { id: "u1", email: "ada@example.com", date_joined: "x" };
 
 let requestMock: ReturnType<typeof vi.spyOn>;
@@ -25,7 +32,7 @@ describe("auth endpoints", () => {
       body: { email: "ada@example.com", password: "pw" },
       auth: false,
     });
-    expect(client.hasSession()).toBe(true);
+    expect(currentSession()).toBe(true);
   });
 
   it("logout always clears the session, even offline", async () => {
@@ -33,7 +40,7 @@ describe("auth endpoints", () => {
     requestMock.mockRejectedValue(new client.ApiError(0, "network", "x"));
 
     await expect(auth.logout()).rejects.toBeInstanceOf(client.ApiError);
-    expect(client.hasSession()).toBe(false);
+    expect(currentSession()).toBe(false);
   });
 
   it("changePassword adopts the fresh session", async () => {
@@ -45,7 +52,7 @@ describe("auth endpoints", () => {
       method: "POST",
       body: { current_password: "old", new_password: "new" },
     });
-    expect(client.hasSession()).toBe(true);
+    expect(currentSession()).toBe(true);
   });
 
   it("updateEmail, reset request and reset confirm hit their endpoints", async () => {

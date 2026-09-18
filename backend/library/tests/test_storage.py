@@ -25,15 +25,10 @@ def test_uses_token_from_settings() -> None:
 
 def test_save_puts_a_private_blob(fake_blob: MagicMock) -> None:
     fake_blob.put.return_value = SimpleNamespace(pathname="logos/a/b")
-    content = ContentFile(b"data")
-    content.content_type = "image/png"  # ty: ignore[unresolved-attribute] - set by Django on uploads
-
-    name = BlobStorage("t").save("logos/a/b", content)
+    name = BlobStorage("t").save("logos/a/b", ContentFile(b"data"))
 
     assert name == "logos/a/b"
-    fake_blob.put.assert_called_once_with(
-        "logos/a/b", b"data", access="private", content_type="image/png", overwrite=True, token="t"
-    )
+    fake_blob.put.assert_called_once_with("logos/a/b", b"data", access="private", overwrite=True, token="t")
 
 
 def test_open_reads_the_private_blob(fake_blob: MagicMock) -> None:

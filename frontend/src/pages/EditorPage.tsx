@@ -26,12 +26,11 @@ import { randomStyle } from "../qr/random";
 import { buildSvg } from "../qr/render";
 import {
   clearLogo,
-  getPrefs,
   loadLogo,
   saveLogo,
-  setPrefs,
+  updateSyncedSettings,
 } from "../qr/storage";
-import { defaultOptions, type QrOptions } from "../qr/types";
+import { defaultOptions, type QrOptions, sameOptions } from "../qr/types";
 import { type LibraryLabels, useLibrary } from "../qr/useLibrary";
 import type { RemoteChanges } from "../sync/engine";
 import { useRemoteChanges } from "../sync/SyncProvider";
@@ -82,7 +81,7 @@ export function EditorPage() {
 
   const changeLocale = (next: Locale) => {
     void i18n.changeLanguage(next);
-    setPrefs({ ...getPrefs(), locale: next });
+    updateSyncedSettings({ locale: next });
   };
 
   // Keep the document title, language attribute and meta description in sync
@@ -187,20 +186,24 @@ export function EditorPage() {
     );
   };
 
+  // Make the document-load effect above reload the active document (options and
+  // logo) on the next library update, even if its id doesn't change. Closing the
+  // save gate first stops the editor's current options/logo from being written
+  // back over the reloaded document meanwhile.
+  const reloadActiveDocument = () => {
+    loadedDocId.current = null;
+    setReady(false);
+  };
+
   // Restore a `.dotcraft` file, replacing the current library, then re-hydrate
-  // the library and editor in place (no full page reload). The two resets pair
-  // with the document-load effect above: clearing `loadedDocId` makes it re-run
-  // for the (possibly unchanged) active id so the restored logo loads, and
-  // `setReady(false)` closes the save gate first so the pre-import options/logo
-  // aren't written back onto the freshly restored document during the reload.
+  // the library and editor in place (no full page reload).
   const confirmImport = async () => {
     const file = pendingImport;
     setPendingImport(null);
     if (!file) return;
     try {
       await importLibrary(new Uint8Array(await file.arrayBuffer()));
-      loadedDocId.current = null;
-      setReady(false);
+      reloadActiveDocument();
       await lib.reload();
     } catch {
       setImportFailed(true);
@@ -212,18 +215,12 @@ export function EditorPage() {
   // newer, so they win and get pushed on the next sync).
   const onRemoteChanges = (changes: RemoteChanges) => {
     const stored = documents.find((d) => d.id === activeDocId);
-    const unsaved =
-      stored !== undefined &&
-      JSON.stringify({ ...options, logo: null }) !==
-        JSON.stringify({ ...stored.options, logo: null });
     if (
-      activeDocId !== null &&
-      changes.documentIds.includes(activeDocId) &&
-      !unsaved
-    ) {
-      loadedDocId.current = null;
-      setReady(false);
-    }
+      stored &&
+      changes.documentIds.includes(stored.id) &&
+      sameOptions(options, stored.options)
+    )
+      reloadActiveDocument();
     void lib.refresh();
   };
   useRemoteChanges(onRemoteChanges);

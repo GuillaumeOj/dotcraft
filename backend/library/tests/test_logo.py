@@ -138,17 +138,21 @@ def test_other_users_documents_are_not_found(
     assert mallory.delete(url(doc)).status_code == 404
 
 
-def test_deleting_a_document_removes_its_logo(auth_api: APIClient, doc: Document) -> None:
+def test_deleting_a_document_removes_its_logo(
+    auth_api: APIClient, doc: Document, django_capture_on_commit_callbacks
+) -> None:
     put(auth_api, doc)
     doc.refresh_from_db()
     storage = doc.logo.storage
     name = doc.logo.name or ""
 
-    auth_api.post(
-        "/api/v1/sync/",
-        {"cursor": 0, "documents": [{"id": str(doc.id), "updatedAt": 99, "deletedAt": 99}]},
-        format="json",
-    )
+    # The blob is only deleted once the sync transaction commits.
+    with django_capture_on_commit_callbacks(execute=True):
+        auth_api.post(
+            "/api/v1/sync/",
+            {"cursor": 0, "documents": [{"id": str(doc.id), "updatedAt": 99, "deletedAt": 99}]},
+            format="json",
+        )
 
     assert not storage.exists(name)
     assert auth_api.get(url(doc)).status_code == 404

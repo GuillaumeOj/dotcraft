@@ -22,7 +22,6 @@ class BlobStorage(Storage):
             name,
             content.read(),
             access="private",
-            content_type=getattr(content, "content_type", None),
             overwrite=True,
             token=self.token,
         )

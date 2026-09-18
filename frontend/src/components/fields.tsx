@@ -48,38 +48,12 @@ export function Field({
   );
 }
 
+/** A labelled single-line input (text, e-mail, password, …). */
 export function TextField({
-  label,
-  value,
-  placeholder,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  placeholder?: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <Field label={label}>
-      {(id) => (
-        <input
-          id={id}
-          type="text"
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      )}
-    </Field>
-  );
-}
-
-/** A labelled single-line input for forms (e-mail, password, …), with the
- *  browser's autofill hint and required-field validation. */
-export function InputField({
   label,
   type = "text",
   value,
+  placeholder,
   autoComplete,
   required = false,
   onChange,
@@ -87,6 +61,7 @@ export function InputField({
   label: string;
   type?: "text" | "email" | "password";
   value: string;
+  placeholder?: string;
   autoComplete?: string;
   required?: boolean;
   onChange: (v: string) => void;
@@ -98,6 +73,7 @@ export function InputField({
           id={id}
           type={type}
           value={value}
+          placeholder={placeholder}
           autoComplete={autoComplete}
           required={required}
           onChange={(e) => onChange(e.target.value)}

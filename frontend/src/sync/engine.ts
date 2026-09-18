@@ -22,30 +22,34 @@ import {
   type RemoteDocument,
   type RemoteFolder,
   type RemoteSettings,
+  type SyncPayload,
   type SyncResponse,
   uploadLogo,
 } from "../api/library";
 import {
-  clearLogo,
   clearTombstone,
-  deleteDocument,
-  deleteFolder,
   getPrefs,
   getSyncState,
   listDocuments,
   listFolders,
+  listLogoIds,
   listOutbox,
   listTombstones,
   loadLogoBlob,
   markDirty,
+  normalizeOptions,
   type OutboxEntry,
+  putDocument,
+  putFolder,
+  putLogoBlob,
+  removeDocument,
+  removeFolder,
+  removeLogo,
   SETTINGS_ID,
   type SyncState,
-  saveDocument,
-  saveFolder,
-  saveLogoBlob,
   setPrefs,
   settleOutbox,
+  syncKey,
   type Tombstone,
   updateSyncState,
   wipeLocalLibrary,
@@ -68,6 +72,13 @@ const NO_CHANGES: RemoteChanges = {
   settings: null,
 };
 
+/** A push with nothing in it (used to pull only). */
+const EMPTY_PUSH: Omit<SyncPayload, "cursor"> = {
+  folders: [],
+  documents: [],
+  settings: null,
+};
+
 function merge(a: RemoteChanges, b: RemoteChanges): RemoteChanges {
   return {
     library: a.library || b.library,
@@ -76,8 +87,7 @@ function merge(a: RemoteChanges, b: RemoteChanges): RemoteChanges {
   };
 }
 
-const tombstoneKey = (kind: "folder" | "document", id: string) =>
-  `${kind}:${id}`;
+type RecordKind = "folder" | "document";
 
 /** A snapshot of the local library, indexed for the LWW comparisons. */
 interface LocalLibrary {
@@ -99,59 +109,61 @@ async function readLocal(): Promise<LocalLibrary> {
   };
 }
 
+const recordsOf = (local: LocalLibrary, kind: RecordKind) =>
+  kind === "folder" ? local.folders : local.documents;
+
 /** When the local copy of a record was last written (or deleted), or -1. */
-function localStamp(
-  local: LocalLibrary,
-  kind: "folder" | "document",
-  id: string,
-): number {
-  const record =
-    kind === "folder" ? local.folders.get(id) : local.documents.get(id);
+function localStamp(local: LocalLibrary, kind: RecordKind, id: string): number {
   return (
-    record?.updatedAt ??
-    local.tombstones.get(tombstoneKey(kind, id))?.deletedAt ??
+    recordsOf(local, kind).get(id)?.updatedAt ??
+    local.tombstones.get(syncKey(kind, id))?.deletedAt ??
     -1
   );
 }
 
-async function applyFolder(
+/** Apply one pulled record if it is newer than the local copy (last write
+ *  wins). Returns whether anything changed. */
+async function applyRecord(
   local: LocalLibrary,
-  remote: RemoteFolder,
+  kind: RecordKind,
+  remote: RemoteFolder | RemoteDocument,
+  put: () => Promise<void>,
+  remove: (id: string) => Promise<void>,
 ): Promise<boolean> {
-  if (remote.updatedAt <= localStamp(local, "folder", remote.id)) return false;
-  if (remote.deletedAt !== null) {
-    if (local.folders.has(remote.id))
-      await deleteFolder(remote.id, { track: false });
-  } else {
-    const { deletedAt: _deleted, ...folder } = remote;
-    await saveFolder(folder, { track: false });
-  }
-  await clearTombstone("folder", remote.id);
+  if (remote.updatedAt <= localStamp(local, kind, remote.id)) return false;
+  if (remote.deletedAt === null) await put();
+  else if (recordsOf(local, kind).has(remote.id)) await remove(remote.id);
+  if (local.tombstones.has(syncKey(kind, remote.id)))
+    await clearTombstone(kind, remote.id);
   return true;
 }
 
-async function applyDocument(
-  local: LocalLibrary,
-  remote: RemoteDocument,
-): Promise<boolean> {
-  if (remote.updatedAt <= localStamp(local, "document", remote.id))
-    return false;
-  if (remote.deletedAt !== null) {
-    if (local.documents.has(remote.id))
-      await deleteDocument(remote.id, { track: false });
-  } else {
-    const doc: QrDocument = {
-      id: remote.id,
-      name: remote.name,
-      folderId: remote.folderId,
-      options: remote.options as unknown as QrDocument["options"],
-      createdAt: remote.createdAt,
-      updatedAt: remote.updatedAt,
-    };
-    await saveDocument(doc, { track: false });
-  }
-  await clearTombstone("document", remote.id);
-  return true;
+function applyFolder(local: LocalLibrary, remote: RemoteFolder) {
+  const { deletedAt: _deleted, ...folder } = remote;
+  return applyRecord(
+    local,
+    "folder",
+    remote,
+    () => putFolder(folder),
+    removeFolder,
+  );
+}
+
+function applyDocument(local: LocalLibrary, remote: RemoteDocument) {
+  const { deletedAt: _d, logoHash: _h, logoMime: _m, ...doc } = remote;
+  return applyRecord(
+    local,
+    "document",
+    remote,
+    () =>
+      putDocument({
+        ...doc,
+        folderId: doc.folderId ?? "",
+        // One canonical options shape, whatever the server sent.
+        options: normalizeOptions(doc.options),
+      }),
+    removeDocument,
+  );
 }
 
 /** Bring each pulled document's logo in line with the cloud, unless the local
@@ -169,11 +181,10 @@ async function applyLogos(
     const wanted = remote.deletedAt === null ? remote.logoHash : null;
     if (wanted === known) continue;
     if (wanted) {
-      const blob = await downloadLogo(remote.id);
-      await saveLogoBlob(remote.id, blob, { track: false });
+      await putLogoBlob(remote.id, await downloadLogo(remote.id));
       state.logoHashes[remote.id] = wanted;
     } else {
-      await clearLogo(remote.id, { track: false });
+      await removeLogo(remote.id);
       delete state.logoHashes[remote.id];
     }
     changed.push(remote.id);
@@ -185,15 +196,12 @@ function applySettings(remote: RemoteSettings | null): RemoteSettings | null {
   if (!remote) return null;
   const prefs = getPrefs();
   if (remote.updatedAt <= (prefs.settingsUpdatedAt ?? 0)) return null;
-  setPrefs(
-    {
-      ...prefs,
-      colorFormat: remote.colorFormat ?? prefs.colorFormat,
-      ...(remote.locale ? { locale: remote.locale } : {}),
-      settingsUpdatedAt: remote.updatedAt,
-    },
-    { track: false },
-  );
+  setPrefs({
+    ...prefs,
+    colorFormat: remote.colorFormat ?? prefs.colorFormat,
+    ...(remote.locale ? { locale: remote.locale } : {}),
+    settingsUpdatedAt: remote.updatedAt,
+  });
   return remote;
 }
 
@@ -203,6 +211,10 @@ async function applyResponse(
   state: SyncState,
   dirtyLogos: Set<string>,
 ): Promise<RemoteChanges> {
+  const settings = applySettings(response.settings);
+  if (response.folders.length === 0 && response.documents.length === 0)
+    return { ...NO_CHANGES, settings };
+
   const local = await readLocal();
   let library = false;
   const documentIds: string[] = [];
@@ -216,31 +228,30 @@ async function applyResponse(
     }
   }
   const logoIds = await applyLogos(response.documents, state, dirtyLogos);
-  return {
-    library: library || logoIds.length > 0,
-    documentIds: [...new Set([...documentIds, ...logoIds])],
-    settings: applySettings(response.settings),
-  };
+  return merge(
+    { library, documentIds, settings },
+    { library: logoIds.length > 0, documentIds: logoIds, settings: null },
+  );
+}
+
+/** A queued deletion, as the tombstone the API expects. */
+function tombstoneChange(local: LocalLibrary, kind: RecordKind, id: string) {
+  const tomb = local.tombstones.get(syncKey(kind, id));
+  return tomb && { id, updatedAt: tomb.deletedAt, deletedAt: tomb.deletedAt };
 }
 
 function folderChange(
   local: LocalLibrary,
   id: string,
 ): FolderChange | undefined {
-  const folder = local.folders.get(id);
-  if (folder) return folder;
-  const tomb = local.tombstones.get(tombstoneKey("folder", id));
-  return tomb && { id, updatedAt: tomb.deletedAt, deletedAt: tomb.deletedAt };
+  return local.folders.get(id) ?? tombstoneChange(local, "folder", id);
 }
 
 function documentChange(
   local: LocalLibrary,
   id: string,
 ): DocumentChange | undefined {
-  const doc = local.documents.get(id);
-  if (doc) return { ...doc, options: { ...doc.options, logo: null } };
-  const tomb = local.tombstones.get(tombstoneKey("document", id));
-  return tomb && { id, updatedAt: tomb.deletedAt, deletedAt: tomb.deletedAt };
+  return local.documents.get(id) ?? tombstoneChange(local, "document", id);
 }
 
 function settingsChange(): RemoteSettings | null {
@@ -281,28 +292,25 @@ async function pushLogos(
 /** Pull every page after `cursor`, pushing `first` along with the first page. */
 async function pullAll(
   state: SyncState,
-  first: {
-    folders: FolderChange[];
-    documents: DocumentChange[];
-    settings: RemoteSettings | null;
-  },
+  first: Omit<SyncPayload, "cursor">,
   dirtyLogos: Set<string>,
 ): Promise<RemoteChanges> {
   let changes = NO_CHANGES;
-  let payload = { cursor: state.cursor, ...first };
+  let payload: SyncPayload = { cursor: state.cursor, ...first };
   for (;;) {
     const response = await postSync(payload);
     changes = merge(changes, await applyResponse(response, state, dirtyLogos));
     state.cursor = response.cursor;
     if (!response.hasMore) return changes;
-    payload = {
-      cursor: state.cursor,
-      folders: [],
-      documents: [],
-      settings: null,
-    };
+    payload = { cursor: state.cursor, ...EMPTY_PUSH };
   }
 }
+
+const EMPTY_LOCAL: LocalLibrary = {
+  folders: new Map(),
+  documents: new Map(),
+  tombstones: new Map(),
+};
 
 /** Push local changes and pull remote ones. No-op until an account has been
  *  adopted. Throws {@link ApiError} when the API can't be reached. */
@@ -311,7 +319,8 @@ export async function syncOnce(): Promise<RemoteChanges> {
   if (!state.userId) return NO_CHANGES;
 
   const entries = await listOutbox();
-  const local = await readLocal();
+  // An idle poll (nothing queued) doesn't need to read the library.
+  const local = entries.length > 0 ? await readLocal() : EMPTY_LOCAL;
   const byKind = (kind: OutboxEntry["kind"]) =>
     entries.filter((e) => e.kind === kind);
   const folders = byKind("folder")
@@ -330,10 +339,9 @@ export async function syncOnce(): Promise<RemoteChanges> {
   );
 
   // Pushed deletions are recorded in the cloud now.
-  for (const entry of entries) {
-    if (entry.kind !== "folder" && entry.kind !== "document") continue;
-    const tomb = local.tombstones.get(tombstoneKey(entry.kind, entry.id));
-    if (tomb) await clearTombstone(entry.kind, entry.id);
+  for (const tomb of local.tombstones.values()) {
+    if (entries.some((e) => e.key === tomb.key))
+      await clearTombstone(tomb.kind, tomb.id);
   }
   await pushLogos(logoEntries, local, state);
   await settleOutbox(entries);
@@ -346,10 +354,11 @@ export async function syncOnce(): Promise<RemoteChanges> {
 
 /** True when the only local content is the untouched starter project seeded on
  *  first run (one folder, one never-edited document, no logo). */
-async function isPristineStarter(
+function isPristineStarter(
   folders: Folder[],
   documents: QrDocument[],
-): Promise<boolean> {
+  logoIds: Set<string>,
+): boolean {
   if (folders.length !== 1 || documents.length !== 1) return false;
   const [folder] = folders;
   const [doc] = documents;
@@ -358,16 +367,20 @@ async function isPristineStarter(
     doc.folderId === folder.id &&
     folder.updatedAt === folder.createdAt &&
     doc.updatedAt === doc.createdAt &&
-    !(await loadLogoBlob(doc.id))
+    !logoIds.has(doc.id)
   );
 }
 
 /** Queue every local record, logo and synced setting for upload. */
-async function enqueueEverything(folders: Folder[], documents: QrDocument[]) {
+async function enqueueEverything(
+  folders: Folder[],
+  documents: QrDocument[],
+  logoIds: Set<string>,
+) {
   for (const folder of folders) await markDirty("folder", folder.id);
   for (const doc of documents) {
     await markDirty("document", doc.id);
-    if (await loadLogoBlob(doc.id)) await markDirty("logo", doc.id);
+    if (logoIds.has(doc.id)) await markDirty("logo", doc.id);
   }
   if (getPrefs().settingsUpdatedAt !== undefined)
     await markDirty("settings", SETTINGS_ID);
@@ -387,27 +400,27 @@ export async function adoptAccount(userId: string): Promise<RemoteChanges> {
     wiped = true;
   }
 
-  const folders = await listFolders();
-  const documents = await listDocuments();
-  const pristine = await isPristineStarter(folders, documents);
+  const [folders, documents, logoIds] = await Promise.all([
+    listFolders(),
+    listDocuments(),
+    listLogoIds(),
+  ]);
+  const pristine = isPristineStarter(folders, documents, logoIds);
 
   // Pull the whole cloud copy first, without pushing anything yet.
   const state: SyncState = { userId, cursor: 0, logoHashes: {} };
-  const changes = await pullAll(
-    state,
-    { folders: [], documents: [], settings: null },
-    new Set(),
-  );
+  const changes = await pullAll(state, EMPTY_PUSH, new Set());
 
+  const localIds = new Set(documents.map((d) => d.id));
   const cloudHasDocuments = (await listDocuments()).some(
-    (d) => !documents.some((local) => local.id === d.id),
+    (d) => !localIds.has(d.id),
   );
   if (pristine && cloudHasDocuments) {
-    await deleteDocument(documents[0].id, { track: false });
-    await deleteFolder(folders[0].id, { track: false });
+    await removeDocument(documents[0].id);
+    await removeFolder(folders[0].id);
     await settleOutbox(await listOutbox());
   } else {
-    await enqueueEverything(folders, documents);
+    await enqueueEverything(folders, documents, logoIds);
   }
 
   await updateSyncState(state);

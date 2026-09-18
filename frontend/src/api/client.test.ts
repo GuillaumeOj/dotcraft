@@ -1,13 +1,19 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ApiError,
-  hasSession,
   onSessionChange,
   refreshSession,
   request,
   type Session,
   setSession,
 } from "./client";
+
+/** The latest session broadcast by the client (null when signed out). */
+let latest: unknown = null;
+onSessionChange((session) => {
+  latest = session;
+});
+const currentSession = () => latest !== null;
 
 const SESSION: Session = {
   user: { id: "u1", email: "ada@example.com", date_joined: "2026-01-01" },
@@ -110,6 +116,14 @@ describe("request", () => {
     expect(err.message).toBe("Bad");
   });
 
+  it("handles a null JSON error body", async () => {
+    mockFetch(json(500, null));
+
+    const err = await request("/x/").catch((e) => e);
+
+    expect(err.code).toBe("http_500");
+  });
+
   it("reports network failures with status 0", async () => {
     mockFetch(new TypeError("offline"));
 
@@ -142,7 +156,7 @@ describe("request", () => {
     const err = await request("/x/").catch((e) => e);
 
     expect(err.status).toBe(401);
-    expect(hasSession()).toBe(false);
+    expect(currentSession()).toBe(false);
   });
 
   it("does not retry unauthenticated calls", async () => {
@@ -176,7 +190,7 @@ describe("sessions", () => {
     expect(a).toEqual(SESSION);
     expect(b).toEqual(SESSION);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(hasSession()).toBe(true);
+    expect(currentSession()).toBe(true);
   });
 
   it("keeps the session on a network error during refresh", async () => {
@@ -184,6 +198,6 @@ describe("sessions", () => {
     mockFetch(new TypeError("offline"));
 
     await expect(refreshSession()).rejects.toMatchObject({ status: 0 });
-    expect(hasSession()).toBe(true);
+    expect(currentSession()).toBe(true);
   });
 });
