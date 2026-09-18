@@ -1,0 +1,11 @@
+{% extends "emails/base.html" %}
+{% block title %}Reset your Dotcraft password{% endblock %}
+{% block content %}
+  <p>Hello,</p>
+  <p>Someone (hopefully you) asked to reset the password of the Dotcraft account <strong>{{ user.email }}</strong>.</p>
+  <p style="padding:16px 0;">
+    <a href="{{ reset_url }}" style="display:inline-block;background:#18181b;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Choose a new password</a>
+  </p>
+  <p style="font-size:13px;color:#52525b;">Or paste this link in your browser:<br><a href="{{ reset_url }}" style="color:#52525b;word-break:break-all;">{{ reset_url }}</a></p>
+  <p>If you didn't ask for this, you can ignore this e-mail: your password stays unchanged.</p>
+{% endblock %}

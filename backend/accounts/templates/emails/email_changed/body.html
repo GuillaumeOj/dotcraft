@@ -1,0 +1,8 @@
+{% extends "emails/base.html" %}
+{% block title %}Your Dotcraft e-mail address was changed{% endblock %}
+{% block content %}
+  <p>Hello,</p>
+  <p>The e-mail address of your Dotcraft account was changed from <strong>{{ old_email }}</strong> to <strong>{{ new_email }}</strong>.</p>
+  <p>If you made this change, there is nothing else to do.</p>
+  <p>If you didn't, <a href="{{ frontend_url }}/forgot-password" style="color:#18181b;font-weight:600;">reset your password</a> right away.</p>
+{% endblock %}
