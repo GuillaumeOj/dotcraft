@@ -317,7 +317,7 @@
     "forgot": {
       "title": "Redefinir a palavra-passe",
       "intro": "Introduza o e-mail da sua conta e enviaremos uma ligação para escolher uma nova palavra-passe.",
-      "submit": "Enviar ligação",
+      "submit": "Enviar ligação de redefinição",
       "sent": "Se existir uma conta para {{email}}, foi enviada uma ligação de redefinição. Verifique a sua caixa de entrada."
     },
     "reset": {

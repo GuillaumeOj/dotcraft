@@ -205,23 +205,23 @@
     "items": {
       "privacy": {
         "q": "Comment ma bibliothèque est-elle conservée ?",
-        "a": "Vos projets et QR codes sont toujours enregistrés dans votre navigateur (IndexedDB) : Dotcraft fonctionne donc sans compte. Si vous vous connectez, votre bibliothèque est aussi stockée dans votre compte, pour être sauvegardée et disponible sur tous vos appareils. Sans compte, rien n'est envoyé."
+        "a": "Vos projets et QR codes sont toujours enregistrés dans votre navigateur (IndexedDB) : Dotcraft fonctionne donc sans compte. Si vous vous connectez, votre bibliothèque est aussi stockée dans votre compte, pour être sauvegardée et disponible sur tous vos appareils. Sans compte, rien n’est envoyé."
       },
       "free": {
         "q": "Dotcraft est-il gratuit ?",
         "a": "Oui. Dotcraft est entièrement gratuit, sans limites ni formules payantes."
       },
       "account": {
-        "q": "Ai-je besoin d'un compte ?",
+        "q": "Ai-je besoin d’un compte ?",
         "a": "Non. Vous pouvez créer et exporter des QR codes sans inscription. Le compte est facultatif et gratuit : il sauvegarde votre bibliothèque et la synchronise entre vos appareils."
       },
       "sync": {
         "q": "Que se passe-t-il si je modifie le même QR code sur deux appareils ?",
-        "a": "Les modifications se synchronisent automatiquement en arrière-plan, généralement en quelques secondes. Si un même élément a été modifié sur deux appareils avant qu'ils aient pu se synchroniser, c'est la modification la plus récente qui l'emporte. Les suppressions sont synchronisées elles aussi."
+        "a": "Les modifications se synchronisent automatiquement en arrière-plan, généralement en quelques secondes. Si un même élément a été modifié sur deux appareils avant qu’ils aient pu se synchroniser, c’est la modification la plus récente qui l’emporte. Les suppressions sont synchronisées elles aussi."
       },
       "forgotPassword": {
-        "q": "J'ai oublié mon mot de passe. Que faire ?",
-        "a": "Sur l'écran de connexion, choisissez « Mot de passe oublié ? » et saisissez votre e-mail. Vous recevrez un lien pour en choisir un nouveau."
+        "q": "J’ai oublié mon mot de passe. Que faire ?",
+        "a": "Sur l’écran de connexion, choisissez « Mot de passe oublié ? » et saisissez votre e-mail. Vous recevrez un lien pour en choisir un nouveau."
       },
       "expire": {
         "q": "Mes QR codes vont-ils expirer ?",
@@ -232,8 +232,8 @@
         "a": "PNG et SVG. Choisissez le PNG pour une image prête à l’emploi à une taille fixe, et le SVG lorsque vous avez besoin d’un vecteur net qui s’adapte à toutes les tailles, pour l’impression ou pour le retoucher."
       },
       "clearData": {
-        "q": "Que se passe-t-il si j'efface les données de mon navigateur ?",
-        "a": "Sans compte, votre bibliothèque n'existe que dans votre navigateur : effacer les données du site ou utiliser la navigation privée la supprime — utilisez Exporter dans la bibliothèque pour garder un fichier de sauvegarde. Si vous êtes connecté, votre bibliothèque est aussi stockée dans votre compte et revient dès que vous vous reconnectez."
+        "q": "Que se passe-t-il si j’efface les données de mon navigateur ?",
+        "a": "Sans compte, votre bibliothèque n’existe que dans votre navigateur : effacer les données du site ou utiliser la navigation privée la supprime — utilisez Exporter dans la bibliothèque pour garder un fichier de sauvegarde. Si vous êtes connecté, votre bibliothèque est aussi stockée dans votre compte et revient dès que vous vous reconnectez."
       }
     }
   },
@@ -243,7 +243,7 @@
     "articles": {
       "account": {
         "title": "Compte et synchronisation",
-        "body": "Dotcraft fonctionne sans compte : votre bibliothèque est enregistrée dans votre navigateur. Créez un compte gratuit depuis le bas de la bibliothèque (ou l'élément Compte du menu sur mobile) pour la sauvegarder et la retrouver sur tous vos appareils. Les QR codes que vous avez déjà sont envoyés automatiquement à la connexion.\n\nUne fois connecté, la synchronisation se fait toute seule : chaque modification est enregistrée dans votre compte quelques secondes après, et les modifications faites sur vos autres appareils apparaissent automatiquement. L'icône de synchronisation à côté de votre e-mail indique si tout est à jour. Si vous travaillez hors ligne, vos modifications sont conservées et synchronisées dès le retour de la connexion. Quand un même QR code est modifié sur deux appareils avant qu'ils aient pu se synchroniser, c'est la modification la plus récente qui l'emporte.\n\nOuvrez la page Compte pour changer votre e-mail ou votre mot de passe, ou pour vous déconnecter. La déconnexion retire la bibliothèque de cet appareil — elle reste dans votre compte et revient dès que vous vous reconnectez. Si vous oubliez votre mot de passe, utilisez « Mot de passe oublié ? » sur l'écran de connexion pour recevoir un lien de réinitialisation par e-mail."
+        "body": "Dotcraft fonctionne sans compte : votre bibliothèque est enregistrée dans votre navigateur. Créez un compte gratuit depuis le bas de la bibliothèque (ou l’élément Compte du menu sur mobile) pour la sauvegarder et la retrouver sur tous vos appareils. Les QR codes que vous avez déjà sont envoyés automatiquement à la connexion.\n\nUne fois connecté, la synchronisation se fait toute seule : chaque modification est enregistrée dans votre compte quelques secondes après, et les modifications faites sur vos autres appareils apparaissent automatiquement. L’icône de synchronisation à côté de votre e-mail indique si tout est à jour. Si vous travaillez hors ligne, vos modifications sont conservées et synchronisées dès le retour de la connexion. Quand un même QR code est modifié sur deux appareils avant qu’ils aient pu se synchroniser, c’est la modification la plus récente qui l’emporte.\n\nOuvrez la page Compte pour changer votre e-mail ou votre mot de passe, ou pour vous déconnecter. La déconnexion retire la bibliothèque de cet appareil — elle reste dans votre compte et revient dès que vous vous reconnectez. Si vous oubliez votre mot de passe, utilisez « Mot de passe oublié ? » sur l’écran de connexion pour recevoir un lien de réinitialisation par e-mail."
       },
       "library": {
         "title": "Importer et exporter votre bibliothèque",
@@ -275,7 +275,7 @@
     "subtitle": "Gardez votre bibliothèque sauvegardée et synchronisée sur tous vos appareils.",
     "loading": "Chargement…",
     "welcomeTitle": "Synchronisez votre bibliothèque",
-    "pitch": "Votre bibliothèque n'est enregistrée que dans ce navigateur. Créez un compte gratuit pour la sauvegarder et la retrouver sur tous vos appareils — vos QR codes existants sont envoyés automatiquement.",
+    "pitch": "Votre bibliothèque n’est enregistrée que dans ce navigateur. Créez un compte gratuit pour la sauvegarder et la retrouver sur tous vos appareils — vos QR codes existants sont envoyés automatiquement.",
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
     "email": "E-mail",
@@ -289,7 +289,7 @@
     "signedInAs": "Connecté en tant que {{email}}",
     "syncTitle": "Synchronisation",
     "emailTitle": "Adresse e-mail",
-    "updateEmail": "Modifier l'e-mail",
+    "updateEmail": "Modifier l’e-mail",
     "emailUpdated": "Votre adresse e-mail a été modifiée.",
     "passwordTitle": "Mot de passe",
     "changePassword": "Changer le mot de passe",
@@ -298,7 +298,7 @@
     "signOutHint": "La déconnexion retire votre bibliothèque de cet appareil. Elle reste en sécurité dans votre compte et revient dès que vous vous reconnectez.",
     "signOut": "Se déconnecter",
     "unsyncedTitle": "Modifications non synchronisées",
-    "unsyncedMessage": "Certaines de vos dernières modifications n'ont pas encore pu être enregistrées dans le cloud (êtes-vous hors ligne ?). Si vous vous déconnectez maintenant, elles seront perdues.",
+    "unsyncedMessage": "Certaines de vos dernières modifications n’ont pas encore pu être enregistrées dans le cloud (êtes-vous hors ligne ?). Si vous vous déconnectez maintenant, elles seront perdues.",
     "signOutAnyway": "Se déconnecter quand même"
   },
   "sync": {
@@ -316,7 +316,7 @@
     "backToSignIn": "Retour à la connexion",
     "forgot": {
       "title": "Réinitialiser votre mot de passe",
-      "intro": "Saisissez l'e-mail de votre compte et nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+      "intro": "Saisissez l’e-mail de votre compte et nous vous enverrons un lien pour choisir un nouveau mot de passe.",
       "submit": "Envoyer le lien",
       "sent": "Si un compte existe pour {{email}}, un lien de réinitialisation est en route. Consultez votre boîte de réception."
     },

@@ -128,7 +128,7 @@
     "deleteQrCode": "Eliminar código QR",
     "confirmDeleteDoc": "¿Eliminar «{{name}}»?",
     "account": "Cuenta",
-    "signIn": "Inicia sesión para sincronizar"
+    "signIn": "Iniciar sesión para sincronizar"
   },
   "library": {
     "myProject": "Mi proyecto",

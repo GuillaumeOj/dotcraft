@@ -213,7 +213,7 @@
       },
       "account": {
         "q": "Mi serve un account?",
-        "a": "No. Puoi creare ed esportare codici QR senza registrarti. L'account è facoltativo e gratuito: salva la tua libreria e la mantiene sincronizzata tra i tuoi dispositivi."
+        "a": "No. Puoi creare ed esportare codici QR senza registrarti. L’account è facoltativo e gratuito: salva la tua libreria e la mantiene sincronizzata tra i tuoi dispositivi."
       },
       "sync": {
         "q": "Cosa succede se modifico lo stesso codice QR su due dispositivi?",
@@ -233,7 +233,7 @@
       },
       "clearData": {
         "q": "Cosa succede se cancello i dati del browser?",
-        "a": "Senza account, la tua libreria esiste solo nel browser: cancellare i dati del sito o usare la navigazione privata la elimina. Usa Esporta nella libreria per conservare un file di backup. Se hai effettuato l'accesso, la libreria è salvata anche nel tuo account e torna non appena accedi di nuovo."
+        "a": "Senza account, la tua libreria esiste solo nel browser: cancellare i dati del sito o usare la navigazione privata la elimina. Usa Esporta nella libreria per conservare un file di backup. Se hai effettuato l’accesso, la libreria è salvata anche nel tuo account e torna non appena accedi di nuovo."
       }
     }
   },
@@ -243,7 +243,7 @@
     "articles": {
       "account": {
         "title": "Account e sincronizzazione",
-        "body": "Dotcraft funziona senza account: la tua libreria viene salvata nel browser. Crea un account gratuito dal fondo della libreria (o dalla voce Account del menu su mobile) per farne il backup e usarla su tutti i tuoi dispositivi. I codici QR che hai già vengono caricati automaticamente all'accesso.\n\nDopo l'accesso, la sincronizzazione avviene da sola: ogni modifica viene salvata nel tuo account pochi secondi dopo, e le modifiche fatte sugli altri dispositivi compaiono automaticamente. L'icona di sincronizzazione accanto alla tua e-mail indica se è tutto aggiornato. Se lavori offline, le modifiche vengono conservate e sincronizzate non appena torni online. Quando lo stesso codice QR viene modificato su due dispositivi prima che possano sincronizzarsi, prevale la modifica più recente.\n\nApri la pagina Account per cambiare e-mail o password, o per uscire. Uscendo, la libreria viene rimossa da questo dispositivo: resta nel tuo account e torna non appena accedi di nuovo. Se dimentichi la password, usa «Password dimenticata?» nella schermata di accesso per ricevere un link di reimpostazione via e-mail."
+        "body": "Dotcraft funziona senza account: la tua libreria viene salvata nel browser. Crea un account gratuito dal fondo della libreria (o dalla voce Account del menu su mobile) per farne il backup e usarla su tutti i tuoi dispositivi. I codici QR che hai già vengono caricati automaticamente all’accesso.\n\nDopo l’accesso, la sincronizzazione avviene da sola: ogni modifica viene salvata nel tuo account pochi secondi dopo, e le modifiche fatte sugli altri dispositivi compaiono automaticamente. L’icona di sincronizzazione accanto alla tua e-mail indica se è tutto aggiornato. Se lavori offline, le modifiche vengono conservate e sincronizzate non appena torni online. Quando lo stesso codice QR viene modificato su due dispositivi prima che possano sincronizzarsi, prevale la modifica più recente.\n\nApri la pagina Account per cambiare e-mail o password, o per uscire. Uscendo, la libreria viene rimossa da questo dispositivo: resta nel tuo account e torna non appena accedi di nuovo. Se dimentichi la password, usa «Password dimenticata?» nella schermata di accesso per ricevere un link di reimpostazione via e-mail."
       },
       "library": {
         "title": "Importare ed esportare la libreria",
@@ -313,10 +313,10 @@
     "syncNow": "Sincronizza ora"
   },
   "auth": {
-    "backToSignIn": "Torna all'accesso",
+    "backToSignIn": "Torna all’accesso",
     "forgot": {
       "title": "Reimposta la password",
-      "intro": "Inserisci l'e-mail del tuo account e ti invieremo un link per scegliere una nuova password.",
+      "intro": "Inserisci l’e-mail del tuo account e ti invieremo un link per scegliere una nuova password.",
       "submit": "Invia link",
       "sent": "Se esiste un account per {{email}}, ti abbiamo inviato un link di reimpostazione. Controlla la tua casella di posta."
     },
