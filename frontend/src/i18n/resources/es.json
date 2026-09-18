@@ -126,7 +126,9 @@
     "duplicateQrCode": "Duplicar código QR",
     "renameQrCode": "Renombrar código QR",
     "deleteQrCode": "Eliminar código QR",
-    "confirmDeleteDoc": "¿Eliminar «{{name}}»?"
+    "confirmDeleteDoc": "¿Eliminar «{{name}}»?",
+    "account": "Cuenta",
+    "signIn": "Inicia sesión para sincronizar"
   },
   "library": {
     "myProject": "Mi proyecto",
@@ -178,7 +180,8 @@
   },
   "nav": {
     "menu": "Menú",
-    "backToEditor": "Volver al editor"
+    "backToEditor": "Volver al editor",
+    "account": "Cuenta"
   },
   "footer": {
     "label": "Pie de página",
@@ -193,15 +196,16 @@
   "info": {
     "library": "Aprende a importar y exportar tu biblioteca",
     "exportQr": "Aprende a exportar tu código QR",
-    "errorCorrection": "Más información sobre la corrección de errores"
+    "errorCorrection": "Más información sobre la corrección de errores",
+    "account": "Más información sobre las cuentas y la sincronización"
   },
   "faq": {
     "title": "Preguntas frecuentes",
-    "subtitle": "Respuestas rápidas sobre privacidad, precio y cómo funciona Dotcraft.",
+    "subtitle": "Respuestas rápidas sobre privacidad, cuentas, precios y el funcionamiento de Dotcraft.",
     "items": {
       "privacy": {
         "q": "¿Cómo se guarda mi biblioteca?",
-        "a": "Todo permanece en tu navegador. Tus proyectos y códigos QR se guardan localmente en tu dispositivo (almacenamiento local e IndexedDB); nada se envía a un servidor y nosotros no podemos acceder a ello de ninguna manera."
+        "a": "Tus proyectos y códigos QR siempre se guardan en tu navegador (IndexedDB), así que Dotcraft funciona sin cuenta. Si inicias sesión, tu biblioteca también se almacena en tu cuenta para que esté respaldada y disponible en todos tus dispositivos. Sin cuenta, no se sube nada."
       },
       "free": {
         "q": "¿Dotcraft es gratis?",
@@ -209,7 +213,15 @@
       },
       "account": {
         "q": "¿Necesito una cuenta?",
-        "a": "No. No hay registro ni inicio de sesión: Dotcraft funciona por completo en tu navegador, así que puedes empezar a diseñar de inmediato."
+        "a": "No. Puedes diseñar y exportar códigos QR sin registrarte. La cuenta es opcional y gratuita: respalda tu biblioteca y la mantiene sincronizada entre tus dispositivos."
+      },
+      "sync": {
+        "q": "¿Qué pasa si edito el mismo código QR en dos dispositivos?",
+        "a": "Los cambios se sincronizan automáticamente en segundo plano, normalmente en pocos segundos. Si el mismo elemento se modificó en dos dispositivos antes de que pudieran sincronizarse, prevalece el cambio más reciente. Las eliminaciones también se sincronizan."
+      },
+      "forgotPassword": {
+        "q": "He olvidado mi contraseña. ¿Qué puedo hacer?",
+        "a": "En la pantalla de inicio de sesión, elige «¿Olvidaste tu contraseña?» e introduce tu correo. Recibirás un enlace para elegir una nueva."
       },
       "expire": {
         "q": "¿Mis códigos QR caducarán?",
@@ -220,8 +232,8 @@
         "a": "PNG y SVG. Elige PNG para una imagen lista para usar con un tamaño fijo, y SVG cuando necesites un vector nítido que se adapte a cualquier tamaño, para impresión o para seguir editándolo."
       },
       "clearData": {
-        "q": "¿Qué pasa si borro los datos de mi navegador?",
-        "a": "Tu biblioteca se guarda en el almacenamiento local del navegador, así que borrar los datos del sitio o usar la navegación privada la eliminará. Usa el botón Exportar de la biblioteca para guardar un archivo de copia de seguridad que puedas volver a importar más tarde."
+        "q": "¿Qué pasa si borro los datos del navegador?",
+        "a": "Sin cuenta, tu biblioteca solo existe en tu navegador, así que borrar los datos del sitio o usar la navegación privada la elimina: usa Exportar en la biblioteca para guardar un archivo de copia de seguridad. Si has iniciado sesión, tu biblioteca también se guarda en tu cuenta y vuelve en cuanto inicies sesión de nuevo."
       }
     }
   },
@@ -229,6 +241,10 @@
     "title": "Centro de ayuda",
     "subtitle": "Guías para sacar el máximo partido a Dotcraft.",
     "articles": {
+      "account": {
+        "title": "Cuenta y sincronización",
+        "body": "Dotcraft funciona sin cuenta: tu biblioteca se guarda en tu navegador. Crea una cuenta gratuita desde la parte inferior de la biblioteca (o desde el elemento Cuenta del menú en el móvil) para respaldarla y usarla en todos tus dispositivos. Los códigos QR que ya tienes se suben automáticamente al iniciar sesión.\n\nUna vez iniciada la sesión, la sincronización es automática: cada cambio se guarda en tu cuenta unos segundos después de hacerlo, y los cambios hechos en tus otros dispositivos aparecen solos. El icono de sincronización junto a tu correo indica si todo está al día. Si trabajas sin conexión, tus cambios se conservan y se sincronizan en cuanto vuelves a estar en línea. Cuando el mismo código QR se edita en dos dispositivos antes de que puedan sincronizarse, prevalece el cambio más reciente.\n\nAbre la página Cuenta para cambiar tu correo o tu contraseña, o para cerrar sesión. Al cerrar sesión, la biblioteca se elimina de este dispositivo: sigue en tu cuenta y vuelve en cuanto inicies sesión de nuevo. Si olvidas tu contraseña, usa «¿Olvidaste tu contraseña?» en la pantalla de inicio de sesión para recibir un enlace de restablecimiento por correo."
+      },
       "library": {
         "title": "Importar y exportar tu biblioteca",
         "body": "Toda tu biblioteca —cada proyecto, carpeta y código QR— se puede guardar en un único archivo .dotcraft. En la biblioteca, usa Exportar para descargar ese archivo como copia de seguridad o para llevar tu trabajo a otro navegador o dispositivo.\n\nUsa Importar para restaurar un archivo .dotcraft. La importación reemplaza tu biblioteca actual por el contenido del archivo, así que exporta primero una copia de seguridad si quieres conservar lo que tienes.",
@@ -253,5 +269,76 @@
         "cta": "Abrir un informe de error"
       }
     }
+  },
+  "account": {
+    "title": "Cuenta",
+    "subtitle": "Mantén tu biblioteca respaldada y sincronizada en todos tus dispositivos.",
+    "loading": "Cargando…",
+    "welcomeTitle": "Sincroniza tu biblioteca",
+    "pitch": "Tu biblioteca solo está guardada en este navegador. Crea una cuenta gratuita para respaldarla y usarla en todos tus dispositivos: los códigos QR que ya tienes se suben automáticamente.",
+    "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "newEmail": "Nuevo correo electrónico",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "signedInAs": "Sesión iniciada como {{email}}",
+    "syncTitle": "Sincronización",
+    "emailTitle": "Correo electrónico",
+    "updateEmail": "Actualizar correo",
+    "emailUpdated": "Tu correo electrónico se ha actualizado.",
+    "passwordTitle": "Contraseña",
+    "changePassword": "Cambiar contraseña",
+    "passwordUpdated": "Tu contraseña se ha cambiado. Se ha cerrado la sesión en tus otros dispositivos.",
+    "signOutTitle": "Cerrar sesión",
+    "signOutHint": "Al cerrar sesión, tu biblioteca se elimina de este dispositivo. Sigue a salvo en tu cuenta y vuelve en cuanto inicies sesión de nuevo.",
+    "signOut": "Cerrar sesión",
+    "unsyncedTitle": "Cambios sin sincronizar",
+    "unsyncedMessage": "Algunos de tus últimos cambios aún no se han podido guardar en la nube (¿estás sin conexión?). Si cierras sesión ahora, se perderán.",
+    "signOutAnyway": "Cerrar sesión de todos modos"
+  },
+  "sync": {
+    "status": {
+      "idle": "Sincronizado",
+      "syncing": "Sincronizando…",
+      "offline": "Sin conexión: los cambios se sincronizarán cuando vuelvas a estar en línea",
+      "error": "Error de sincronización: se reintentará en breve"
+    },
+    "lastSynced": "Última sincronización: {{time}}",
+    "never": "Aún no sincronizado",
+    "syncNow": "Sincronizar ahora"
+  },
+  "auth": {
+    "backToSignIn": "Volver a iniciar sesión",
+    "forgot": {
+      "title": "Restablecer tu contraseña",
+      "intro": "Introduce el correo de tu cuenta y te enviaremos un enlace para elegir una nueva contraseña.",
+      "submit": "Enviar enlace",
+      "sent": "Si existe una cuenta para {{email}}, te hemos enviado un enlace de restablecimiento. Revisa tu bandeja de entrada."
+    },
+    "reset": {
+      "title": "Elige una nueva contraseña",
+      "submit": "Guardar contraseña",
+      "done": "Tu contraseña se ha cambiado. Ya puedes iniciar sesión con ella.",
+      "requestNew": "Solicitar un nuevo enlace"
+    }
+  },
+  "apiErrors": {
+    "invalid_credentials": "Correo o contraseña incorrectos.",
+    "email_taken": "Ya existe una cuenta con este correo.",
+    "wrong_password": "La contraseña actual es incorrecta.",
+    "password_too_short": "La contraseña debe tener al menos 8 caracteres.",
+    "password_too_common": "Esta contraseña es demasiado común.",
+    "password_entirely_numeric": "La contraseña no puede estar formada solo por números.",
+    "password_too_similar": "La contraseña se parece demasiado a tu correo.",
+    "invalid_token": "Este enlace de restablecimiento no es válido o ha caducado.",
+    "throttled": "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+    "network": "No se puede conectar con el servidor. Comprueba tu conexión y vuelve a intentarlo.",
+    "invalidEmail": "Introduce un correo electrónico válido.",
+    "generic": "Algo ha salido mal. Vuelve a intentarlo."
   }
 }

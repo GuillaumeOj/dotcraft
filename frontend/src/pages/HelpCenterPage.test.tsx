@@ -16,6 +16,7 @@ describe("HelpCenterPage", () => {
     ).toBeInTheDocument();
     // Anchors match the InfoLink targets on the editor controls.
     for (const id of [
+      "account",
       "library",
       "export-qr",
       "error-correction",
@@ -27,6 +28,8 @@ describe("HelpCenterPage", () => {
     // The error-correction article reuses the editor's level descriptions.
     expect(screen.getByText("Quartile")).toBeInTheDocument();
     expect(screen.getByText(/Recovers from ~25% damage/)).toBeInTheDocument();
+    // The account article explains sync conflicts and signing out.
+    expect(screen.getByText(/the most recent change wins/)).toBeInTheDocument();
     // The library article warns about importing untrusted .dotcraft files.
     expect(
       screen.getByText(/Only import .dotcraft files from a source you trust/),

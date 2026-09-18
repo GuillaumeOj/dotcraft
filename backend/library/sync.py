@@ -132,8 +132,8 @@ def _push_settings(user_settings: UserSettings, data: dict[str, Any] | None) -> 
         return False, False
     if data["updatedAt"] < user_settings.updated_at:
         return False, True
-    user_settings.locale = data["locale"]
-    user_settings.color_format = data["colorFormat"]
+    user_settings.locale = data["locale"] or ""
+    user_settings.color_format = data["colorFormat"] or ""
     user_settings.updated_at = data["updatedAt"]
     user_settings.server_seq = next_change_seq()
     user_settings.save()

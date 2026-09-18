@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AccountButton } from "../components/AccountButton";
 import {
   ContentPanel,
   EditorActions,
@@ -32,6 +33,8 @@ import {
 } from "../qr/storage";
 import { defaultOptions, type QrOptions } from "../qr/types";
 import { type LibraryLabels, useLibrary } from "../qr/useLibrary";
+import type { RemoteChanges } from "../sync/engine";
+import { useRemoteChanges } from "../sync/SyncProvider";
 
 /** The QR-code editor: the home route. Renders the header, the two-column
  *  workspace (or mobile modals) and the import dialogs. The surrounding `.app`
@@ -204,6 +207,27 @@ export function EditorPage() {
     }
   };
 
+  // Changes pulled from the cloud: refresh the library, and reload the open
+  // document when it changed — unless it has edits not yet persisted (they are
+  // newer, so they win and get pushed on the next sync).
+  const onRemoteChanges = (changes: RemoteChanges) => {
+    const stored = documents.find((d) => d.id === activeDocId);
+    const unsaved =
+      stored !== undefined &&
+      JSON.stringify({ ...options, logo: null }) !==
+        JSON.stringify({ ...stored.options, logo: null });
+    if (
+      activeDocId !== null &&
+      changes.documentIds.includes(activeDocId) &&
+      !unsaved
+    ) {
+      loadedDocId.current = null;
+      setReady(false);
+    }
+    void lib.refresh();
+  };
+  useRemoteChanges(onRemoteChanges);
+
   const error = result.error ? describeRenderError(result.error, t) : null;
 
   // Library and settings render either in their desktop spot or inside a modal —
@@ -232,6 +256,7 @@ export function EditorPage() {
       onDeleteFolder={lib.deleteFolder}
       onDeleteDocument={lib.removeDocument}
       onSelectDocument={selectDocument}
+      footer={isMobile ? undefined : <AccountButton />}
     />
   );
   const settingsPanel = (

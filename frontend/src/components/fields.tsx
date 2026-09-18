@@ -74,6 +74,39 @@ export function TextField({
   );
 }
 
+/** A labelled single-line input for forms (e-mail, password, …), with the
+ *  browser's autofill hint and required-field validation. */
+export function InputField({
+  label,
+  type = "text",
+  value,
+  autoComplete,
+  required = false,
+  onChange,
+}: {
+  label: string;
+  type?: "text" | "email" | "password";
+  value: string;
+  autoComplete?: string;
+  required?: boolean;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <Field label={label}>
+      {(id) => (
+        <input
+          id={id}
+          type={type}
+          value={value}
+          autoComplete={autoComplete}
+          required={required}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+    </Field>
+  );
+}
+
 export function SelectField<T extends string>({
   label,
   info,

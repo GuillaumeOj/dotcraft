@@ -245,6 +245,13 @@ def test_null_settings_are_accepted(auth_api: APIClient) -> None:
     assert post(auth_api, settings=None)["settings"] is None
 
 
+def test_unset_locale_is_accepted(auth_api: APIClient, user: User) -> None:
+    post(auth_api, settings={"locale": None, "colorFormat": "rgb", "updatedAt": 5})
+
+    stored = UserSettings.objects.get(user=user)
+    assert (stored.locale, stored.color_format) == ("", "rgb")
+
+
 def test_str_representations(auth_api: APIClient, user: User) -> None:
     f = folder(name="Named")
     post(auth_api, folders=[f], settings={"locale": "en", "colorFormat": "hex", "updatedAt": 1})

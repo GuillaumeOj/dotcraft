@@ -7,13 +7,15 @@ const FAQ_IDS = [
   "privacy",
   "free",
   "account",
+  "sync",
+  "forgotPassword",
   "expire",
   "formats",
   "clearData",
 ] as const;
 
-/** The FAQ route: short question/answer pairs about privacy, pricing and how the
- *  browser-only library behaves. */
+/** The FAQ route: short question/answer pairs about privacy, accounts and sync,
+ *  pricing and how the library behaves. */
 export function FaqPage() {
   const { t } = useTranslation();
   return (

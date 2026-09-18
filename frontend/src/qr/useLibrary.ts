@@ -53,6 +53,14 @@ export const DEFAULT_LIBRARY_LABELS: LibraryLabels = {
   copySuffix: (name) => `${name} copy`,
 };
 
+/** Deep equality of two options snapshots, ignoring the (never persisted) logo. */
+function sameOptions(a: QrDocument["options"], b: QrDocument["options"]) {
+  return (
+    JSON.stringify({ ...a, logo: null }) ===
+    JSON.stringify({ ...b, logo: null })
+  );
+}
+
 /** Return `arr` with the item sharing `item.id` replaced by `item`. */
 function replaceById<T extends { id: string }>(arr: T[], item: T): T[] {
   return arr.map((x) => (x.id === item.id ? item : x));
@@ -114,6 +122,9 @@ export interface Library {
   /** Re-read the whole library from storage (e.g. after a library import),
    *  reseeding a starter project if it came back empty. */
   reload(): Promise<void>;
+  /** Re-read the library after changes arrived from the cloud, keeping the
+   *  active document open when it still exists. */
+  refresh(): Promise<void>;
 }
 
 export function useLibrary(
@@ -148,7 +159,7 @@ export function useLibrary(
   // `isCancelled` guard lets the initial load bail if the component unmounts
   // mid-read.
   const hydrate = useCallback(
-    async (isCancelled: () => boolean = () => false) => {
+    async (isCancelled: () => boolean = () => false, keepActive = false) => {
       let [fs, ds] = await Promise.all([listFolders(), listDocuments()]);
       if (ds.length === 0) {
         const { folder, doc } = makeStarter(labelsRef.current);
@@ -163,8 +174,11 @@ export function useLibrary(
       setDocuments(ds);
       setColorFormat(prefs.colorFormat);
       setCollapsedFolders(new Set(prefs.collapsedFolderIds));
+      const preferred = keepActive
+        ? activeIdRef.current
+        : prefs.lastOpenedDocId;
       setActiveDocId(
-        ds.find((d) => d.id === prefs.lastOpenedDocId)?.id ?? ds[0]?.id ?? null,
+        ds.find((d) => d.id === preferred)?.id ?? ds[0]?.id ?? null,
       );
       setLoaded(true);
     },
@@ -356,11 +370,11 @@ export function useLibrary(
     const id = activeIdRef.current;
     const doc = documentsRef.current.find((d) => d.id === id);
     if (!doc) return;
-    const updated: QrDocument = {
-      ...doc,
-      options: { ...options, logo: null },
-      updatedAt: now(),
-    };
+    const next = { ...options, logo: null };
+    // Opening a document runs this with its own options: don't bump updatedAt
+    // for an unchanged document, or a stale device would win a sync conflict.
+    if (sameOptions(doc.options, next)) return;
+    const updated: QrDocument = { ...doc, options: next, updatedAt: now() };
     // Mirror into the ref immediately so a same-tick duplicate sees the edit.
     documentsRef.current = replaceById(documentsRef.current, updated);
     setDocuments((ds) => replaceById(ds, updated));
@@ -368,6 +382,7 @@ export function useLibrary(
   }, []);
 
   const reload = useCallback(() => hydrate(), [hydrate]);
+  const refresh = useCallback(() => hydrate(undefined, true), [hydrate]);
 
   return {
     folders,
@@ -391,5 +406,6 @@ export function useLibrary(
     selectDocument,
     persistActiveOptions,
     reload,
+    refresh,
   };
 }

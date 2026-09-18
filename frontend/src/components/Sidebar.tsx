@@ -56,6 +56,8 @@ export interface SidebarProps {
   onDeleteFolder(id: string): void;
   onDeleteDocument(id: string): void;
   onSelectDocument(id: string): void;
+  /** Pinned under the tree, at the bottom of the library (the account link). */
+  footer?: ReactNode;
 }
 
 /** What the recursive nodes receive: the public props plus shared drag state so
@@ -211,6 +213,7 @@ export function Sidebar(props: SidebarProps) {
             ))}
           </ul>
         )}
+        {props.footer}
       </Panel>
     </aside>
   );

@@ -12,7 +12,14 @@
  *
  *  Every entry point feature-detects its store and swallows errors, so disabled
  *  storage, private mode, or quota overflow degrade to a no-op rather than
- *  breaking the app. */
+ *  breaking the app.
+ *
+ *  Cloud sync bookkeeping lives here too, so every local write is recorded where
+ *  it happens: each tracked mutation adds an entry to the `outbox` store (what to
+ *  push next), hard deletes also leave a `tombstones` record (so the deletion can
+ *  be pushed), and the `sync` store keeps the account/cursor state. Writes that
+ *  apply changes *from* the cloud pass `{ track: false }` so they aren't echoed
+ *  back. */
 
 import { asLocale, type Locale } from "../i18n/locales";
 import { COLOR_FORMATS, type ColorFormat } from "./color";
@@ -36,10 +43,13 @@ import {
 } from "./types";
 
 const DB_NAME = "qr-studio";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const FOLDER_STORE = "folders";
 const DOC_STORE = "documents";
 const LOGO_STORE = "logo";
+const OUTBOX_STORE = "outbox";
+const TOMBSTONE_STORE = "tombstones";
+const SYNC_STORE = "sync";
 
 /** localStorage key for the app-wide preferences record. Exported for tests. */
 export const PREFS_KEY = "qr-studio:prefs";
@@ -64,6 +74,9 @@ export interface Prefs {
   /** The user's chosen interface language. Absent until they pick one — the app
    *  then falls back to browser detection. */
   locale?: Locale;
+  /** When `colorFormat` or `locale` last changed (epoch ms). These two follow the
+   *  account across devices; absent until the user changes one of them. */
+  settingsUpdatedAt?: number;
 }
 
 const DEFAULT_PREFS: Prefs = {
@@ -115,18 +128,36 @@ export function getPrefs(): Prefs {
       // Only surface a stored language when it's a supported one; otherwise omit
       // the key so callers fall back to browser detection.
       ...(locale ? { locale } : {}),
+      ...(typeof parsed.settingsUpdatedAt === "number"
+        ? { settingsUpdatedAt: parsed.settingsUpdatedAt }
+        : {}),
     };
   } catch {
     return { ...DEFAULT_PREFS };
   }
 }
 
-/** Persist the app-wide preferences. No-op on failure. */
-export function setPrefs(prefs: Prefs): void {
+/** Persist the app-wide preferences. No-op on failure. When a synced setting
+ *  (colour format or language) changes, it is stamped and queued for sync unless
+ *  `track` is false (the change came from the cloud). */
+export function setPrefs(
+  prefs: Prefs,
+  { track = true }: WriteOptions = {},
+): void {
+  const previous = getPrefs();
+  let next = prefs;
+  if (
+    track &&
+    (previous.colorFormat !== prefs.colorFormat ||
+      previous.locale !== prefs.locale)
+  ) {
+    next = { ...prefs, settingsUpdatedAt: Date.now() };
+    void markDirty("settings", SETTINGS_ID);
+  }
   try {
     localStorage.setItem(
       PREFS_KEY,
-      JSON.stringify({ version: PREFS_VERSION, ...prefs }),
+      JSON.stringify({ version: PREFS_VERSION, ...next }),
     );
   } catch {
     // Quota or unavailable storage — drop the write.
@@ -151,6 +182,13 @@ function openDb(): Promise<IDBDatabase> {
         db.createObjectStore(FOLDER_STORE, { keyPath: "id" });
       if (!db.objectStoreNames.contains(DOC_STORE))
         db.createObjectStore(DOC_STORE, { keyPath: "id" });
+      // v3: cloud sync bookkeeping.
+      if (!db.objectStoreNames.contains(OUTBOX_STORE))
+        db.createObjectStore(OUTBOX_STORE, { keyPath: "key" });
+      if (!db.objectStoreNames.contains(TOMBSTONE_STORE))
+        db.createObjectStore(TOMBSTONE_STORE, { keyPath: "key" });
+      if (!db.objectStoreNames.contains(SYNC_STORE))
+        db.createObjectStore(SYNC_STORE);
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -198,8 +236,21 @@ export async function listFolders(): Promise<Folder[]> {
 }
 
 /** Insert or update a folder. No-op on failure. */
-export async function saveFolder(folder: Folder): Promise<void> {
+export async function saveFolder(
+  folder: Folder,
+  { track = true }: WriteOptions = {},
+): Promise<void> {
   await withStore(FOLDER_STORE, "readwrite", (s) => s.put(folder));
+  if (track) await trackUpsert("folder", folder.id);
+}
+
+/** Delete a single folder record (not its contents). No-op on failure. */
+export async function deleteFolder(
+  id: string,
+  { track = true }: WriteOptions = {},
+): Promise<void> {
+  await withStore(FOLDER_STORE, "readwrite", (s) => s.delete(id));
+  if (track) await trackDelete("folder", id);
 }
 
 // --- Documents -------------------------------------------------------------
@@ -218,18 +269,27 @@ export async function listDocuments(): Promise<QrDocument[]> {
 
 /** Insert or update a document. The logo is forced null — it lives in the logo
  *  store, keyed by the document id. No-op on failure. */
-export async function saveDocument(doc: QrDocument): Promise<void> {
+export async function saveDocument(
+  doc: QrDocument,
+  { track = true }: WriteOptions = {},
+): Promise<void> {
   const record: QrDocument = {
     ...doc,
     options: { ...doc.options, logo: null },
   };
   await withStore(DOC_STORE, "readwrite", (s) => s.put(record));
+  if (track) await trackUpsert("document", doc.id);
 }
 
-/** Delete a single document and its logo. No-op on failure. */
-export async function deleteDocument(id: string): Promise<void> {
+/** Delete a single document and its logo. No-op on failure. The logo goes with
+ *  the document in the cloud too, so only the document deletion is tracked. */
+export async function deleteDocument(
+  id: string,
+  { track = true }: WriteOptions = {},
+): Promise<void> {
   await withStore(DOC_STORE, "readwrite", (s) => s.delete(id));
-  await clearLogo(id);
+  await clearLogo(id, { track: false });
+  if (track) await trackDelete("document", id);
 }
 
 /** Maximum folder nesting, counting the top-level project as level 1. Beyond
@@ -277,9 +337,7 @@ export async function deleteFolderTree(
   for (const doc of documents) {
     if (doomed.has(doc.folderId)) await deleteDocument(doc.id);
   }
-  for (const folderId of doomed) {
-    await withStore(FOLDER_STORE, "readwrite", (s) => s.delete(folderId));
-  }
+  for (const folderId of doomed) await deleteFolder(folderId);
 }
 
 // --- Logos -----------------------------------------------------------------
@@ -300,8 +358,13 @@ export async function loadLogo(docId: string): Promise<string | null> {
 
 /** Store a document's logo Blob directly. No-op on failure. Used by import,
  *  which already holds the Blob, and by {@link saveLogo}. */
-export async function saveLogoBlob(docId: string, blob: Blob): Promise<void> {
+export async function saveLogoBlob(
+  docId: string,
+  blob: Blob,
+  { track = true }: WriteOptions = {},
+): Promise<void> {
   await withStore(LOGO_STORE, "readwrite", (s) => s.put(blob, docId));
+  if (track) await markDirty("logo", docId);
 }
 
 /** Store a document's logo (a data URL) as a Blob. No-op on failure. */
@@ -316,8 +379,12 @@ export async function saveLogo(docId: string, dataUrl: string): Promise<void> {
 }
 
 /** Remove a document's logo. No-op on failure. */
-export async function clearLogo(docId: string): Promise<void> {
+export async function clearLogo(
+  docId: string,
+  { track = true }: WriteOptions = {},
+): Promise<void> {
   await withStore(LOGO_STORE, "readwrite", (s) => s.delete(docId));
+  if (track) await markDirty("logo", docId);
 }
 
 /** Copy a document's logo Blob onto another document. No-op if the source has
@@ -326,17 +393,193 @@ export async function copyLogo(fromId: string, toId: string): Promise<void> {
   const blob = await withStore<Blob | undefined>(LOGO_STORE, "readonly", (s) =>
     s.get(fromId),
   );
-  if (blob) await withStore(LOGO_STORE, "readwrite", (s) => s.put(blob, toId));
+  if (blob) await saveLogoBlob(toId, blob);
 }
 
 // --- Whole-library reset ---------------------------------------------------
 
 /** Wipe every folder, document, and logo. Used by library import, which then
- *  restores the archive over the empty stores. No-op on failure. */
+ *  restores the archive over the empty stores; the wiped records are tombstoned
+ *  so the replacement reaches the cloud too. No-op on failure. */
 export async function clearLibrary(): Promise<void> {
+  const [folders, documents] = await Promise.all([
+    listFolders(),
+    listDocuments(),
+  ]);
   await withStore(FOLDER_STORE, "readwrite", (s) => s.clear());
   await withStore(DOC_STORE, "readwrite", (s) => s.clear());
   await withStore(LOGO_STORE, "readwrite", (s) => s.clear());
+  for (const f of folders) await trackDelete("folder", f.id);
+  for (const d of documents) await trackDelete("document", d.id);
+}
+
+/** Erase everything this device knows about the library — records, logos and
+ *  sync bookkeeping — without queueing anything for the cloud. Used on sign-out
+ *  (the cloud copy stays intact) and before adopting a different account. */
+export async function wipeLocalLibrary(): Promise<void> {
+  for (const store of [
+    FOLDER_STORE,
+    DOC_STORE,
+    LOGO_STORE,
+    OUTBOX_STORE,
+    TOMBSTONE_STORE,
+    SYNC_STORE,
+  ]) {
+    await withStore(store, "readwrite", (s) => s.clear());
+  }
+  // The synced settings now belong to no account: don't push them to the next.
+  const { settingsUpdatedAt: _stamp, ...prefs } = getPrefs();
+  setPrefs(prefs, { track: false });
+}
+
+// --- Sync bookkeeping ------------------------------------------------------
+
+/** Options for writes that can come from the cloud. `track: false` applies the
+ *  change locally without queueing it to be pushed back. */
+export interface WriteOptions {
+  track?: boolean;
+}
+
+/** What a queued change refers to. `settings` has a single fixed id. */
+export type SyncKind = "folder" | "document" | "logo" | "settings";
+export const SETTINGS_ID = "settings";
+
+/** A queued local change. `rev` changes on every write, so a sync can tell
+ *  whether the entry was re-dirtied while its push was in flight. */
+export interface OutboxEntry {
+  key: string;
+  kind: SyncKind;
+  id: string;
+  rev: number;
+}
+
+/** A locally deleted folder or document, kept until the deletion is pushed. */
+export interface Tombstone {
+  key: string;
+  kind: "folder" | "document";
+  id: string;
+  deletedAt: number;
+}
+
+/** Which account this device's library belongs to, how far it has pulled, and
+ *  the content hash of each logo as last synced. */
+export interface SyncState {
+  userId: string | null;
+  cursor: number;
+  logoHashes: Record<string, string>;
+}
+
+const SYNC_STATE_KEY = "state";
+const EMPTY_SYNC_STATE: SyncState = { userId: null, cursor: 0, logoHashes: {} };
+
+const syncKey = (kind: SyncKind, id: string) => `${kind}:${id}`;
+
+let revCounter = 0;
+/** A strictly increasing revision number for outbox entries. */
+function nextRev(): number {
+  revCounter += 1;
+  return Date.now() * 1000 + (revCounter % 1000);
+}
+
+const changeListeners = new Set<() => void>();
+
+/** Subscribe to tracked local writes (the sync engine debounces a push on
+ *  them). Returns the unsubscribe function. */
+export function onLocalChange(listener: () => void): () => void {
+  changeListeners.add(listener);
+  return () => {
+    changeListeners.delete(listener);
+  };
+}
+
+/** Queue `kind:id` to be pushed on the next sync. */
+export async function markDirty(kind: SyncKind, id: string): Promise<void> {
+  const entry: OutboxEntry = {
+    key: syncKey(kind, id),
+    kind,
+    id,
+    rev: nextRev(),
+  };
+  await withStore(OUTBOX_STORE, "readwrite", (s) => s.put(entry));
+  for (const listener of changeListeners) listener();
+}
+
+async function trackUpsert(kind: "folder" | "document", id: string) {
+  await withStore(TOMBSTONE_STORE, "readwrite", (s) =>
+    s.delete(syncKey(kind, id)),
+  );
+  await markDirty(kind, id);
+}
+
+async function trackDelete(kind: "folder" | "document", id: string) {
+  const tombstone: Tombstone = {
+    key: syncKey(kind, id),
+    kind,
+    id,
+    deletedAt: Date.now(),
+  };
+  await withStore(TOMBSTONE_STORE, "readwrite", (s) => s.put(tombstone));
+  await markDirty(kind, id);
+}
+
+/** Every queued change, oldest first. */
+export async function listOutbox(): Promise<OutboxEntry[]> {
+  const entries =
+    (await withStore<OutboxEntry[]>(OUTBOX_STORE, "readonly", (s) =>
+      s.getAll(),
+    )) ?? [];
+  return entries.sort((a, b) => a.rev - b.rev);
+}
+
+/** Drop pushed entries — but only those not re-dirtied since they were read. */
+export async function settleOutbox(pushed: OutboxEntry[]): Promise<void> {
+  const current = new Map((await listOutbox()).map((e) => [e.key, e.rev]));
+  for (const entry of pushed) {
+    if (current.get(entry.key) === entry.rev) {
+      await withStore(OUTBOX_STORE, "readwrite", (s) => s.delete(entry.key));
+    }
+  }
+}
+
+/** Every pending deletion. */
+export async function listTombstones(): Promise<Tombstone[]> {
+  return (
+    (await withStore<Tombstone[]>(TOMBSTONE_STORE, "readonly", (s) =>
+      s.getAll(),
+    )) ?? []
+  );
+}
+
+/** Forget a tombstone once the deletion has been pushed (or superseded). */
+export async function clearTombstone(
+  kind: "folder" | "document",
+  id: string,
+): Promise<void> {
+  await withStore(TOMBSTONE_STORE, "readwrite", (s) =>
+    s.delete(syncKey(kind, id)),
+  );
+}
+
+/** This device's sync state (defaults for a library never synced). */
+export async function getSyncState(): Promise<SyncState> {
+  const stored = await withStore<SyncState | undefined>(
+    SYNC_STORE,
+    "readonly",
+    (s) => s.get(SYNC_STATE_KEY),
+  );
+  return {
+    ...EMPTY_SYNC_STATE,
+    ...stored,
+    logoHashes: { ...stored?.logoHashes },
+  };
+}
+
+/** Merge `patch` into the stored sync state. */
+export async function updateSyncState(
+  patch: Partial<SyncState>,
+): Promise<void> {
+  const next = { ...(await getSyncState()), ...patch };
+  await withStore(SYNC_STORE, "readwrite", (s) => s.put(next, SYNC_STATE_KEY));
 }
 
 // --- Legacy migration ------------------------------------------------------

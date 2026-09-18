@@ -126,7 +126,9 @@
     "duplicateQrCode": "Duplica codice QR",
     "renameQrCode": "Rinomina codice QR",
     "deleteQrCode": "Elimina codice QR",
-    "confirmDeleteDoc": "Eliminare «{{name}}»?"
+    "confirmDeleteDoc": "Eliminare «{{name}}»?",
+    "account": "Account",
+    "signIn": "Accedi per sincronizzare"
   },
   "library": {
     "myProject": "Il mio progetto",
@@ -178,7 +180,8 @@
   },
   "nav": {
     "menu": "Menu",
-    "backToEditor": "Torna all’editor"
+    "backToEditor": "Torna all’editor",
+    "account": "Account"
   },
   "footer": {
     "label": "Piè di pagina",
@@ -193,15 +196,16 @@
   "info": {
     "library": "Scopri come importare ed esportare la tua libreria",
     "exportQr": "Scopri come esportare il tuo codice QR",
-    "errorCorrection": "Scopri di più sulla correzione degli errori"
+    "errorCorrection": "Scopri di più sulla correzione degli errori",
+    "account": "Scopri di più su account e sincronizzazione"
   },
   "faq": {
     "title": "FAQ",
-    "subtitle": "Risposte rapide su privacy, prezzo e funzionamento di Dotcraft.",
+    "subtitle": "Risposte rapide su privacy, account, prezzi e funzionamento di Dotcraft.",
     "items": {
       "privacy": {
         "q": "Come viene conservata la mia libreria?",
-        "a": "Tutto resta nel tuo browser. I tuoi progetti e codici QR sono salvati localmente sul tuo dispositivo (archiviazione locale e IndexedDB); nulla viene inviato a un server e noi non possiamo accedervi in alcun modo."
+        "a": "I tuoi progetti e codici QR vengono sempre salvati nel browser (IndexedDB), quindi Dotcraft funziona anche senza account. Se accedi, la libreria viene salvata anche nel tuo account, così ne hai un backup ed è disponibile su tutti i tuoi dispositivi. Senza account, non viene caricato nulla."
       },
       "free": {
         "q": "Dotcraft è gratuito?",
@@ -209,7 +213,15 @@
       },
       "account": {
         "q": "Mi serve un account?",
-        "a": "No. Non c’è registrazione né accesso: Dotcraft funziona interamente nel tuo browser, quindi puoi iniziare a creare subito."
+        "a": "No. Puoi creare ed esportare codici QR senza registrarti. L'account è facoltativo e gratuito: salva la tua libreria e la mantiene sincronizzata tra i tuoi dispositivi."
+      },
+      "sync": {
+        "q": "Cosa succede se modifico lo stesso codice QR su due dispositivi?",
+        "a": "Le modifiche vengono sincronizzate automaticamente in background, di solito in pochi secondi. Se lo stesso elemento è stato modificato su due dispositivi prima che potessero sincronizzarsi, prevale la modifica più recente. Anche le eliminazioni vengono sincronizzate."
+      },
+      "forgotPassword": {
+        "q": "Ho dimenticato la password. Cosa posso fare?",
+        "a": "Nella schermata di accesso, scegli «Password dimenticata?» e inserisci la tua e-mail. Riceverai un link per sceglierne una nuova."
       },
       "expire": {
         "q": "I miei codici QR scadranno?",
@@ -221,7 +233,7 @@
       },
       "clearData": {
         "q": "Cosa succede se cancello i dati del browser?",
-        "a": "La tua libreria risiede nell’archiviazione locale del browser, quindi cancellare i dati del sito o usare la navigazione privata la eliminerà. Usa il pulsante Esporta nella libreria per salvare un file di backup che potrai reimportare in seguito."
+        "a": "Senza account, la tua libreria esiste solo nel browser: cancellare i dati del sito o usare la navigazione privata la elimina. Usa Esporta nella libreria per conservare un file di backup. Se hai effettuato l'accesso, la libreria è salvata anche nel tuo account e torna non appena accedi di nuovo."
       }
     }
   },
@@ -229,6 +241,10 @@
     "title": "Centro assistenza",
     "subtitle": "Guide per sfruttare al meglio Dotcraft.",
     "articles": {
+      "account": {
+        "title": "Account e sincronizzazione",
+        "body": "Dotcraft funziona senza account: la tua libreria viene salvata nel browser. Crea un account gratuito dal fondo della libreria (o dalla voce Account del menu su mobile) per farne il backup e usarla su tutti i tuoi dispositivi. I codici QR che hai già vengono caricati automaticamente all'accesso.\n\nDopo l'accesso, la sincronizzazione avviene da sola: ogni modifica viene salvata nel tuo account pochi secondi dopo, e le modifiche fatte sugli altri dispositivi compaiono automaticamente. L'icona di sincronizzazione accanto alla tua e-mail indica se è tutto aggiornato. Se lavori offline, le modifiche vengono conservate e sincronizzate non appena torni online. Quando lo stesso codice QR viene modificato su due dispositivi prima che possano sincronizzarsi, prevale la modifica più recente.\n\nApri la pagina Account per cambiare e-mail o password, o per uscire. Uscendo, la libreria viene rimossa da questo dispositivo: resta nel tuo account e torna non appena accedi di nuovo. Se dimentichi la password, usa «Password dimenticata?» nella schermata di accesso per ricevere un link di reimpostazione via e-mail."
+      },
       "library": {
         "title": "Importare ed esportare la libreria",
         "body": "L’intera libreria — ogni progetto, cartella e codice QR — può essere salvata in un unico file .dotcraft. Nella libreria, usa Esporta per scaricare quel file come backup o per spostare il tuo lavoro su un altro browser o dispositivo.\n\nUsa Importa per ripristinare un file .dotcraft. L’importazione sostituisce la libreria attuale con il contenuto del file, quindi esporta prima un backup se vuoi conservare ciò che hai.",
@@ -253,5 +269,76 @@
         "cta": "Apri una segnalazione di bug"
       }
     }
+  },
+  "account": {
+    "title": "Account",
+    "subtitle": "Mantieni la tua libreria salvata e sincronizzata su tutti i tuoi dispositivi.",
+    "loading": "Caricamento…",
+    "welcomeTitle": "Sincronizza la tua libreria",
+    "pitch": "La tua libreria è salvata solo in questo browser. Crea un account gratuito per farne il backup e usarla su tutti i tuoi dispositivi: i codici QR che hai già vengono caricati automaticamente.",
+    "signIn": "Accedi",
+    "signUp": "Crea account",
+    "email": "E-mail",
+    "password": "Password",
+    "confirmPassword": "Conferma password",
+    "currentPassword": "Password attuale",
+    "newPassword": "Nuova password",
+    "newEmail": "Nuova e-mail",
+    "forgotPassword": "Password dimenticata?",
+    "passwordMismatch": "Le password non coincidono.",
+    "signedInAs": "Accesso effettuato come {{email}}",
+    "syncTitle": "Sincronizzazione",
+    "emailTitle": "Indirizzo e-mail",
+    "updateEmail": "Aggiorna e-mail",
+    "emailUpdated": "Il tuo indirizzo e-mail è stato aggiornato.",
+    "passwordTitle": "Password",
+    "changePassword": "Cambia password",
+    "passwordUpdated": "La tua password è stata cambiata. È stata effettuata la disconnessione dagli altri dispositivi.",
+    "signOutTitle": "Esci",
+    "signOutHint": "Uscendo, la tua libreria viene rimossa da questo dispositivo. Resta al sicuro nel tuo account e torna non appena accedi di nuovo.",
+    "signOut": "Esci",
+    "unsyncedTitle": "Modifiche non sincronizzate",
+    "unsyncedMessage": "Alcune delle tue ultime modifiche non sono ancora state salvate nel cloud (sei offline?). Se esci ora, andranno perse.",
+    "signOutAnyway": "Esci comunque"
+  },
+  "sync": {
+    "status": {
+      "idle": "Sincronizzato",
+      "syncing": "Sincronizzazione…",
+      "offline": "Offline: le modifiche verranno sincronizzate quando tornerai online",
+      "error": "Sincronizzazione non riuscita: nuovo tentativo a breve"
+    },
+    "lastSynced": "Ultima sincronizzazione: {{time}}",
+    "never": "Non ancora sincronizzato",
+    "syncNow": "Sincronizza ora"
+  },
+  "auth": {
+    "backToSignIn": "Torna all'accesso",
+    "forgot": {
+      "title": "Reimposta la password",
+      "intro": "Inserisci l'e-mail del tuo account e ti invieremo un link per scegliere una nuova password.",
+      "submit": "Invia link",
+      "sent": "Se esiste un account per {{email}}, ti abbiamo inviato un link di reimpostazione. Controlla la tua casella di posta."
+    },
+    "reset": {
+      "title": "Scegli una nuova password",
+      "submit": "Salva password",
+      "done": "La tua password è stata cambiata. Ora puoi accedere con la nuova password.",
+      "requestNew": "Richiedi un nuovo link"
+    }
+  },
+  "apiErrors": {
+    "invalid_credentials": "E-mail o password errate.",
+    "email_taken": "Questa e-mail è già usata da un account.",
+    "wrong_password": "La password attuale non è corretta.",
+    "password_too_short": "La password deve contenere almeno 8 caratteri.",
+    "password_too_common": "Questa password è troppo comune.",
+    "password_entirely_numeric": "La password non può essere composta solo da cifre.",
+    "password_too_similar": "La password è troppo simile alla tua e-mail.",
+    "invalid_token": "Questo link di reimpostazione non è valido o è scaduto.",
+    "throttled": "Troppi tentativi. Attendi un minuto e riprova.",
+    "network": "Impossibile raggiungere il server. Controlla la connessione e riprova.",
+    "invalidEmail": "Inserisci un indirizzo e-mail valido.",
+    "generic": "Qualcosa è andato storto. Riprova."
   }
 }

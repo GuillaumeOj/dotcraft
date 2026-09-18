@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { renderWithRouter as render } from "../test/router";
 import { Navbar } from "./Navbar";
 
 function renderNavbar(over: Partial<Parameters<typeof Navbar>[0]> = {}) {

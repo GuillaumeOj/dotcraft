@@ -1,7 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { resetDb } from "../test/db";
-import { getPrefs } from "./storage";
+import {
+  deleteDocument,
+  getPrefs,
+  listDocuments,
+  saveDocument,
+} from "./storage";
 import { DEFAULT_OPTIONS } from "./types";
 import { useLibrary } from "./useLibrary";
 
@@ -40,6 +45,7 @@ describe("useLibrary — first run", () => {
         lastOpenedDocId: result.current.activeDocId,
         collapsedFolderIds: [],
         collapsedPanelIds: [],
+        settingsUpdatedAt: expect.any(Number),
       }),
     );
   });
@@ -248,5 +254,51 @@ describe("useLibrary — migration", () => {
     });
     expect(result.current.activeDocId).toBe(result.current.documents[0].id);
     expect(result.current.colorFormat).toBe("named");
+  });
+});
+
+describe("useLibrary — cloud sync support", () => {
+  it("does not touch a document whose options didn't change", async () => {
+    const { result } = await mounted();
+    const before = result.current.documents[0];
+
+    act(() => result.current.persistActiveOptions({ ...before.options }));
+
+    expect(result.current.documents[0]).toBe(before);
+  });
+
+  it("refreshes from storage while keeping the open document", async () => {
+    const { result } = await mounted();
+    const project = result.current.folders[0].id;
+    act(() => result.current.createDocument(project));
+    const opened = result.current.activeDocId;
+    await waitFor(async () => expect(await listDocuments()).toHaveLength(2));
+
+    // Another device renamed the first document.
+    const [first] = await listDocuments();
+    await saveDocument(
+      { ...first, name: "Renamed remotely", updatedAt: first.updatedAt + 1 },
+      { track: false },
+    );
+    await act(() => result.current.refresh());
+
+    expect(result.current.activeDocId).toBe(opened);
+    expect(result.current.documents.map((d) => d.name)).toContain(
+      "Renamed remotely",
+    );
+  });
+
+  it("falls back to the first document when the open one was deleted remotely", async () => {
+    const { result } = await mounted();
+    const project = result.current.folders[0].id;
+    act(() => result.current.createDocument(project));
+    const opened = result.current.activeDocId as string;
+    await waitFor(async () => expect(await listDocuments()).toHaveLength(2));
+
+    await deleteDocument(opened, { track: false });
+    await act(() => result.current.refresh());
+
+    expect(result.current.activeDocId).not.toBe(opened);
+    expect(result.current.activeDocId).toBe(result.current.documents[0].id);
   });
 });

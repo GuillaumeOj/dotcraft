@@ -12,6 +12,7 @@ const EC_LEVELS = ["L", "M", "Q", "H"] as const;
 /** Each help article: a stable `id` used as the in-page anchor (matched by the
  *  `InfoLink`s on the editor controls) and the catalog `key` for its copy. */
 const ARTICLES = [
+  { id: "account", key: "account" },
   { id: "library", key: "library" },
   { id: "export-qr", key: "exportQr" },
   { id: "error-correction", key: "errorCorrection" },
@@ -30,8 +31,8 @@ function Paragraphs({ text }: { text: string }) {
   );
 }
 
-/** The Help Center route: how-to articles for the library, exporting, error
- *  correction, and reaching the author via GitHub issue forms. Deep links like
+/** The Help Center route: how-to articles for accounts and sync, the library,
+ *  exporting, error correction, and reaching the author via GitHub issue forms. Deep links like
  *  `/help-center#error-correction` scroll straight to the relevant article. */
 export function HelpCenterPage() {
   const { t } = useTranslation();

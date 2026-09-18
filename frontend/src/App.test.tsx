@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
@@ -9,6 +9,7 @@ import { DEFAULT_OPTIONS, type QrDocument, type QrOptions } from "./qr/types";
 import type { Library } from "./qr/useLibrary";
 import { useLibrary } from "./qr/useLibrary";
 import { createMatchMedia } from "./test/matchMedia";
+import { emitRemoteChanges } from "./test/providers";
 import { renderWithRouter as render } from "./test/router";
 
 /** Options on the Text tab, pre-filled — the editor then shows a "Text" field. */
@@ -94,6 +95,7 @@ function makeLib(over: Partial<Library> = {}): Library {
     selectDocument: vi.fn(),
     persistActiveOptions: vi.fn(),
     reload: vi.fn(async () => {}),
+    refresh: vi.fn(async () => {}),
     ...over,
   };
 }
@@ -438,5 +440,70 @@ describe("App — mobile layout", () => {
     expect(mockedStorage.setPrefs).toHaveBeenCalledWith(
       expect.objectContaining({ collapsedPanelIds: ["style"] }),
     );
+  });
+
+  it("shows the account link at the bottom of the desktop library", async () => {
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+
+    expect(
+      within(libraryAside()).getByRole("link", { name: "Sign in to sync" }),
+    ).toHaveAttribute("href", "/account");
+  });
+
+  it("opens the account view from the mobile menu", async () => {
+    setMobile();
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByAltText("QR code preview");
+
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Account" }));
+
+    expect(
+      await screen.findByRole("heading", { name: "Account" }),
+    ).toBeInTheDocument();
+  });
+
+  it("refreshes the library and reloads the open document on remote changes", async () => {
+    const lib = setLib({ documents: [makeDoc({ options: textOpts("old") })] });
+    render(<App />);
+    await waitFor(() =>
+      expect(screen.getByLabelText("Text")).toHaveValue("old"),
+    );
+
+    // The cloud changed the open document: the editor reloads it.
+    setLib({
+      documents: [makeDoc({ options: textOpts("from the cloud") })],
+      refresh: lib.refresh,
+    });
+    act(() =>
+      emitRemoteChanges({ library: true, documentIds: ["d1"], settings: null }),
+    );
+
+    expect(lib.refresh).toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Text")).toHaveValue("from the cloud"),
+    );
+  });
+
+  it("keeps unsaved edits when the open document changes remotely", async () => {
+    const lib = setLib({ documents: [makeDoc({ options: textOpts("old") })] });
+    const user = userEvent.setup();
+    render(<App />);
+    const text = await screen.findByLabelText("Text");
+    await waitFor(() => expect(text).toHaveValue("old"));
+    await user.type(text, " + mine");
+
+    act(() =>
+      emitRemoteChanges({
+        library: false,
+        documentIds: ["d1"],
+        settings: null,
+      }),
+    );
+
+    expect(lib.refresh).toHaveBeenCalled();
+    expect(screen.getByLabelText("Text")).toHaveValue("old + mine");
   });
 });

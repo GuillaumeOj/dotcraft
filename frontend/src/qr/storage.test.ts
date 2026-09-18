@@ -4,24 +4,33 @@ import { resetDb } from "../test/db";
 import {
   clearLibrary,
   clearLogo,
+  clearTombstone,
   copyLogo,
   deleteDocument,
   deleteFolderTree,
   folderDepth,
   folderSubtreeIds,
   getPrefs,
+  getSyncState,
   listDocuments,
   listFolders,
+  listOutbox,
+  listTombstones,
   loadLogo,
   loadLogoBlob,
+  markDirty,
   migrateLegacy,
   normalizeOptions,
+  onLocalChange,
   PREFS_KEY,
   saveDocument,
   saveFolder,
   saveLogo,
   saveLogoBlob,
   setPrefs,
+  settleOutbox,
+  updateSyncState,
+  wipeLocalLibrary,
 } from "./storage";
 import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "./types";
 
@@ -77,6 +86,8 @@ describe("preferences", () => {
       lastOpenedDocId: "abc",
       collapsedFolderIds: ["f1", "f2"],
       collapsedPanelIds: ["style", "logo"],
+      // Changing a synced setting (the colour format) stamps it for sync.
+      settingsUpdatedAt: expect.any(Number),
     });
   });
 
@@ -417,6 +428,7 @@ describe("migrateLegacy", () => {
       lastOpenedDocId: id,
       collapsedFolderIds: [],
       collapsedPanelIds: [],
+      settingsUpdatedAt: expect.any(Number),
     });
     expect(localStorage.getItem(LEGACY_KEY)).toBeNull();
   });
@@ -476,5 +488,135 @@ describe("migrateLegacy", () => {
     localStorage.setItem(LEGACY_KEY, JSON.stringify({ version: 99 }));
     expect(await migrateLegacy(newId, 100)).toBeNull();
     expect(localStorage.getItem(LEGACY_KEY)).toBeNull();
+  });
+});
+
+describe("sync bookkeeping", () => {
+  const keys = async () => (await listOutbox()).map((e) => e.key);
+
+  it("queues tracked writes and notifies subscribers", async () => {
+    const listener = vi.fn();
+    const unsubscribe = onLocalChange(listener);
+    const f = folder();
+    const d = doc({ folderId: f.id });
+
+    await saveFolder(f);
+    await saveDocument(d);
+    await saveLogoBlob(d.id, new NodeBlob(["x"]) as unknown as Blob);
+    unsubscribe();
+    await clearLogo(d.id);
+
+    expect(await keys()).toEqual([
+      `folder:${f.id}`,
+      `document:${d.id}`,
+      `logo:${d.id}`,
+    ]);
+    expect(listener).toHaveBeenCalledTimes(3);
+  });
+
+  it("does not queue untracked writes", async () => {
+    const f = folder();
+    await saveFolder(f, { track: false });
+    await saveDocument(doc(), { track: false });
+    await deleteDocument("x", { track: false });
+
+    expect(await listOutbox()).toEqual([]);
+    expect(await listTombstones()).toEqual([]);
+  });
+
+  it("leaves tombstones for deletions and clears them on re-creation", async () => {
+    const f = folder();
+    const d = doc({ folderId: f.id });
+    await saveFolder(f);
+    await saveDocument(d);
+
+    await deleteFolderTree(f.id, [f], [d]);
+    expect((await listTombstones()).map((t) => t.key).sort()).toEqual([
+      `document:${d.id}`,
+      `folder:${f.id}`,
+    ]);
+
+    await saveFolder(f);
+    expect((await listTombstones()).map((t) => t.key)).toEqual([
+      `document:${d.id}`,
+    ]);
+    await clearTombstone("document", d.id);
+    expect(await listTombstones()).toEqual([]);
+  });
+
+  it("copies logos as a tracked change of the target", async () => {
+    await saveLogoBlob("a", new NodeBlob(["x"]) as unknown as Blob, {
+      track: false,
+    });
+    await copyLogo("a", "b");
+
+    expect(await keys()).toEqual(["logo:b"]);
+  });
+
+  it("settles only entries that weren't re-dirtied", async () => {
+    await markDirty("folder", "a");
+    await markDirty("folder", "b");
+    const pushed = await listOutbox();
+    await markDirty("folder", "b");
+
+    await settleOutbox(pushed);
+
+    expect(await keys()).toEqual(["folder:b"]);
+  });
+
+  it("tombstones the replaced library on import-style clears", async () => {
+    const f = folder();
+    await saveFolder(f, { track: false });
+    await saveDocument(doc({ id: "d1" }), { track: false });
+
+    await clearLibrary();
+
+    expect((await listTombstones()).map((t) => t.key).sort()).toEqual([
+      "document:d1",
+      `folder:${f.id}`,
+    ]);
+  });
+
+  it("stamps and queues synced settings only when they change", async () => {
+    setPrefs({ ...getPrefs(), collapsedFolderIds: ["x"] });
+    expect(getPrefs().settingsUpdatedAt).toBeUndefined();
+
+    setPrefs({ ...getPrefs(), locale: "de" });
+    expect(getPrefs().settingsUpdatedAt).toEqual(expect.any(Number));
+    await vi.waitFor(async () =>
+      expect(await keys()).toEqual(["settings:settings"]),
+    );
+
+    setPrefs({ ...getPrefs(), colorFormat: "hsl" }, { track: false });
+    expect(getPrefs().colorFormat).toBe("hsl");
+  });
+
+  it("stores the sync state and wipes everything on sign-out", async () => {
+    expect(await getSyncState()).toEqual({
+      userId: null,
+      cursor: 0,
+      logoHashes: {},
+    });
+    await updateSyncState({ userId: "u1", cursor: 4, logoHashes: { d: "h" } });
+    await updateSyncState({ cursor: 5 });
+    expect(await getSyncState()).toEqual({
+      userId: "u1",
+      cursor: 5,
+      logoHashes: { d: "h" },
+    });
+
+    await saveFolder(folder());
+    await deleteDocument("gone");
+    setPrefs({ ...getPrefs(), colorFormat: "rgb" });
+
+    await wipeLocalLibrary();
+
+    expect(await listFolders()).toEqual([]);
+    expect(await listOutbox()).toEqual([]);
+    expect(await listTombstones()).toEqual([]);
+    expect((await getSyncState()).userId).toBeNull();
+    // UI prefs survive, but the settings no longer belong to an account.
+    expect(getPrefs().colorFormat).toBe("rgb");
+    expect(getPrefs().settingsUpdatedAt).toBeUndefined();
   });
 });

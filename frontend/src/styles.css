@@ -282,6 +282,96 @@ body {
   color: var(--text);
 }
 
+/* Account pages (account, forgot / reset password). */
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.account__signed-in {
+  margin: 0;
+  color: var(--muted);
+}
+
+.account__pitch {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.account__sync {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form__errors {
+  margin: 0;
+  padding: 10px 12px 10px 28px;
+  border-radius: 9px;
+  background: color-mix(in srgb, #f87171 12%, transparent);
+  color: #fca5a5;
+  font-size: 14px;
+}
+
+.form__success {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: color-mix(in srgb, #4ade80 12%, transparent);
+  color: #86efac;
+  font-size: 14px;
+}
+
+.form__link {
+  align-self: flex-start;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.form__link:hover {
+  color: var(--text);
+}
+
+/* Cloud sync state icon. */
+.sync-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.sync-badge--idle {
+  color: #4ade80;
+}
+
+.sync-badge--error {
+  color: #fbbf24;
+}
+
+.sync-badge--syncing svg {
+  animation: sync-spin 1s linear infinite;
+}
+
+@keyframes sync-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sync-badge--syncing svg {
+    animation: none;
+  }
+}
+
 .faq {
   display: flex;
   flex-direction: column;
@@ -390,6 +480,45 @@ body {
   padding: 14px 12px 16px;
   /* Clip the content so it slides out of view as the column narrows. */
   overflow: hidden;
+}
+
+/* The account link, pinned to the bottom-left of the library under the tree. */
+.sidebar__footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar__account {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.sidebar__account:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.sidebar__account-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Collapsed: keep the bordered rail (the button's diameter wide) but clear its
@@ -760,6 +889,8 @@ input.tree__edit {
 }
 
 input[type="text"],
+input[type="email"],
+input[type="password"],
 input[type="tel"],
 input[type="number"],
 select,
@@ -779,6 +910,8 @@ textarea {
 }
 
 input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
 input[type="tel"]:focus,
 input[type="number"]:focus,
 select:focus,
@@ -1366,7 +1499,14 @@ button.logo-dropzone:hover {
 .app__main--library-collapsed .sidebar__new,
 .app__main--library-collapsed .sidebar__library-actions,
 .app__main--library-collapsed .sidebar__panel > .tree,
-.app__main--library-collapsed .sidebar__panel > .hint {
+.app__main--library-collapsed .sidebar__panel > .hint,
+.app__main--library-collapsed .sidebar__footer {
   visibility: hidden;
   transition: visibility 0s linear 0.25s;
+}
+
+/* Account page buttons keep their natural width inside the stretched column
+   (after the base .btn rules, which this overrides). */
+.account .btn {
+  align-self: flex-start;
 }

@@ -1,11 +1,13 @@
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import type { Locale } from "../i18n/locales";
 import { LanguageSelect } from "./LanguageSelect";
 
 /** The mobile navbar: a hamburger that toggles a stacked menu holding the
- *  language picker and links opening the library and settings modals. Hidden on
+ *  language picker, links opening the library and settings modals, and the
+ *  account view. Hidden on
  *  desktop via CSS. The open state is transient (closes on selection, Escape, or
  *  an outside click). */
 export function Navbar({
@@ -19,6 +21,7 @@ export function Navbar({
   onOpenLibrary: () => void;
   onOpenSettings: () => void;
 }) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -81,6 +84,13 @@ export function Navbar({
             onClick={() => select(onOpenSettings)}
           >
             {t("controls.settings")}
+          </button>
+          <button
+            type="button"
+            className="navbar__item"
+            onClick={() => select(() => navigate("/account"))}
+          >
+            {t("nav.account")}
           </button>
         </nav>
       )}

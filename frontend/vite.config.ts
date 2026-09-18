@@ -3,6 +3,13 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [react()],
+  // In development the Django API runs separately; proxy it so the SPA calls a
+  // same-origin /api, exactly like on Vercel (where a rewrite routes it).
+  server: {
+    proxy: {
+      "/api": process.env.API_PROXY_TARGET ?? "http://localhost:8000",
+    },
+  },
   test: {
     globals: true,
     environment: "jsdom",

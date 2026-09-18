@@ -16,9 +16,18 @@ describe("FaqPage", () => {
     expect(
       screen.getByText("What happens if I clear my browser data?"),
     ).toBeInTheDocument();
-    // The privacy answer makes the local-only guarantee explicit.
+    // The account and sync entries document the optional cloud copy.
     expect(
-      screen.getByText(/nothing is uploaded to a server/),
+      screen.getByText(
+        "What happens if I edit the same QR code on two devices?",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("I forgot my password. What can I do?"),
+    ).toBeInTheDocument();
+    // The privacy answer makes the no-account guarantee explicit.
+    expect(
+      screen.getByText(/Without an account, nothing is uploaded/),
     ).toBeInTheDocument();
   });
 });

@@ -50,8 +50,11 @@ class DocumentIn(_RecordIn):
 
 
 class SettingsIn(serializers.Serializer):
-    locale = serializers.ChoiceField(choices=LOCALES, required=False, allow_blank=True, default="")
-    colorFormat = serializers.ChoiceField(choices=COLOR_FORMATS, required=False, allow_blank=True, default="")
+    # null (or blank) means "not chosen on that device".
+    locale = serializers.ChoiceField(choices=LOCALES, required=False, allow_blank=True, allow_null=True, default="")
+    colorFormat = serializers.ChoiceField(
+        choices=COLOR_FORMATS, required=False, allow_blank=True, allow_null=True, default=""
+    )
     updatedAt = serializers.IntegerField(min_value=0)
 
 
