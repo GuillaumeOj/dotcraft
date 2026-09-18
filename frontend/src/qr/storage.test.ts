@@ -577,6 +577,15 @@ describe("sync bookkeeping", () => {
     ]);
   });
 
+  it("queues the removal of every logo an import-style clear wipes", async () => {
+    await putDocument(doc({ id: "d1" }));
+    await putLogoBlob("d1", new NodeBlob(["x"]) as unknown as Blob);
+
+    await clearLibrary();
+
+    expect(await keys()).toContain("logo:d1");
+  });
+
   it("stamps and queues synced settings only when they change", async () => {
     setPrefs({ ...getPrefs(), collapsedFolderIds: ["x"] });
     updateSyncedSettings({ colorFormat: "hex" });

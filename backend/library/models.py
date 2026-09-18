@@ -17,6 +17,10 @@ from core.models import UUIDModel
 
 CHANGE_SEQUENCE = "library_change_seq"
 
+# Longest folder/document name. Mirrored by MAX_NAME_LENGTH in
+# frontend/src/qr/storage.ts, which clips names before they are synced.
+MAX_NAME_LENGTH = 200
+
 
 def next_change_seq() -> int:
     """Draw the next value of the global change sequence (Postgres)."""
@@ -30,7 +34,7 @@ def next_change_seq() -> int:
 class SyncedRecord(UUIDModel):
     # Indexed through the (owner, server_seq) index declared on each model.
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+", db_index=False)
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=MAX_NAME_LENGTH)
     created_at = models.BigIntegerField()
     updated_at = models.BigIntegerField()
     deleted_at = models.BigIntegerField(null=True, blank=True)

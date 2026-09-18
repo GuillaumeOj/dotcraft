@@ -273,6 +273,14 @@ export async function deleteDocument(id: string): Promise<void> {
   await trackDelete("document", id);
 }
 
+/** Longest folder or document name. Mirrors MAX_NAME_LENGTH in
+ *  backend/library/models.py (the API rejects longer names). */
+export const MAX_NAME_LENGTH = 200;
+
+/** Names are clipped when stored, so every path (rename, "copy" suffixes,
+ *  imports) keeps them within what the cloud accepts. */
+const clipName = (name: string) => name.slice(0, MAX_NAME_LENGTH);
+
 /** Maximum folder nesting, counting the top-level project as level 1. Beyond
  *  this the tree becomes unwieldy in the sidebar. */
 export const MAX_FOLDER_DEPTH = 5;
@@ -382,17 +390,21 @@ export async function copyLogo(fromId: string, toId: string): Promise<void> {
 
 /** Wipe every folder, document, and logo. Used by library import, which then
  *  restores the archive over the empty stores; the wiped records are tombstoned
- *  so the replacement reaches the cloud too. No-op on failure. */
+ *  and the wiped logos queued for removal, so the replacement reaches the cloud
+ *  too (a restored document without a logo must lose its cloud logo). No-op on
+ *  failure. */
 export async function clearLibrary(): Promise<void> {
-  const [folders, documents] = await Promise.all([
+  const [folders, documents, logoIds] = await Promise.all([
     listFolders(),
     listDocuments(),
+    listLogoIds(),
   ]);
   await withStore(FOLDER_STORE, "readwrite", (s) => s.clear());
   await withStore(DOC_STORE, "readwrite", (s) => s.clear());
   await withStore(LOGO_STORE, "readwrite", (s) => s.clear());
   for (const f of folders) await trackDelete("folder", f.id);
   for (const d of documents) await trackDelete("document", d.id);
+  for (const id of logoIds) await markDirty("logo", id);
 }
 
 /** Erase everything this device knows about the library — records, logos and
@@ -421,7 +433,8 @@ export async function wipeLocalLibrary(): Promise<void> {
 // tracked `save*` / `delete*` / `clearLogo` functions above wrap them.
 
 export async function putFolder(folder: Folder): Promise<void> {
-  await withStore(FOLDER_STORE, "readwrite", (s) => s.put(folder));
+  const record: Folder = { ...folder, name: clipName(folder.name) };
+  await withStore(FOLDER_STORE, "readwrite", (s) => s.put(record));
 }
 
 export async function removeFolder(id: string): Promise<void> {
@@ -431,6 +444,7 @@ export async function removeFolder(id: string): Promise<void> {
 export async function putDocument(doc: QrDocument): Promise<void> {
   const record: QrDocument = {
     ...doc,
+    name: clipName(doc.name),
     options: { ...doc.options, logo: null },
   };
   await withStore(DOC_STORE, "readwrite", (s) => s.put(record));
@@ -545,11 +559,13 @@ export async function listOutbox(): Promise<OutboxEntry[]> {
 /** Drop pushed entries — but only those not re-dirtied since they were read. */
 export async function settleOutbox(pushed: OutboxEntry[]): Promise<void> {
   const current = new Map((await listOutbox()).map((e) => [e.key, e.rev]));
-  for (const entry of pushed) {
-    if (current.get(entry.key) === entry.rev) {
-      await withStore(OUTBOX_STORE, "readwrite", (s) => s.delete(entry.key));
-    }
-  }
+  const settled = pushed.filter((e) => current.get(e.key) === e.rev);
+  if (settled.length === 0) return;
+  // One transaction for the whole batch.
+  await withStore(OUTBOX_STORE, "readwrite", (s) => {
+    for (const entry of settled.slice(1)) s.delete(entry.key);
+    return s.delete(settled[0].key);
+  });
 }
 
 /** Every pending deletion. */

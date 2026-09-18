@@ -22,7 +22,7 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { MAX_FOLDER_DEPTH } from "../qr/storage";
+import { MAX_FOLDER_DEPTH, MAX_NAME_LENGTH } from "../qr/storage";
 import type { Folder, QrDocument } from "../qr/types";
 import { InfoLink } from "./InfoLink";
 import { Panel } from "./Panel";
@@ -245,6 +245,7 @@ function InlineEdit({
       type="text"
       className="tree__edit"
       aria-label={t("sidebar.editName")}
+      maxLength={MAX_NAME_LENGTH}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={commit}

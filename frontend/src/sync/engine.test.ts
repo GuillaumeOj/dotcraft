@@ -30,7 +30,7 @@ import {
 } from "../qr/storage";
 import { DEFAULT_OPTIONS, type Folder, type QrDocument } from "../qr/types";
 import { resetDb } from "../test/db";
-import { adoptAccount, hasPendingChanges, syncOnce } from "./engine";
+import { adoptAccount, hasPendingChanges, MAX_PUSH, syncOnce } from "./engine";
 
 vi.mock("../api/library", () => ({
   postSync: vi.fn(),
@@ -127,6 +127,31 @@ describe("syncOnce", () => {
     expect(payload.settings).toBeNull();
     expect(await hasPendingChanges()).toBe(false);
     expect((await getSyncState()).cursor).toBe(10);
+  });
+
+  it("pushes a large outbox in batches the API accepts", async () => {
+    await adopted();
+    for (let i = 0; i <= MAX_PUSH; i++)
+      await saveFolder(folder({ id: `f${i}` }));
+
+    await syncOnce();
+
+    expect(postSync).toHaveBeenCalledTimes(2);
+    expect(postSync.mock.calls[0][0].folders).toHaveLength(MAX_PUSH);
+    expect(postSync.mock.calls[1][0].folders).toHaveLength(1);
+    expect(await hasPendingChanges()).toBe(false);
+  });
+
+  it("never pushes names longer than the API accepts", async () => {
+    await adopted();
+    await saveFolder(folder({ name: "x".repeat(300) }));
+    await saveDocument(doc({ name: "y".repeat(300) }));
+
+    await syncOnce();
+
+    const payload = lastPayload();
+    expect(payload.folders[0]).toMatchObject({ name: "x".repeat(200) });
+    expect(payload.documents[0]).toMatchObject({ name: "y".repeat(200) });
   });
 
   it("pushes deletions as tombstones, then forgets them", async () => {
@@ -382,6 +407,18 @@ describe("syncOnce", () => {
       expect(await hasPendingChanges()).toBe(false);
     });
 
+    it("drops a logo the API refuses (too large or unsupported)", async () => {
+      await putDocument(doc());
+      await adopted();
+      await saveLogoBlob("d1", new Blob(["huge"], { type: "image/png" }));
+      uploadLogo.mockRejectedValue(new ApiError(400, "invalid", "x"));
+
+      await syncOnce();
+
+      expect(await hasPendingChanges()).toBe(false);
+      expect((await getSyncState()).cursor).toBe(10);
+    });
+
     it("keeps the logo queued when the upload fails", async () => {
       await putDocument(doc());
       await adopted();
@@ -500,6 +537,22 @@ describe("adoptAccount", () => {
     expect((await listDocuments()).map((d) => d.id)).toEqual(["d9"]);
     expect((await listFolders()).map((f) => f.id)).toEqual(["f9"]);
     expect(await hasPendingChanges()).toBe(false);
+  });
+
+  it("still pushes the settings when it drops the starter", async () => {
+    await saveFolder(folder());
+    await saveDocument(doc());
+    updateSyncedSettings({ colorFormat: "rgb" });
+    await Promise.resolve();
+    postSync.mockResolvedValueOnce(
+      response({ documents: [remoteDoc({ id: "d9", folderId: "f9" })] }),
+    );
+
+    await adoptAccount("u1");
+
+    expect((await listOutbox()).map((e) => e.key)).toEqual([
+      "settings:settings",
+    ]);
   });
 
   it("keeps an untouched starter when the account is empty", async () => {

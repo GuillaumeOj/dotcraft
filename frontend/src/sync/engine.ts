@@ -264,8 +264,12 @@ function settingsChange(): RemoteSettings | null {
   };
 }
 
-/** Push queued logo changes. A 404 means the document is gone (or not in the
- *  cloud yet); the change is dropped either way. */
+/** Logo upload answers that mean "drop this change": 404, the document is gone
+ *  (or not in the cloud yet); 400, the API refuses the image (too large or of
+ *  an unsupported type). Either way it must not block every later sync. */
+const DROPPED_LOGO_STATUSES = [400, 404];
+
+/** Push queued logo changes. */
 async function pushLogos(
   entries: OutboxEntry[],
   local: LocalLibrary,
@@ -284,7 +288,11 @@ async function pushLogos(
         delete state.logoHashes[entry.id];
       }
     } catch (err) {
-      if (!(err instanceof ApiError && err.status === 404)) throw err;
+      if (
+        !(err instanceof ApiError) ||
+        !DROPPED_LOGO_STATUSES.includes(err.status)
+      )
+        throw err;
     }
   }
 }
@@ -312,13 +320,33 @@ const EMPTY_LOCAL: LocalLibrary = {
   tombstones: new Map(),
 };
 
+/** Most queued changes pushed in one request. Mirrors MAX_BATCH in
+ *  backend/library/serializers.py, which caps each list; counting every kind
+ *  against it is a deliberate over-approximation. */
+export const MAX_PUSH = 1000;
+
 /** Push local changes and pull remote ones. No-op until an account has been
  *  adopted. Throws {@link ApiError} when the API can't be reached. */
 export async function syncOnce(): Promise<RemoteChanges> {
   const state = await getSyncState();
   if (!state.userId) return NO_CHANGES;
 
-  const entries = await listOutbox();
+  // A large outbox (e.g. a big library on first sign-in) goes up in batches.
+  const outbox = await listOutbox();
+  let changes = NO_CHANGES;
+  // Always at least one round-trip: an idle poll still pulls.
+  for (let i = 0; i === 0 || i < outbox.length; i += MAX_PUSH) {
+    const batch = outbox.slice(i, i + MAX_PUSH);
+    changes = merge(changes, await syncBatch(state, batch));
+  }
+  return changes;
+}
+
+/** Push `entries` (possibly none), pull what changed, and settle them. */
+async function syncBatch(
+  state: SyncState,
+  entries: OutboxEntry[],
+): Promise<RemoteChanges> {
   // An idle poll (nothing queued) doesn't need to read the library.
   const local = entries.length > 0 ? await readLocal() : EMPTY_LOCAL;
   const byKind = (kind: OutboxEntry["kind"]) =>
@@ -339,9 +367,9 @@ export async function syncOnce(): Promise<RemoteChanges> {
   );
 
   // Pushed deletions are recorded in the cloud now.
-  for (const tomb of local.tombstones.values()) {
-    if (entries.some((e) => e.key === tomb.key))
-      await clearTombstone(tomb.kind, tomb.id);
+  for (const entry of entries) {
+    const tomb = local.tombstones.get(entry.key);
+    if (tomb) await clearTombstone(tomb.kind, tomb.id);
   }
   await pushLogos(logoEntries, local, state);
   await settleOutbox(entries);
@@ -418,7 +446,9 @@ export async function adoptAccount(userId: string): Promise<RemoteChanges> {
   if (pristine && cloudHasDocuments) {
     await removeDocument(documents[0].id);
     await removeFolder(folders[0].id);
-    await settleOutbox(await listOutbox());
+    // Forget the starter's queued records (anything else still goes up).
+    const starter = new Set([documents[0].id, folders[0].id]);
+    await settleOutbox((await listOutbox()).filter((e) => starter.has(e.id)));
   } else {
     await enqueueEverything(folders, documents, logoIds);
   }

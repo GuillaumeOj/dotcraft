@@ -5,8 +5,9 @@ from typing import Any, ClassVar
 
 from rest_framework import serializers
 
-from library.models import Document, Folder, UserSettings
+from library.models import MAX_NAME_LENGTH, Document, Folder, UserSettings
 
+# Mirrored by MAX_PUSH in frontend/src/sync/engine.ts.
 MAX_BATCH = 1000
 MAX_OPTIONS_BYTES = 64 * 1024
 LOCALES = ("en", "fr", "es", "de", "it", "pt")
@@ -19,7 +20,7 @@ class _RecordIn(serializers.Serializer):
     live_fields: ClassVar[dict[str, Any]] = {"name": "", "createdAt": 0}
 
     id = serializers.UUIDField()
-    name = serializers.CharField(max_length=200, allow_blank=True, required=False)
+    name = serializers.CharField(max_length=MAX_NAME_LENGTH, allow_blank=True, required=False)
     createdAt = serializers.IntegerField(min_value=0, required=False)
     updatedAt = serializers.IntegerField(min_value=0)
     deletedAt = serializers.IntegerField(min_value=0, required=False, allow_null=True, default=None)
