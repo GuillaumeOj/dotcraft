@@ -65,6 +65,7 @@ class TestSettings:
             "BLOB_READ_WRITE_TOKEN",
             "BREVO_API_KEY",
             "EMAIL_HOST",
+            "FRONTEND_URL",
             "VERCEL_URL",
         ):
             monkeypatch.delenv(key, raising=False)
@@ -97,6 +98,8 @@ class TestSettings:
         assert settings.STORAGES["default"]["BACKEND"] == "library.storage.BlobStorage"
         assert settings.MAILERS["default"]["BACKEND"] == "anymail.backends.brevo.EmailBackend"
         assert "preview.vercel.app" in settings.ALLOWED_HOSTS
+        # E-mail links point at the deployment when FRONTEND_URL isn't set.
+        assert settings.FRONTEND_URL == "https://preview.vercel.app"
         assert "https://preview.vercel.app" in settings.CSRF_TRUSTED_ORIGINS
         assert settings.REFRESH_COOKIE_SECURE is True
 

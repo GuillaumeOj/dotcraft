@@ -36,8 +36,18 @@ for _var in ("VERCEL_URL", "VERCEL_BRANCH_URL", "VERCEL_PROJECT_PRODUCTION_URL")
 
 CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS if host not in ("localhost", "127.0.0.1")]
 
-# Public URL of the SPA, used to build links in e-mails.
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+
+# Public URL of the SPA, used to build links in e-mails. The SPA and the API
+# share an origin, so a Vercel deployment can name its own: the branch URL on a
+# preview, the project's domain in production.
+def _default_frontend_url() -> str:
+    for var in ("VERCEL_BRANCH_URL", "VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_URL"):
+        if host := os.environ.get(var):
+            return f"https://{host}"
+    return "http://localhost:5173"
+
+
+FRONTEND_URL = (os.environ.get("FRONTEND_URL") or _default_frontend_url()).rstrip("/")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
