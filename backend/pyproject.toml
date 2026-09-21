@@ -1,0 +1,88 @@
+[project]
+name = "dotcraft-backend"
+version = "0.1.0"
+description = "Dotcraft API: accounts and cloud sync for the QR-code library"
+requires-python = ">=3.13"
+dependencies = [
+    "dj-database-url>=3.1.2",
+    "django>=6.1,<6.2",
+    "django-anymail[brevo]>=15.2",
+    "djangorestframework>=3.18.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "gunicorn>=26.2.0",
+    "psycopg[binary]>=3.3.5",
+    "vercel>=0.11.3",
+    "whitenoise>=6.12.0",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.1.1",
+    "djangorestframework-stubs>=3.18.1",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.16.8",
+    "ty==0.0.82",
+]
+
+[tool.vercel]
+entrypoint = "config.wsgi:application"
+
+[tool.vercel.scripts]
+# Vercel runs collectstatic itself; apply pending migrations on every deploy.
+build = "python manage.py migrate --noinput"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "S",   # bandit
+    "DJ",  # django
+    "SIM", # simplify
+    "C4",  # comprehensions
+    "PT",  # pytest style
+    "RUF", # ruff-specific
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106"]
+"conftest.py" = ["S105"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["accounts", "config", "core", "library"]
+
+[tool.ty.environment]
+python-version = "3.13"
+
+[tool.ty.src]
+include = ["accounts", "config", "core", "library", "conftest.py", "manage.py"]
+exclude = ["**/migrations"]
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings_test"
+python_files = ["test_*.py"]
+addopts = "--strict-markers"
+filterwarnings = ["error::RuntimeWarning"]
+
+[tool.coverage.run]
+branch = true
+source = ["accounts", "config", "core", "library"]
+omit = ["*/migrations/*", "*/tests/*", "config/wsgi.py"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true

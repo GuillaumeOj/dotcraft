@@ -1,0 +1,8 @@
+Hello,
+
+The e-mail address of your Dotcraft account was changed from {{ old_email }} to {{ new_email }}.
+
+If you made this change, there is nothing else to do.
+If you didn't, reset your password right away from {{ frontend_url }}/forgot-password.
+
+— Dotcraft

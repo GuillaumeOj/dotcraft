@@ -1,0 +1,343 @@
+{
+  "app": {
+    "tagline": "Design a styled QR code, then export it as PNG or SVG.",
+    "language": "Language",
+    "documentTitle": "Dotcraft — styled QR code editor",
+    "metaDescription": "Design styled QR codes with custom dot and droplet eye styles, colors, and a center logo."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "controls": {
+    "content": "Content",
+    "textOrUrl": "Text or URL",
+    "urlPlaceholder": "https://example.com",
+    "errorCorrection": "Error correction",
+    "logoForcesH": "A logo is set — error correction is forced to H.",
+    "style": "Style",
+    "dotStyle": "Dot style",
+    "eyeStyle": "Eye style",
+    "colourFormat": "Colour format",
+    "foreground": "Foreground",
+    "background": "Background",
+    "quietZone": "Quiet-zone margin",
+    "logo": "Logo",
+    "logoDropPrompt": "Drag an image here, or click to browse (PNG / JPG / SVG)",
+    "logoPreview": "logo preview",
+    "removeLogo": "Remove logo",
+    "changeLogo": "Change logo",
+    "replaceLogoTitle": "Replace current logo?",
+    "replaceLogoMessage": "The new image will replace the current logo.",
+    "replace": "Replace",
+    "size": "Size",
+    "padding": "Padding",
+    "cornerRadius": "Corner radius",
+    "logoBackground": "Logo background",
+    "transparentLogoBg": "Transparent logo background",
+    "randomize": "Randomize",
+    "reset": "Reset to defaults",
+    "dotStyles": {
+      "square": "Square",
+      "gapped": "Gapped",
+      "rounded": "Rounded",
+      "circle": "Circle",
+      "dots": "Dots"
+    },
+    "eyeStyles": {
+      "square": "Square",
+      "rounded": "Rounded",
+      "circle": "Circle",
+      "droplet": "Droplet"
+    },
+    "contentTypes": {
+      "text": "Text",
+      "url": "URL",
+      "email": "Email",
+      "phone": "Phone",
+      "wifi": "Wi-Fi",
+      "vcard": "vCard"
+    },
+    "ecLabels": {
+      "auto": "Automatic",
+      "L": "Low",
+      "M": "Medium",
+      "Q": "Quartile",
+      "H": "High"
+    },
+    "ecDescriptions": {
+      "auto": "Picks the best level for your content.",
+      "L": "Recovers from ~7% damage — smallest, densest-looking code.",
+      "M": "Recovers from ~15% damage — a balanced default.",
+      "Q": "Recovers from ~25% damage.",
+      "H": "Recovers from ~30% damage — most robust, needed behind a logo."
+    },
+    "logoForcesHigh": "A logo is set — error correction is forced to High.",
+    "settings": "Settings"
+  },
+  "preview": {
+    "qrAlt": "QR code preview",
+    "pngSize": "PNG size",
+    "downloadPng": "Download PNG",
+    "downloadSvg": "Download SVG",
+    "vectorSize": "Vector size: {{px}}×{{px}}",
+    "title": "Preview"
+  },
+  "color": {
+    "hex": "Hex",
+    "rgb": "RGB",
+    "hsl": "HSL",
+    "named": "Named"
+  },
+  "fields": {
+    "hexValue": "Hex value",
+    "hexPlaceholder": "000000",
+    "namedColour": "Named colour",
+    "namedPlaceholder": "tomato, navy, …",
+    "swatch": "{{label}} swatch",
+    "dialCode": "Country dialling code",
+    "phonePlaceholder": "Phone number"
+  },
+  "sidebar": {
+    "savedQrCodes": "Saved QR codes",
+    "library": "Library",
+    "hideLibrary": "Hide library",
+    "showLibrary": "Show library",
+    "newProject": "New Project",
+    "exportLibrary": "Export",
+    "exportLibraryTitle": "Download your whole library as a .dotcraft file",
+    "importLibrary": "Import",
+    "importLibraryTitle": "Replace your library with a .dotcraft file",
+    "confirmImportTitle": "Replace library?",
+    "confirmImport": "Importing replaces your current library with the contents of this file. Continue?",
+    "importErrorTitle": "Import failed",
+    "importError": "Could not import this file. Make sure it's a .dotcraft library export.",
+    "noProjects": "No projects yet.",
+    "editName": "Edit name",
+    "addQrCode": "Add QR code",
+    "addSubfolder": "Add subfolder",
+    "renameProject": "Rename project",
+    "renameFolder": "Rename folder",
+    "deleteProject": "Delete project",
+    "deleteFolder": "Delete folder",
+    "collapse": "Collapse {{name}}",
+    "expand": "Expand {{name}}",
+    "confirmDeleteFolder": "Delete “{{name}}” and everything inside it?",
+    "duplicateQrCode": "Duplicate QR code",
+    "renameQrCode": "Rename QR code",
+    "deleteQrCode": "Delete QR code",
+    "confirmDeleteDoc": "Delete “{{name}}”?",
+    "account": "Account"
+  },
+  "library": {
+    "myProject": "My Project",
+    "myQrCode": "My QR code",
+    "newProject": "New Project",
+    "newFolder": "New Folder",
+    "untitledQr": "Untitled QR",
+    "copySuffix": "{{name}} copy"
+  },
+  "errors": {
+    "enterText": "Enter some text or a URL to encode.",
+    "couldNotRender": "Could not render QR code."
+  },
+  "content": {
+    "text": "Text",
+    "textPlaceholder": "Any text to encode",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "emailTo": "To",
+    "emailPlaceholder": "name@example.com",
+    "emailSubject": "Subject",
+    "emailBody": "Message",
+    "phoneNumber": "Phone number",
+    "wifiSsid": "Network name (SSID)",
+    "wifiSecurity": "Security",
+    "wifiPassword": "Password",
+    "wifiHidden": "Hidden network",
+    "wifiEnc": {
+      "WPA": "WPA / WPA2",
+      "WEP": "WEP",
+      "nopass": "No password (open)"
+    },
+    "vcardFirstName": "First name",
+    "vcardLastName": "Last name",
+    "vcardOrg": "Organisation",
+    "vcardTitle": "Job title",
+    "vcardPhone": "Phone",
+    "vcardEmail": "Email",
+    "vcardWebsite": "Website",
+    "vcardStreet": "Street",
+    "vcardCity": "City",
+    "vcardRegion": "Region / State",
+    "vcardPostalCode": "Postal code",
+    "vcardCountry": "Country",
+    "vcardNote": "Note"
+  },
+  "export": {
+    "title": "Export"
+  },
+  "nav": {
+    "menu": "Menu",
+    "backToEditor": "Back to editor",
+    "account": "Account"
+  },
+  "footer": {
+    "label": "Footer",
+    "faq": "FAQ",
+    "helpCenter": "Help Center",
+    "blog": "Blog",
+    "github": "GitHub",
+    "madeWithPrefix": "Made with",
+    "madeWithSuffix": "in Lyon",
+    "love": "love"
+  },
+  "info": {
+    "library": "Learn how to import and export your library",
+    "exportQr": "Learn how to export your QR code",
+    "errorCorrection": "Learn about error correction",
+    "account": "Learn about accounts and cloud sync"
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Quick answers about privacy, accounts, pricing and how Dotcraft works.",
+    "items": {
+      "privacy": {
+        "q": "How is my library kept?",
+        "a": "Your projects and QR codes are always saved in your browser (IndexedDB), so Dotcraft works without an account. If you sign in, your library is also stored in your account so it is backed up and available on all your devices. Without an account, nothing is uploaded."
+      },
+      "free": {
+        "q": "Is Dotcraft free?",
+        "a": "Yes. Dotcraft is completely free to use, with no limits and no paid tiers."
+      },
+      "account": {
+        "q": "Do I need an account?",
+        "a": "No. You can design and export QR codes without signing up. An account is optional and free: it backs up your library and keeps it in sync across your devices."
+      },
+      "sync": {
+        "q": "What happens if I edit the same QR code on two devices?",
+        "a": "Changes sync automatically in the background, usually within a few seconds. If the same item was changed on two devices before they could sync, the most recent change wins. Deletions sync too."
+      },
+      "forgotPassword": {
+        "q": "I forgot my password. What can I do?",
+        "a": "On the sign-in screen, choose \"Forgot your password?\" and enter your e-mail. You'll receive a link to choose a new one."
+      },
+      "expire": {
+        "q": "Will my QR codes expire?",
+        "a": "No. The codes are static and encode your data directly, so they never expire, redirect, or phone home. Once exported, they keep working forever."
+      },
+      "formats": {
+        "q": "Which formats can I export?",
+        "a": "PNG and SVG. Choose PNG for a ready-to-use image at a fixed size, and SVG when you need a sharp vector that scales to any size for print or further editing."
+      },
+      "clearData": {
+        "q": "What happens if I clear my browser data?",
+        "a": "Without an account, your library only lives in your browser, so clearing site data or using private browsing erases it — use Export in the library to keep a backup file. When you're signed in, your library is also stored in your account and comes back as soon as you sign in again."
+      }
+    }
+  },
+  "helpCenter": {
+    "title": "Help Center",
+    "subtitle": "Guides for getting the most out of Dotcraft.",
+    "articles": {
+      "account": {
+        "title": "Account and cloud sync",
+        "body": "Dotcraft works without an account: your library is saved in your browser. Create a free account from the bottom of the library (or the Account item of the menu on mobile) to back it up and use it on all your devices. The QR codes you already have are uploaded automatically when you sign in.\n\nOnce you're signed in, syncing happens on its own: every change is saved to your account a few seconds after you make it, and changes made on your other devices show up automatically. The sync icon next to your e-mail tells you whether everything is up to date. If you work offline, your changes are kept and sync as soon as you're back online. When the same QR code is edited on two devices before they could sync, the most recent change wins.\n\nOpen the Account page to change your e-mail or password, or to sign out. Signing out removes the library from this device — it stays in your account and comes back when you sign in again. If you forget your password, use \"Forgot your password?\" on the sign-in screen to get a reset link by e-mail."
+      },
+      "library": {
+        "title": "Import and export your library",
+        "body": "Your whole library — every project, folder and QR code — can be saved to a single .dotcraft file. In the library, use Export to download that file as a backup or to move your work to another browser or device.\n\nUse Import to restore a .dotcraft file. Importing replaces your current library with the contents of the file, so export a backup first if you want to keep what you have.",
+        "warning": "Only import .dotcraft files from a source you trust. We do everything we can to handle imports safely, but a library file ultimately contains whatever its creator put in it — treat one from an unknown origin with the same caution as any file you didn't make yourself."
+      },
+      "exportQr": {
+        "title": "Export a QR code",
+        "body": "Open the Export panel to download the QR code you are editing. Pick a PNG size (512, 1024 or 2048 px) and choose Download PNG for a ready-to-use image, or Download SVG for a crisp vector that scales to any size.\n\nUse PNG when you need a fixed-size image to drop into a document or post online. Use SVG for print, large formats, or when you want to keep editing the artwork in a vector tool."
+      },
+      "errorCorrection": {
+        "title": "Error correction explained",
+        "body": "Error correction adds redundancy so a QR code still scans when part of it is dirty, damaged or covered. Higher levels survive more damage but make the code denser, because they pack in more data.\n\nAutomatic picks a sensible level for your content. When you add a center logo, error correction is raised to High so the logo doesn't stop the code from scanning."
+      },
+      "requestFeature": {
+        "title": "Request a feature",
+        "body": "Have an idea that would make Dotcraft better? Open a feature request on GitHub. The form walks you through describing the problem you're trying to solve and the solution you have in mind, which helps it get picked up faster.",
+        "cta": "Open a feature request"
+      },
+      "reportBug": {
+        "title": "Report a bug",
+        "body": "Something not working as expected? Open a bug report on GitHub. The form asks for what happened, the steps to reproduce it, what you expected, and your browser and operating system, so the issue can be tracked down quickly.",
+        "cta": "Open a bug report"
+      }
+    }
+  },
+  "account": {
+    "title": "Account",
+    "subtitle": "Keep your library backed up and in sync across your devices.",
+    "loading": "Loading…",
+    "welcomeTitle": "Sync your library",
+    "pitch": "Your library is only saved in this browser. Create a free account to back it up and use it on all your devices — the QR codes you already have are uploaded automatically.",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "email": "E-mail",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newEmail": "New e-mail",
+    "forgotPassword": "Forgot your password?",
+    "passwordMismatch": "The passwords don't match.",
+    "signedInAs": "Signed in as {{email}}",
+    "syncTitle": "Cloud sync",
+    "emailTitle": "E-mail address",
+    "updateEmail": "Update e-mail",
+    "emailUpdated": "Your e-mail address was updated.",
+    "passwordTitle": "Password",
+    "changePassword": "Change password",
+    "passwordUpdated": "Your password was changed. Your other devices were signed out.",
+    "signOutTitle": "Sign out",
+    "signOutHint": "Signing out removes your library from this device. It stays safe in your account and comes back when you sign in again.",
+    "signOut": "Sign out",
+    "unsyncedTitle": "Unsynced changes",
+    "unsyncedMessage": "Some of your latest changes couldn't be saved to the cloud yet (are you offline?). If you sign out now, they will be lost.",
+    "signOutAnyway": "Sign out anyway"
+  },
+  "sync": {
+    "status": {
+      "idle": "Synced",
+      "syncing": "Syncing…",
+      "offline": "Offline — changes will sync when you're back online",
+      "error": "Sync failed — retrying shortly"
+    },
+    "lastSynced": "Last synced {{time}}",
+    "never": "Not synced yet",
+    "syncNow": "Sync now"
+  },
+  "auth": {
+    "backToSignIn": "Back to sign in",
+    "forgot": {
+      "title": "Reset your password",
+      "intro": "Enter the e-mail of your account and we'll send you a link to choose a new password.",
+      "submit": "Send reset link",
+      "sent": "If an account exists for {{email}}, a reset link is on its way. Check your inbox."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "submit": "Set new password",
+      "done": "Your password was changed. You can now sign in with it.",
+      "requestNew": "Request a new link"
+    }
+  },
+  "apiErrors": {
+    "invalid_credentials": "Wrong e-mail or password.",
+    "email_taken": "An account already uses this e-mail.",
+    "wrong_password": "The current password is incorrect.",
+    "password_too_short": "The password must be at least 8 characters long.",
+    "password_too_common": "This password is too common.",
+    "password_entirely_numeric": "The password can't be made of digits only.",
+    "password_too_similar": "The password is too similar to your e-mail.",
+    "invalid_token": "This reset link is invalid or has expired.",
+    "throttled": "Too many attempts. Please wait a minute and try again.",
+    "network": "Can't reach the server. Check your connection and try again.",
+    "invalidEmail": "Enter a valid e-mail address.",
+    "generic": "Something went wrong. Please try again."
+  }
+}

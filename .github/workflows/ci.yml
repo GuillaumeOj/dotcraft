@@ -7,8 +7,11 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  frontend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,5 +30,46 @@ jobs:
       - name: Lint & format check
         run: bun run check
 
-      - name: Test
-        run: bun run test
+      - name: Test (with coverage thresholds)
+        run: bun run test:coverage
+
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: dotcraft
+          POSTGRES_USER: dotcraft
+          POSTGRES_PASSWORD: dotcraft
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dotcraft -d dotcraft"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://dotcraft:dotcraft@localhost:5432/dotcraft
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install tox
+        run: uv tool install tox
+
+      # Every step runs a tox env, so CI and `tox` locally share one definition.
+      - name: Lint, format & import sorting (ruff)
+        run: tox -e backend-lint
+
+      - name: Type check (ty)
+        run: tox -e backend-types
+
+      - name: Migrations + tests (coverage gate)
+        run: tox -e backend-test

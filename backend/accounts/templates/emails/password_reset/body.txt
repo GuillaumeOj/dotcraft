@@ -1,0 +1,10 @@
+Hello,
+
+Someone (hopefully you) asked to reset the password of the Dotcraft account {{ user.email }}.
+
+Open this link to choose a new password:
+{{ reset_url }}
+
+If you didn't ask for this, you can ignore this e-mail: your password stays unchanged.
+
+— Dotcraft

@@ -1,0 +1,343 @@
+{
+  "app": {
+    "tagline": "Gestalte einen stilvollen QR-Code und exportiere ihn als PNG oder SVG.",
+    "language": "Sprache",
+    "documentTitle": "Dotcraft — Editor für stilvolle QR-Codes",
+    "metaDescription": "Gestalte stilvolle QR-Codes mit individuellen Punkt- und Tropfen-Augenstilen, Farben und einem zentralen Logo."
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "close": "Schließen"
+  },
+  "controls": {
+    "content": "Inhalt",
+    "textOrUrl": "Text oder URL",
+    "urlPlaceholder": "https://beispiel.com",
+    "errorCorrection": "Fehlerkorrektur",
+    "logoForcesH": "Ein Logo ist gesetzt — die Fehlerkorrektur wird auf H erzwungen.",
+    "style": "Stil",
+    "dotStyle": "Punktstil",
+    "eyeStyle": "Augenstil",
+    "colourFormat": "Farbformat",
+    "foreground": "Vordergrund",
+    "background": "Hintergrund",
+    "quietZone": "Ruhezonen-Rand",
+    "logo": "Logo",
+    "logoDropPrompt": "Bild hierher ziehen oder zum Auswählen klicken (PNG / JPG / SVG)",
+    "logoPreview": "Logo-Vorschau",
+    "removeLogo": "Logo entfernen",
+    "changeLogo": "Logo ändern",
+    "replaceLogoTitle": "Aktuelles Logo ersetzen?",
+    "replaceLogoMessage": "Das neue Bild ersetzt das aktuelle Logo.",
+    "replace": "Ersetzen",
+    "size": "Größe",
+    "padding": "Innenabstand",
+    "cornerRadius": "Eckenradius",
+    "logoBackground": "Logo-Hintergrund",
+    "transparentLogoBg": "Transparenter Logo-Hintergrund",
+    "randomize": "Zufällig",
+    "reset": "Auf Standard zurücksetzen",
+    "dotStyles": {
+      "square": "Quadrat",
+      "gapped": "Mit Abstand",
+      "rounded": "Abgerundet",
+      "circle": "Kreis",
+      "dots": "Punkte"
+    },
+    "eyeStyles": {
+      "square": "Quadrat",
+      "rounded": "Abgerundet",
+      "circle": "Kreis",
+      "droplet": "Tropfen"
+    },
+    "contentTypes": {
+      "text": "Text",
+      "url": "URL",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "wifi": "WLAN",
+      "vcard": "vCard"
+    },
+    "ecLabels": {
+      "auto": "Automatisch",
+      "L": "Niedrig",
+      "M": "Mittel",
+      "Q": "Quartil",
+      "H": "Hoch"
+    },
+    "ecDescriptions": {
+      "auto": "Wählt die beste Stufe für deinen Inhalt.",
+      "L": "Behebt ~7 % Schäden — kleinster, dichtester Code.",
+      "M": "Behebt ~15 % Schäden — ausgewogene Standardwahl.",
+      "Q": "Behebt ~25 % Schäden.",
+      "H": "Behebt ~30 % Schäden — am robustesten, hinter einem Logo nötig."
+    },
+    "logoForcesHigh": "Ein Logo ist gesetzt — die Fehlerkorrektur wird auf Hoch erzwungen.",
+    "settings": "Einstellungen"
+  },
+  "preview": {
+    "qrAlt": "QR-Code-Vorschau",
+    "pngSize": "PNG-Größe",
+    "downloadPng": "PNG herunterladen",
+    "downloadSvg": "SVG herunterladen",
+    "vectorSize": "Vektorgröße: {{px}}×{{px}}",
+    "title": "Vorschau"
+  },
+  "color": {
+    "hex": "Hex",
+    "rgb": "RGB",
+    "hsl": "HSL",
+    "named": "Benannt"
+  },
+  "fields": {
+    "hexValue": "Hex-Wert",
+    "hexPlaceholder": "000000",
+    "namedColour": "Benannte Farbe",
+    "namedPlaceholder": "tomato, navy, …",
+    "swatch": "{{label}} Farbfeld",
+    "dialCode": "Ländervorwahl",
+    "phonePlaceholder": "Telefonnummer"
+  },
+  "sidebar": {
+    "savedQrCodes": "Gespeicherte QR-Codes",
+    "library": "Bibliothek",
+    "hideLibrary": "Bibliothek ausblenden",
+    "showLibrary": "Bibliothek einblenden",
+    "newProject": "Neues Projekt",
+    "exportLibrary": "Exportieren",
+    "exportLibraryTitle": "Lade deine gesamte Bibliothek als .dotcraft-Datei herunter",
+    "importLibrary": "Importieren",
+    "importLibraryTitle": "Ersetze deine Bibliothek durch eine .dotcraft-Datei",
+    "confirmImportTitle": "Bibliothek ersetzen?",
+    "confirmImport": "Beim Importieren wird deine aktuelle Bibliothek durch den Inhalt dieser Datei ersetzt. Fortfahren?",
+    "importErrorTitle": "Import fehlgeschlagen",
+    "importError": "Diese Datei konnte nicht importiert werden. Stelle sicher, dass es sich um einen .dotcraft-Bibliotheksexport handelt.",
+    "noProjects": "Noch keine Projekte.",
+    "editName": "Namen bearbeiten",
+    "addQrCode": "QR-Code hinzufügen",
+    "addSubfolder": "Unterordner hinzufügen",
+    "renameProject": "Projekt umbenennen",
+    "renameFolder": "Ordner umbenennen",
+    "deleteProject": "Projekt löschen",
+    "deleteFolder": "Ordner löschen",
+    "collapse": "{{name}} einklappen",
+    "expand": "{{name}} ausklappen",
+    "confirmDeleteFolder": "„{{name}}“ und alles darin löschen?",
+    "duplicateQrCode": "QR-Code duplizieren",
+    "renameQrCode": "QR-Code umbenennen",
+    "deleteQrCode": "QR-Code löschen",
+    "confirmDeleteDoc": "„{{name}}“ löschen?",
+    "account": "Konto"
+  },
+  "library": {
+    "myProject": "Mein Projekt",
+    "myQrCode": "Mein QR-Code",
+    "newProject": "Neues Projekt",
+    "newFolder": "Neuer Ordner",
+    "untitledQr": "Unbenannter QR",
+    "copySuffix": "{{name}} Kopie"
+  },
+  "errors": {
+    "enterText": "Gib einen Text oder eine URL zum Kodieren ein.",
+    "couldNotRender": "QR-Code konnte nicht gerendert werden."
+  },
+  "content": {
+    "text": "Text",
+    "textPlaceholder": "Beliebiger Text zum Kodieren",
+    "url": "URL",
+    "urlPlaceholder": "https://example.com",
+    "emailTo": "An",
+    "emailPlaceholder": "name@example.com",
+    "emailSubject": "Betreff",
+    "emailBody": "Nachricht",
+    "phoneNumber": "Telefonnummer",
+    "wifiSsid": "Netzwerkname (SSID)",
+    "wifiSecurity": "Sicherheit",
+    "wifiPassword": "Passwort",
+    "wifiHidden": "Verstecktes Netzwerk",
+    "wifiEnc": {
+      "WPA": "WPA / WPA2",
+      "WEP": "WEP",
+      "nopass": "Kein Passwort (offen)"
+    },
+    "vcardFirstName": "Vorname",
+    "vcardLastName": "Nachname",
+    "vcardOrg": "Organisation",
+    "vcardTitle": "Position",
+    "vcardPhone": "Telefon",
+    "vcardEmail": "E-Mail",
+    "vcardWebsite": "Website",
+    "vcardStreet": "Straße",
+    "vcardCity": "Stadt",
+    "vcardRegion": "Region / Bundesland",
+    "vcardPostalCode": "Postleitzahl",
+    "vcardCountry": "Land",
+    "vcardNote": "Notiz"
+  },
+  "export": {
+    "title": "Exportieren"
+  },
+  "nav": {
+    "menu": "Menü",
+    "backToEditor": "Zurück zum Editor",
+    "account": "Konto"
+  },
+  "footer": {
+    "label": "Fußzeile",
+    "faq": "FAQ",
+    "helpCenter": "Hilfe-Center",
+    "blog": "Blog",
+    "github": "GitHub",
+    "madeWithPrefix": "Gemacht mit",
+    "madeWithSuffix": "in Lyon",
+    "love": "Liebe"
+  },
+  "info": {
+    "library": "Erfahre, wie du deine Bibliothek importierst und exportierst",
+    "exportQr": "Erfahre, wie du deinen QR-Code exportierst",
+    "errorCorrection": "Mehr über die Fehlerkorrektur erfahren",
+    "account": "Mehr über Konten und Cloud-Synchronisierung erfahren"
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Schnelle Antworten zu Datenschutz, Konten, Preisen und der Funktionsweise von Dotcraft.",
+    "items": {
+      "privacy": {
+        "q": "Wie wird meine Bibliothek gespeichert?",
+        "a": "Deine Projekte und QR-Codes werden immer in deinem Browser (IndexedDB) gespeichert, daher funktioniert Dotcraft ohne Konto. Wenn du dich anmeldest, wird deine Bibliothek zusätzlich in deinem Konto gespeichert – so ist sie gesichert und auf all deinen Geräten verfügbar. Ohne Konto wird nichts hochgeladen."
+      },
+      "free": {
+        "q": "Ist Dotcraft kostenlos?",
+        "a": "Ja. Dotcraft ist völlig kostenlos, ohne Einschränkungen und ohne kostenpflichtige Tarife."
+      },
+      "account": {
+        "q": "Brauche ich ein Konto?",
+        "a": "Nein. Du kannst QR-Codes ohne Registrierung gestalten und exportieren. Ein Konto ist optional und kostenlos: Es sichert deine Bibliothek und hält sie auf all deinen Geräten synchron."
+      },
+      "sync": {
+        "q": "Was passiert, wenn ich denselben QR-Code auf zwei Geräten bearbeite?",
+        "a": "Änderungen werden automatisch im Hintergrund synchronisiert, meist innerhalb weniger Sekunden. Wurde dasselbe Element auf zwei Geräten geändert, bevor sie sich synchronisieren konnten, gilt die neueste Änderung. Auch Löschungen werden synchronisiert."
+      },
+      "forgotPassword": {
+        "q": "Ich habe mein Passwort vergessen. Was kann ich tun?",
+        "a": "Wähle auf dem Anmeldebildschirm „Passwort vergessen?“ und gib deine E-Mail-Adresse ein. Du erhältst einen Link, mit dem du ein neues festlegen kannst."
+      },
+      "expire": {
+        "q": "Laufen meine QR-Codes ab?",
+        "a": "Nein. Die Codes sind statisch und kodieren deine Daten direkt, daher laufen sie nie ab, leiten nicht um und senden keine Daten. Einmal exportiert, funktionieren sie für immer."
+      },
+      "formats": {
+        "q": "In welchen Formaten kann ich exportieren?",
+        "a": "PNG und SVG. Wähle PNG für ein gebrauchsfertiges Bild in fester Größe und SVG, wenn du eine scharfe Vektorgrafik benötigst, die sich auf jede Größe skalieren lässt – für den Druck oder zur weiteren Bearbeitung."
+      },
+      "clearData": {
+        "q": "Was passiert, wenn ich meine Browserdaten lösche?",
+        "a": "Ohne Konto existiert deine Bibliothek nur in deinem Browser. Wenn du die Websitedaten löschst oder im privaten Modus surfst, geht sie verloren – nutze Exportieren in der Bibliothek, um eine Sicherungsdatei aufzubewahren. Wenn du angemeldet bist, ist deine Bibliothek zusätzlich in deinem Konto gespeichert und ist wieder da, sobald du dich erneut anmeldest."
+      }
+    }
+  },
+  "helpCenter": {
+    "title": "Hilfe-Center",
+    "subtitle": "Anleitungen, um das Beste aus Dotcraft herauszuholen.",
+    "articles": {
+      "account": {
+        "title": "Konto und Cloud-Synchronisierung",
+        "body": "Dotcraft funktioniert ohne Konto: Deine Bibliothek wird in deinem Browser gespeichert. Erstelle unten in der Bibliothek (oder über den Menüpunkt Konto auf dem Smartphone) ein kostenloses Konto, um sie zu sichern und auf all deinen Geräten zu nutzen. Deine vorhandenen QR-Codes werden bei der Anmeldung automatisch hochgeladen.\n\nSobald du angemeldet bist, läuft die Synchronisierung von selbst: Jede Änderung wird wenige Sekunden später in deinem Konto gespeichert, und Änderungen von deinen anderen Geräten erscheinen automatisch. Das Synchronisierungssymbol neben deiner E-Mail zeigt, ob alles aktuell ist. Wenn du offline arbeitest, bleiben deine Änderungen erhalten und werden synchronisiert, sobald du wieder online bist. Wird derselbe QR-Code auf zwei Geräten bearbeitet, bevor sie sich synchronisieren konnten, gilt die neueste Änderung.\n\nÖffne die Seite Konto, um deine E-Mail-Adresse oder dein Passwort zu ändern oder dich abzumelden. Beim Abmelden wird die Bibliothek von diesem Gerät entfernt – sie bleibt in deinem Konto und ist wieder da, sobald du dich erneut anmeldest. Wenn du dein Passwort vergisst, wähle auf dem Anmeldebildschirm „Passwort vergessen?“, um per E-Mail einen Link zum Zurücksetzen zu erhalten."
+      },
+      "library": {
+        "title": "Bibliothek importieren und exportieren",
+        "body": "Deine gesamte Bibliothek – jedes Projekt, jeder Ordner und jeder QR-Code – lässt sich in einer einzigen .dotcraft-Datei speichern. Verwende in der Bibliothek „Exportieren“, um diese Datei als Sicherung herunterzuladen oder deine Arbeit auf einen anderen Browser oder ein anderes Gerät zu übertragen.\n\nVerwende „Importieren“, um eine .dotcraft-Datei wiederherzustellen. Der Import ersetzt deine aktuelle Bibliothek durch den Inhalt der Datei – exportiere also zuerst eine Sicherung, wenn du deine Daten behalten möchtest.",
+        "warning": "Importiere nur .dotcraft-Dateien aus einer Quelle, der du vertraust. Wir tun alles, um Importe sicher zu verarbeiten, aber eine Bibliotheksdatei enthält letztlich das, was ihr Ersteller hineingelegt hat – behandle eine Datei unbekannter Herkunft mit der gleichen Vorsicht wie jede andere Datei, die du nicht selbst erstellt hast."
+      },
+      "exportQr": {
+        "title": "Einen QR-Code exportieren",
+        "body": "Öffne das Export-Panel, um den gerade bearbeiteten QR-Code herunterzuladen. Wähle eine PNG-Größe (512, 1024 oder 2048 px) und dann „PNG herunterladen“ für ein gebrauchsfertiges Bild oder „SVG herunterladen“ für eine scharfe Vektorgrafik, die sich auf jede Größe skalieren lässt.\n\nVerwende PNG, wenn du ein Bild in fester Größe für ein Dokument oder eine Online-Veröffentlichung benötigst. Verwende SVG für den Druck, große Formate oder wenn du das Motiv in einem Vektorprogramm weiter bearbeiten möchtest."
+      },
+      "errorCorrection": {
+        "title": "Die Fehlerkorrektur erklärt",
+        "body": "Die Fehlerkorrektur fügt Redundanz hinzu, damit ein QR-Code auch dann noch lesbar ist, wenn ein Teil verschmutzt, beschädigt oder verdeckt ist. Höhere Stufen überstehen mehr Beschädigungen, machen den Code aber dichter, weil sie mehr Daten enthalten.\n\nDie Stufe „Automatisch“ wählt eine passende Stufe für deinen Inhalt. Wenn du ein Logo in der Mitte hinzufügst, wird die Fehlerkorrektur auf „Hoch“ angehoben, damit das Logo die Lesbarkeit des Codes nicht beeinträchtigt."
+      },
+      "requestFeature": {
+        "title": "Eine Funktion vorschlagen",
+        "body": "Hast du eine Idee, die Dotcraft besser machen würde? Erstelle eine Funktionsanfrage auf GitHub. Das Formular führt dich durch die Beschreibung des Problems, das du lösen möchtest, und der Lösung, die du dir vorstellst – so wird sie schneller aufgegriffen.",
+        "cta": "Funktionsanfrage erstellen"
+      },
+      "reportBug": {
+        "title": "Einen Fehler melden",
+        "body": "Funktioniert etwas nicht wie erwartet? Erstelle einen Fehlerbericht auf GitHub. Das Formular fragt, was passiert ist, die Schritte zur Reproduktion, was du erwartet hast sowie deinen Browser und dein Betriebssystem, damit das Problem schnell gefunden werden kann.",
+        "cta": "Fehlerbericht erstellen"
+      }
+    }
+  },
+  "account": {
+    "title": "Konto",
+    "subtitle": "Halte deine Bibliothek gesichert und auf allen Geräten synchron.",
+    "loading": "Wird geladen…",
+    "welcomeTitle": "Bibliothek synchronisieren",
+    "pitch": "Deine Bibliothek ist nur in diesem Browser gespeichert. Erstelle ein kostenloses Konto, um sie zu sichern und auf all deinen Geräten zu nutzen – deine vorhandenen QR-Codes werden automatisch hochgeladen.",
+    "signIn": "Anmelden",
+    "signUp": "Konto erstellen",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "newEmail": "Neue E-Mail",
+    "forgotPassword": "Passwort vergessen?",
+    "passwordMismatch": "Die Passwörter stimmen nicht überein.",
+    "signedInAs": "Angemeldet als {{email}}",
+    "syncTitle": "Cloud-Synchronisierung",
+    "emailTitle": "E-Mail-Adresse",
+    "updateEmail": "E-Mail ändern",
+    "emailUpdated": "Deine E-Mail-Adresse wurde geändert.",
+    "passwordTitle": "Passwort",
+    "changePassword": "Passwort ändern",
+    "passwordUpdated": "Dein Passwort wurde geändert. Deine anderen Geräte wurden abgemeldet.",
+    "signOutTitle": "Abmelden",
+    "signOutHint": "Beim Abmelden wird deine Bibliothek von diesem Gerät entfernt. Sie bleibt sicher in deinem Konto und ist wieder da, sobald du dich erneut anmeldest.",
+    "signOut": "Abmelden",
+    "unsyncedTitle": "Nicht synchronisierte Änderungen",
+    "unsyncedMessage": "Einige deiner letzten Änderungen konnten noch nicht in der Cloud gespeichert werden (bist du offline?). Wenn du dich jetzt abmeldest, gehen sie verloren.",
+    "signOutAnyway": "Trotzdem abmelden"
+  },
+  "sync": {
+    "status": {
+      "idle": "Synchronisiert",
+      "syncing": "Wird synchronisiert…",
+      "offline": "Offline – Änderungen werden synchronisiert, sobald du wieder online bist",
+      "error": "Synchronisierung fehlgeschlagen – neuer Versuch in Kürze"
+    },
+    "lastSynced": "Zuletzt synchronisiert: {{time}}",
+    "never": "Noch nicht synchronisiert",
+    "syncNow": "Jetzt synchronisieren"
+  },
+  "auth": {
+    "backToSignIn": "Zurück zur Anmeldung",
+    "forgot": {
+      "title": "Passwort zurücksetzen",
+      "intro": "Gib die E-Mail-Adresse deines Kontos ein, und wir senden dir einen Link, mit dem du ein neues Passwort festlegen kannst.",
+      "submit": "Link senden",
+      "sent": "Falls ein Konto für {{email}} existiert, ist ein Link zum Zurücksetzen unterwegs. Sieh in deinem Posteingang nach."
+    },
+    "reset": {
+      "title": "Neues Passwort festlegen",
+      "submit": "Passwort speichern",
+      "done": "Dein Passwort wurde geändert. Du kannst dich jetzt damit anmelden.",
+      "requestNew": "Neuen Link anfordern"
+    }
+  },
+  "apiErrors": {
+    "invalid_credentials": "E-Mail oder Passwort ist falsch.",
+    "email_taken": "Diese E-Mail wird bereits von einem Konto verwendet.",
+    "wrong_password": "Das aktuelle Passwort ist falsch.",
+    "password_too_short": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+    "password_too_common": "Dieses Passwort ist zu häufig.",
+    "password_entirely_numeric": "Das Passwort darf nicht nur aus Ziffern bestehen.",
+    "password_too_similar": "Das Passwort ist deiner E-Mail zu ähnlich.",
+    "invalid_token": "Dieser Link zum Zurücksetzen ist ungültig oder abgelaufen.",
+    "throttled": "Zu viele Versuche. Bitte warte eine Minute und versuche es erneut.",
+    "network": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.",
+    "invalidEmail": "Gib eine gültige E-Mail-Adresse ein.",
+    "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+  }
+}

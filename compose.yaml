@@ -1,0 +1,73 @@
+# Local development stack: `tox -e dev` (or `docker compose up --build`).
+#   frontend  http://localhost:5173  (Vite, proxies /api to the backend)
+#   backend   http://localhost:8000  (Django; admin at /api/admin/)
+#   mailpit   http://localhost:8025  (catches outgoing e-mails)
+# Host ports can be overridden with DB_PORT, BACKEND_PORT, FRONTEND_PORT,
+# MAILPIT_UI_PORT and MAILPIT_SMTP_PORT.
+name: dotcraft
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: dotcraft
+      POSTGRES_USER: dotcraft
+      POSTGRES_PASSWORD: dotcraft
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dotcraft -d dotcraft"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    environment:
+      DJANGO_DEBUG: "1"
+      DJANGO_SECRET_KEY: dev-insecure-secret-key-for-local-development-only
+      DJANGO_ADMIN_PATH: admin
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      DATABASE_URL: postgres://dotcraft:dotcraft@db:5432/dotcraft
+      DJANGO_MEDIA_ROOT: /data/media
+      FRONTEND_URL: http://localhost:5173
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: "1025"
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+      - media:/data/media
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      API_PROXY_TARGET: http://backend:8000
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
+  media:
+  frontend-node-modules:
