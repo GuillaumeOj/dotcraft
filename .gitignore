@@ -25,4 +25,4 @@ backend/staticfiles/
 
 # Claude Code worktrees
 .claude/worktrees/
-.env*
+.env.local
