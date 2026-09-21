@@ -6,15 +6,17 @@ import { useSync } from "../sync/SyncProvider";
 import { InfoLink } from "./InfoLink";
 import { SyncBadge } from "./SyncBadge";
 
-/** The library's footer: a link to the account view (sign in when anonymous,
- *  the account e-mail and sync state when signed in). */
+/** The account row of the library footer: a link to the account view (sign in
+ *  when anonymous, the account e-mail and sync state when signed in). */
 export function AccountButton() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { status } = useSync();
-  const label = user ? t("sidebar.account") : t("sidebar.signIn");
+  // Short labels on purpose: the library column is narrow enough that a longer
+  // translation would be clipped mid-word.
+  const label = user ? t("sidebar.account") : t("account.signIn");
   return (
-    <div className="sidebar__footer">
+    <div className="sidebar__account-row">
       <Link
         to="/account"
         className="sidebar__account"

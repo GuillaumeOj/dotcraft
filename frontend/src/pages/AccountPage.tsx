@@ -267,7 +267,13 @@ export function AccountPage() {
   }
 
   return (
-    <PageLayout title={t("account.title")} subtitle={t("account.subtitle")}>
+    <PageLayout
+      title={t("account.title")}
+      subtitle={t("account.subtitle")}
+      // Signed out there is a single short form: centre it. Signed in the page
+      // is a stack of settings panels, which reads better from the top.
+      centered={!auth.user}
+    >
       <div className="account">{content}</div>
     </PageLayout>
   );

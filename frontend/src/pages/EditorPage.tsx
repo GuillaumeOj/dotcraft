@@ -253,7 +253,20 @@ export function EditorPage() {
       onDeleteFolder={lib.deleteFolder}
       onDeleteDocument={lib.removeDocument}
       onSelectDocument={selectDocument}
-      footer={isMobile ? undefined : <AccountButton />}
+      footer={
+        isMobile ? undefined : (
+          // Desktop keeps the language picker with the account controls at the
+          // bottom of the library; on mobile both live in the navbar menu.
+          <div className="sidebar__footer">
+            <LanguageSelect
+              className="sidebar__lang"
+              value={i18n.language}
+              onChange={changeLocale}
+            />
+            <AccountButton />
+          </div>
+        )
+      }
     />
   );
   const settingsPanel = (
@@ -280,9 +293,6 @@ export function EditorPage() {
           onOpenLibrary={() => setLibraryOpen(true)}
           onOpenSettings={() => setSettingsOpen(true)}
         />
-        {!isMobile && (
-          <LanguageSelect value={i18n.language} onChange={changeLocale} />
-        )}
         <h1>Dotcraft</h1>
         <p>{t("app.tagline")}</p>
       </header>

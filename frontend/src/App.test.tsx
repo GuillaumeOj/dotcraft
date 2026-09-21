@@ -443,13 +443,16 @@ describe("App — mobile layout", () => {
     );
   });
 
-  it("shows the account link at the bottom of the desktop library", async () => {
+  it("shows the language picker and the account link at the bottom of the desktop library", async () => {
     render(<App />);
     await screen.findByAltText("QR code preview");
 
-    expect(
-      within(libraryAside()).getByRole("link", { name: "Sign in to sync" }),
-    ).toHaveAttribute("href", "/account");
+    const library = within(libraryAside());
+    expect(library.getByLabelText("Language")).toBeInTheDocument();
+    expect(library.getByRole("link", { name: "Sign in" })).toHaveAttribute(
+      "href",
+      "/account",
+    );
   });
 
   it("opens the account view from the mobile menu", async () => {

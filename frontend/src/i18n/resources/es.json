@@ -127,8 +127,7 @@
     "renameQrCode": "Renombrar código QR",
     "deleteQrCode": "Eliminar código QR",
     "confirmDeleteDoc": "¿Eliminar «{{name}}»?",
-    "account": "Cuenta",
-    "signIn": "Iniciar sesión para sincronizar"
+    "account": "Cuenta"
   },
   "library": {
     "myProject": "Mi proyecto",
@@ -299,7 +298,7 @@
     "signOut": "Cerrar sesión",
     "unsyncedTitle": "Cambios sin sincronizar",
     "unsyncedMessage": "Algunos de tus últimos cambios aún no se han podido guardar en la nube (¿estás sin conexión?). Si cierras sesión ahora, se perderán.",
-    "signOutAnyway": "Cerrar sesión de todos modos"
+    "signOutAnyway": "Cerrar sesión igualmente"
   },
   "sync": {
     "status": {

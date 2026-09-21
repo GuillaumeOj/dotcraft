@@ -127,8 +127,7 @@
     "renameQrCode": "QR-Code umbenennen",
     "deleteQrCode": "QR-Code löschen",
     "confirmDeleteDoc": "„{{name}}“ löschen?",
-    "account": "Konto",
-    "signIn": "Zum Synchronisieren anmelden"
+    "account": "Konto"
   },
   "library": {
     "myProject": "Mein Projekt",

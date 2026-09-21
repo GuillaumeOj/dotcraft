@@ -127,8 +127,7 @@
     "renameQrCode": "Renommer le QR code",
     "deleteQrCode": "Supprimer le QR code",
     "confirmDeleteDoc": "Supprimer « {{name}} » ?",
-    "account": "Compte",
-    "signIn": "Se connecter pour synchroniser"
+    "account": "Compte"
   },
   "library": {
     "myProject": "Mon projet",
@@ -299,7 +298,7 @@
     "signOut": "Se déconnecter",
     "unsyncedTitle": "Modifications non synchronisées",
     "unsyncedMessage": "Certaines de vos dernières modifications n’ont pas encore pu être enregistrées dans le cloud (êtes-vous hors ligne ?). Si vous vous déconnectez maintenant, elles seront perdues.",
-    "signOutAnyway": "Se déconnecter quand même"
+    "signOutAnyway": "Se déconnecter"
   },
   "sync": {
     "status": {

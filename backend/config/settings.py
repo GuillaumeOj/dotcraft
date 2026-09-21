@@ -10,19 +10,17 @@ from pathlib import Path
 
 import dj_database_url
 
-from config.env import env_bool, env_list, required_admin_path
+from config.env import env_bool, env_list, required_admin_path, required_env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = env_bool("DJANGO_DEBUG", default=False)
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
-if not SECRET_KEY:
-    if not DEBUG:
-        from django.core.exceptions import ImproperlyConfigured
-
-        raise ImproperlyConfigured("DJANGO_SECRET_KEY is required when DEBUG is off.")
-    SECRET_KEY = "dev-insecure-secret-key-for-local-development-only"  # noqa: S105
+SECRET_KEY = required_env(
+    "DJANGO_SECRET_KEY",
+    debug=DEBUG,
+    default="dev-insecure-secret-key-for-local-development-only",
+)
 
 # The Django admin is mounted under /api/<DJANGO_ADMIN_PATH>/. Preview and
 # production must set it explicitly so the admin isn't at a guessable URL.
@@ -122,9 +120,11 @@ STATIC_URL = "/api/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_ROOT = Path(os.environ.get("DJANGO_MEDIA_ROOT", BASE_DIR / "media"))
 
-# Logos go to a private Vercel Blob store when a token is configured, and to
-# the local filesystem otherwise (docker dev, tests).
-BLOB_READ_WRITE_TOKEN = os.environ.get("BLOB_READ_WRITE_TOKEN", "")
+# Logos go to a private Vercel Blob store, and to the local filesystem in
+# development (docker dev, tests). A deployed environment has no writable
+# filesystem, so the token is required there: without it the misconfiguration
+# would only surface as a 500 on the first logo upload.
+BLOB_READ_WRITE_TOKEN = required_env("BLOB_READ_WRITE_TOKEN", debug=DEBUG)
 STORAGES = {
     "default": {
         "BACKEND": "library.storage.BlobStorage"

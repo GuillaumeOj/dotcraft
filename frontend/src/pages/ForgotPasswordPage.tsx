@@ -22,7 +22,7 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <PageLayout title={t("auth.forgot.title")}>
+    <PageLayout title={t("auth.forgot.title")} centered>
       <div className="account">
         <Panel title={t("auth.forgot.title")}>
           <p className="hint">{t("auth.forgot.intro")}</p>

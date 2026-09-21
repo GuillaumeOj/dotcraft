@@ -9,7 +9,7 @@ describe("AccountButton", () => {
   it("invites to sign in when signed out", () => {
     renderWithRouter(<AccountButton />);
 
-    const link = screen.getByRole("link", { name: "Sign in to sync" });
+    const link = screen.getByRole("link", { name: "Sign in" });
     expect(link).toHaveAttribute("href", "/account");
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(

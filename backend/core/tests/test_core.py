@@ -34,6 +34,17 @@ class TestEnv:
         monkeypatch.setenv("HOSTS", "a.com, b.com,,")
         assert env.env_list("HOSTS", default=[]) == ["a.com", "b.com"]
 
+    def test_required_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("TOKEN", raising=False)
+        assert env.required_env("TOKEN", debug=True, default="dev") == "dev"
+        monkeypatch.setenv("TOKEN", "  real  ")
+        assert env.required_env("TOKEN", debug=False) == "real"
+
+    def test_required_env_is_required_without_debug(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("TOKEN", "   ")
+        with pytest.raises(ImproperlyConfigured, match="TOKEN is required"):
+            env.required_env("TOKEN", debug=False)
+
     def test_admin_path_defaults_in_debug(self) -> None:
         assert env.required_admin_path(None, debug=True) == "admin"
         assert env.required_admin_path(" /secret-door/ ", debug=False) == "secret-door"
@@ -82,6 +93,11 @@ class TestSettings:
     def test_production_requires_secret_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
         with pytest.raises(ImproperlyConfigured, match="DJANGO_SECRET_KEY"):
             self._reload(monkeypatch, DJANGO_DEBUG="0", DJANGO_ADMIN_PATH="door")
+
+    def test_production_requires_a_blob_token(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # Deployments have no writable filesystem, so logo storage must be configured.
+        with pytest.raises(ImproperlyConfigured, match="BLOB_READ_WRITE_TOKEN"):
+            self._reload(monkeypatch, DJANGO_DEBUG="0", DJANGO_SECRET_KEY="s", DJANGO_ADMIN_PATH="door")
 
     def test_production_configuration(self, monkeypatch: pytest.MonkeyPatch) -> None:
         settings = self._reload(

@@ -6,17 +6,21 @@ import type { Locale } from "../i18n/locales";
 import { updateSyncedSettings } from "../qr/storage";
 import { LanguageSelect } from "./LanguageSelect";
 
-/** The chrome for the static content pages (FAQ, Help Center): a back link to
- *  the editor, the page title and the language picker, with the article content
+/** The chrome for the pages outside the editor (FAQ, Help Center, account): a
+ *  back link to the editor, the page title and the language picker, with the
  *  rendered in `<main className="page">`. Keeps the locale in sync the same way
  *  the editor does, so switching language here persists across the app. */
 export function PageLayout({
   title,
   subtitle,
+  centered = false,
   children,
 }: {
   title: string;
   subtitle?: string;
+  /** Centre the content in what's left of the viewport, for the short forms
+   *  (sign in, password reset) that would otherwise float against the header. */
+  centered?: boolean;
   children: ReactNode;
 }) {
   const { t, i18n } = useTranslation();
@@ -42,7 +46,9 @@ export function PageLayout({
         <h1>{title}</h1>
         {subtitle && <p>{subtitle}</p>}
       </header>
-      <main className="page">{children}</main>
+      <main className={centered ? "page page--centered" : "page"}>
+        {children}
+      </main>
     </>
   );
 }

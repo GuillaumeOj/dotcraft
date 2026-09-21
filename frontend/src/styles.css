@@ -261,6 +261,18 @@ body {
   max-width: 760px;
 }
 
+/* Short forms (sign in, password reset) sit in the middle of what's left of
+   the viewport instead of hanging off the header. */
+.page--centered {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: none;
+  padding-bottom: 24px;
+}
+
 .page__header {
   display: flex;
   flex-direction: column;
@@ -287,6 +299,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
   max-width: 480px;
 }
 
@@ -482,14 +495,29 @@ body {
   overflow: hidden;
 }
 
-/* The account link, pinned to the bottom-left of the library under the tree. */
+/* Language picker above the account link, pinned to the bottom-left of the
+   library under the tree. */
 .sidebar__footer {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 8px;
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--border);
+}
+
+/* The picker is a header pill elsewhere; here it flows with the footer. */
+.app__lang.sidebar__lang {
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 100%;
+}
+
+.sidebar__account-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .sidebar__account {
@@ -1202,8 +1230,11 @@ button.logo-dropzone:hover {
   color: var(--muted);
 }
 
+/* Wrap rather than squeeze: some locales spell an action out in several words,
+   and a stacked pair of buttons reads better than two cramped columns. */
 .modal__actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
 }

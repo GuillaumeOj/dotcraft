@@ -24,7 +24,7 @@ export function ResetPasswordPage() {
   };
 
   return (
-    <PageLayout title={t("auth.reset.title")}>
+    <PageLayout title={t("auth.reset.title")} centered>
       <div className="account">
         <Panel title={t("auth.reset.title")}>
           {succeeded ? (

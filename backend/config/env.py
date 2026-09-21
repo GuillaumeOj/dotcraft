@@ -23,6 +23,20 @@ def env_list(name: str, *, default: list[str]) -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def required_env(name: str, *, debug: bool, default: str = "") -> str:
+    """Read a variable every deployed environment must set.
+
+    Development falls back to ``default`` so a bare checkout still runs; with
+    ``DEBUG`` off a missing value fails at startup, where it is obvious, rather
+    than as an error on the first request that happens to need it.
+    """
+    if value := os.environ.get(name, "").strip():
+        return value
+    if not debug:
+        raise ImproperlyConfigured(f"{name} is required when DEBUG is off.")
+    return default
+
+
 def required_admin_path(raw: str | None, *, debug: bool) -> str:
     """Validate the admin URL segment.
 
